@@ -1,0 +1,44 @@
+[
+  {
+    "id": "rwanda-premier-league",
+    "slug": "rwanda-premier-league",
+    "name": "Rwanda Premier League",
+    "shortName": "Premier League",
+    "country": "Rwanda",
+    "type": "league",
+    "season": "2025/26",
+    "logoText": "RPL",
+    "color": "#FF6B00",
+    "secondaryColor": "#121212",
+    "description": "The top tier of Rwandan football, contested by 16 clubs across the country.",
+    "teamCount": 16
+  },
+  {
+    "id": "peace-cup",
+    "slug": "peace-cup",
+    "name": "Peace Cup",
+    "shortName": "Peace Cup",
+    "country": "Rwanda",
+    "type": "cup",
+    "season": "2025/26",
+    "logoText": "PC",
+    "color": "#A855F7",
+    "secondaryColor": "#FFFFFF",
+    "description": "Rwanda's national knockout competition, bringing together clubs from the top flight and the provinces.",
+    "teamCount": 16
+  },
+  {
+    "id": "amavubi",
+    "slug": "amavubi",
+    "name": "Amavubi",
+    "shortName": "Amavubi",
+    "country": "Rwanda",
+    "type": "national",
+    "season": "2026",
+    "logoText": "RWA",
+    "color": "#00A1DE",
+    "secondaryColor": "#FAD201",
+    "description": "Rwanda's national team — AFCON, World Cup and regional fixtures.",
+    "teamCount": 1
+  }
+]

@@ -1,0 +1,30 @@
+- generic [ref=f1e4]:
+  - link "View site" [ref=f1e5] [cursor=pointer]:
+    - /url: /
+  - generic [ref=f1e8]:
+    - generic [ref=f1e9]:
+      - generic [ref=f1e10]: R
+      - heading "Newsroom sign in" [level=1] [ref=f1e11]
+      - paragraph [ref=f1e12]: Manage fixtures, live scores and stories.
+    - generic [ref=f1e13]:
+      - generic [ref=f1e14]:
+        - generic [ref=f1e15]: Email
+        - textbox "Email" [ref=f1e16]:
+          - /placeholder: you@rwandascore.rw
+      - generic [ref=f1e17]:
+        - generic [ref=f1e18]: Password
+        - generic [ref=f1e19]:
+          - textbox "Password" [ref=f1e20]:
+            - /placeholder: ••••••••
+          - button "Show password" [ref=f1e21] [cursor=pointer]
+      - button "Sign in" [ref=f1e25] [cursor=pointer]
+    - generic [ref=f1e30]:
+      - generic [ref=f1e31]: Demo credentials
+      - generic [ref=f1e35]:
+        - button "Admin admin@rwandascore.rw" [ref=f1e36] [cursor=pointer]:
+          - generic [ref=f1e37]: Admin
+          - generic [ref=f1e38]: admin@rwandascore.rw
+        - button "Editor alice@rwandascore.rw" [ref=f1e39] [cursor=pointer]:
+          - generic [ref=f1e40]: Editor
+          - generic [ref=f1e41]: alice@rwandascore.rw
+      - paragraph [ref=f1e42]: Use the demo admin account below, or any editor account.

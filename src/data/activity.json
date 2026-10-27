@@ -1,0 +1,112 @@
+[
+  {
+    "id": "a1",
+    "user": "Frimlong",
+    "role": "ADMIN",
+    "action": "Updated Match",
+    "module": "Rwanda Premier League",
+    "record": "APR FC vs Rayon Sports",
+    "description": "Changed score from 1-0 to 2-0",
+    "ip": "197.243.14.87",
+    "minutesAgo": 3
+  },
+  {
+    "id": "a2",
+    "user": "Alice Mukamana",
+    "role": "EDITOR",
+    "action": "Added Event",
+    "module": "Live Match Control",
+    "record": "Kiyovu Sports vs Police FC",
+    "description": "63' Yellow card — Eric Iradukunda (Rayon Sports)",
+    "ip": "197.243.14.92",
+    "minutesAgo": 5
+  },
+  {
+    "id": "a3",
+    "user": "Eric Nsengimana",
+    "role": "EDITOR",
+    "action": "Published Article",
+    "module": "News",
+    "record": "Derby day: APR and Rayon meet with top spot on the line",
+    "description": "Published article to the front page",
+    "ip": "41.186.33.10",
+    "minutesAgo": 12
+  },
+  {
+    "id": "a4",
+    "user": "Diane Uwase",
+    "role": "EDITOR",
+    "action": "Updated Player",
+    "module": "Players",
+    "record": "Innocent Nshuti",
+    "description": "Updated season goals from 11 to 12",
+    "ip": "41.186.33.21",
+    "minutesAgo": 28
+  },
+  {
+    "id": "a5",
+    "user": "Kevin Habimana",
+    "role": "EDITOR",
+    "action": "Added Fixture",
+    "module": "Fixtures",
+    "record": "AS Kigali vs APR FC",
+    "description": "Scheduled for tomorrow at Kigali Pelé Stadium",
+    "ip": "102.68.77.44",
+    "minutesAgo": 46
+  },
+  {
+    "id": "a6",
+    "user": "Frimlong",
+    "role": "ADMIN",
+    "action": "Uploaded Logo",
+    "module": "Uploads",
+    "record": "mukura-crest.png",
+    "description": "Uploaded and assigned a new club logo",
+    "ip": "197.243.14.87",
+    "minutesAgo": 64
+  },
+  {
+    "id": "a7",
+    "user": "Alice Mukamana",
+    "role": "EDITOR",
+    "action": "Updated Match",
+    "module": "Peace Cup",
+    "record": "Mukura VS vs Rayon Sports",
+    "description": "Changed match status from HT to FT",
+    "ip": "197.243.14.92",
+    "minutesAgo": 92
+  },
+  {
+    "id": "a8",
+    "user": "Eric Nsengimana",
+    "role": "EDITOR",
+    "action": "Updated Team",
+    "module": "Teams",
+    "record": "Kiyovu Sports",
+    "description": "Updated head coach information",
+    "ip": "41.186.33.10",
+    "minutesAgo": 140
+  },
+  {
+    "id": "a9",
+    "user": "Diane Uwase",
+    "role": "EDITOR",
+    "action": "Added Player",
+    "module": "Players",
+    "record": "Ramadhan Niyibizi",
+    "description": "Added player to APR FC squad",
+    "ip": "41.186.33.21",
+    "minutesAgo": 210
+  },
+  {
+    "id": "a10",
+    "user": "Frimlong",
+    "role": "ADMIN",
+    "action": "Signed In",
+    "module": "Authentication",
+    "record": "admin@rwandascore.rw",
+    "description": "Successful sign-in from Kigali",
+    "ip": "197.243.14.87",
+    "minutesAgo": 260
+  }
+]

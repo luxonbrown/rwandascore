@@ -1,0 +1,442 @@
+[
+  {
+    "id": "p-jean-claude-ndayisenga", "name": "Jean-Claude Ndayisenga", "teamId": "apr", "position": "GK", "number": 1, "nationality": "Rwanda", "age": 28, "height": 188, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 17, "goals": 0, "assists": 0, "yellowCards": 1, "redCards": 0, "minutes": 1530, "cleanSheets": 9 },
+    "bio": "A commanding shot-stopper who joined APR from Kiyovu and quickly became the league's most reliable last line."
+  },
+  {
+    "id": "p-thierry-manzi", "name": "Thierry Manzi", "teamId": "apr", "position": "DF", "number": 5, "nationality": "Rwanda", "age": 29, "height": 186, "foot": "Right", "nationalTeam": true, "captain": true,
+    "stats": { "appearances": 18, "goals": 3, "assists": 1, "yellowCards": 4, "redCards": 0, "minutes": 1620, "cleanSheets": 10 },
+    "bio": "APR's captain and the anchor of the Amavubi defence, comfortable stepping into midfield with the ball."
+  },
+  {
+    "id": "p-emmanuel-imanishimwe", "name": "Emmanuel Imanishimwe", "teamId": "apr", "position": "DF", "number": 3, "nationality": "Rwanda", "age": 29, "height": 178, "foot": "Left", "nationalTeam": true,
+    "stats": { "appearances": 17, "goals": 2, "assists": 4, "yellowCards": 3, "redCards": 0, "minutes": 1476, "cleanSheets": 8 },
+    "bio": "An adventurous left-back whose delivery from wide areas is a key weapon for both club and country."
+  },
+  {
+    "id": "p-anicet-ishimwe", "name": "Anicet Ishimwe", "teamId": "apr", "position": "DF", "number": 4, "nationality": "Rwanda", "age": 25, "height": 182, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 16, "goals": 1, "assists": 0, "yellowCards": 2, "redCards": 0, "minutes": 1320, "cleanSheets": 7 },
+    "bio": "A composed ball-playing centre-back with an excellent reading of danger."
+  },
+  {
+    "id": "p-aimable-nsabimana", "name": "Aimable Nsabimana", "teamId": "apr", "position": "DF", "number": 2, "nationality": "Rwanda", "age": 24, "height": 176, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 14, "goals": 0, "assists": 3, "yellowCards": 1, "redCards": 0, "minutes": 1120, "cleanSheets": 6 },
+    "bio": "A relentless right-back who overlaps relentlessly and rarely gives wingers a moment's peace."
+  },
+  {
+    "id": "p-kevin-muhire", "name": "Kevin Muhire", "teamId": "apr", "position": "MF", "number": 8, "nationality": "Rwanda", "age": 26, "height": 175, "foot": "Right", "nationalTeam": true,
+    "stats": { "appearances": 18, "goals": 4, "assists": 5, "yellowCards": 3, "redCards": 0, "minutes": 1544, "cleanSheets": 0 },
+    "bio": "The tempo-setter in APR's midfield. Muhire covers ground, wins second balls and arrives late in the box."
+  },
+  {
+    "id": "p-djihad-bizimana", "name": "Djihad Bizimana", "teamId": "apr", "position": "MF", "number": 6, "nationality": "Rwanda", "age": 28, "height": 180, "foot": "Right", "nationalTeam": true, "captain": true,
+    "stats": { "appearances": 16, "goals": 1, "assists": 3, "yellowCards": 5, "redCards": 0, "minutes": 1380, "cleanSheets": 0 },
+    "bio": "Amavubi's captain and a screening midfielder whose positioning allows APR to play with freedom in front of him."
+  },
+  {
+    "id": "p-patrick-sibomana", "name": "Patrick Sibomana", "teamId": "apr", "position": "MF", "number": 10, "nationality": "Rwanda", "age": 27, "height": 172, "foot": "Left", "nationalTeam": true,
+    "stats": { "appearances": 17, "goals": 6, "assists": 7, "yellowCards": 2, "redCards": 0, "minutes": 1390, "cleanSheets": 0 },
+    "bio": "A silky playmaker who drifts between the lines and is the league's leading creator of clear chances."
+  },
+  {
+    "id": "p-jean-bosco-ruboneka", "name": "Jean-Bosco Ruboneka", "teamId": "apr", "position": "MF", "number": 14, "nationality": "Rwanda", "age": 25, "height": 177, "foot": "Right", "nationalTeam": true,
+    "stats": { "appearances": 15, "goals": 4, "assists": 2, "yellowCards": 4, "redCards": 0, "minutes": 1090, "cleanSheets": 0 },
+    "bio": "An energetic box-to-box midfielder with a habit of scoring from distance."
+  },
+  {
+    "id": "p-olivier-niyonzima", "name": "Olivier Niyonzima", "teamId": "apr", "position": "FW", "number": 7, "nationality": "Rwanda", "age": 24, "height": 179, "foot": "Right", "nationalTeam": true,
+    "stats": { "appearances": 18, "goals": 8, "assists": 4, "yellowCards": 2, "redCards": 0, "minutes": 1410, "cleanSheets": 0 },
+    "bio": "A direct winger who loves to attack the full-back on the outside and fire early crosses into the box."
+  },
+  {
+    "id": "p-gilbert-mugisha", "name": "Gilbert Mugisha", "teamId": "apr", "position": "FW", "number": 9, "nationality": "Rwanda", "age": 23, "height": 183, "foot": "Right", "nationalTeam": true,
+    "stats": { "appearances": 18, "goals": 10, "assists": 3, "yellowCards": 1, "redCards": 0, "minutes": 1395, "cleanSheets": 0 },
+    "bio": "APR's leading striker and one of Rwanda's brightest young finishers, deadly across the face of goal."
+  },
+  {
+    "id": "p-yannick-mukunzi", "name": "Yannick Mukunzi", "teamId": "apr", "position": "MF", "number": 16, "nationality": "Rwanda", "age": 27, "height": 174, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 12, "goals": 1, "assists": 2, "yellowCards": 2, "redCards": 0, "minutes": 720, "cleanSheets": 0 },
+    "bio": "A reliable rotation midfielder who keeps possession and defends intelligently."
+  },
+  {
+    "id": "p-ramadhan-niyibizi", "name": "Ramadhan Niyibizi", "teamId": "apr", "position": "FW", "number": 11, "nationality": "Rwanda", "age": 22, "height": 176, "foot": "Left", "nationalTeam": false,
+    "stats": { "appearances": 14, "goals": 3, "assists": 3, "yellowCards": 0, "redCards": 0, "minutes": 620, "cleanSheets": 0 },
+    "bio": "A tricky young forward who has become an important impact substitute for APR."
+  },
+  {
+    "id": "p-claude-niyomugabo", "name": "Claude Niyomugabo", "teamId": "apr", "position": "GK", "number": 22, "nationality": "Rwanda", "age": 24, "height": 185, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 1, "goals": 0, "assists": 0, "yellowCards": 0, "redCards": 0, "minutes": 90, "cleanSheets": 1 },
+    "bio": "An agile young goalkeeper learning from one of the country's best."
+  },
+  {
+    "id": "p-eric-ndayishimiye", "name": "Eric Ndayishimiye", "teamId": "apr", "position": "DF", "number": 15, "nationality": "Rwanda", "age": 26, "height": 181, "foot": "Left", "nationalTeam": false,
+    "stats": { "appearances": 9, "goals": 0, "assists": 0, "yellowCards": 2, "redCards": 0, "minutes": 610, "cleanSheets": 3 },
+    "bio": "A versatile defender capable of playing centre-back or left-back."
+  },
+  {
+    "id": "p-fiston-kalisa", "name": "Fiston Kalisa", "teamId": "apr", "position": "MF", "number": 18, "nationality": "Rwanda", "age": 21, "height": 170, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 8, "goals": 1, "assists": 1, "yellowCards": 0, "redCards": 0, "minutes": 340, "cleanSheets": 0 },
+    "bio": "An academy graduate with excellent close control and a fearless attitude."
+  },
+  {
+    "id": "p-didier-mugisha", "name": "Didier Mugisha", "teamId": "apr", "position": "FW", "number": 20, "nationality": "Rwanda", "age": 20, "height": 180, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 6, "goals": 2, "assists": 0, "yellowCards": 0, "redCards": 0, "minutes": 210, "cleanSheets": 0 },
+    "bio": "A tall teenage striker with an eye for goal and a bright future."
+  },
+  {
+    "id": "p-fiacre-ntwari", "name": "Fiacre Ntwari", "teamId": "rayon", "position": "GK", "number": 1, "nationality": "Rwanda", "age": 25, "height": 190, "foot": "Right", "nationalTeam": true,
+    "stats": { "appearances": 17, "goals": 0, "assists": 0, "yellowCards": 2, "redCards": 0, "minutes": 1530, "cleanSheets": 7 },
+    "bio": "Rwanda's first-choice goalkeeper, signed by Rayon after impressing in the national team set-up."
+  },
+  {
+    "id": "p-shaban-bwira", "name": "Shaban Bwira", "teamId": "rayon", "position": "DF", "number": 5, "nationality": "Rwanda", "age": 27, "height": 185, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 18, "goals": 2, "assists": 1, "yellowCards": 5, "redCards": 1, "minutes": 1590, "cleanSheets": 7 },
+    "bio": "A vocal, aggressive centre-back who leads Rayon's back line."
+  },
+  {
+    "id": "p-eric-iradukunda", "name": "Eric Iradukunda", "teamId": "rayon", "position": "MF", "number": 6, "nationality": "Rwanda", "age": 24, "height": 178, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 17, "goals": 2, "assists": 3, "yellowCards": 7, "redCards": 0, "minutes": 1430, "cleanSheets": 0 },
+    "bio": "Rayon's combative holding midfielder, always willing to make the tactical foul."
+  },
+  {
+    "id": "p-kevin-ishimwe", "name": "Kevin Ishimwe", "teamId": "rayon", "position": "MF", "number": 8, "nationality": "Rwanda", "age": 25, "height": 176, "foot": "Left", "nationalTeam": false,
+    "stats": { "appearances": 18, "goals": 3, "assists": 6, "yellowCards": 3, "redCards": 0, "minutes": 1540, "cleanSheets": 0 },
+    "bio": "The Blues' creative heartbeat, equally dangerous from set pieces and open play."
+  },
+  {
+    "id": "p-innocent-nshuti", "name": "Innocent Nshuti", "teamId": "rayon", "position": "FW", "number": 9, "nationality": "Rwanda", "age": 27, "height": 181, "foot": "Right", "nationalTeam": true,
+    "stats": { "appearances": 18, "goals": 12, "assists": 4, "yellowCards": 1, "redCards": 0, "minutes": 1580, "cleanSheets": 0 },
+    "bio": "The league's top scorer. Nshuti's movement in the box is the best in Rwanda and he has become an Amavubi regular."
+  },
+  {
+    "id": "p-jules-ulimwengu", "name": "Jules Ulimwengu", "teamId": "rayon", "position": "FW", "number": 19, "nationality": "Burundi", "age": 27, "height": 184, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 16, "goals": 6, "assists": 5, "yellowCards": 2, "redCards": 0, "minutes": 1210, "cleanSheets": 0 },
+    "bio": "The Burundian forward brings physicality and experience to Rayon's front line."
+  },
+  {
+    "id": "p-prince-kwizera", "name": "Prince Kwizera", "teamId": "rayon", "position": "MF", "number": 10, "nationality": "Rwanda", "age": 23, "height": 172, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 15, "goals": 4, "assists": 4, "yellowCards": 1, "redCards": 0, "minutes": 1020, "cleanSheets": 0 },
+    "bio": "A quick, technical attacker who plays best between the lines."
+  },
+  {
+    "id": "p-moussa-camara", "name": "Moussa Camara", "teamId": "rayon", "position": "DF", "number": 4, "nationality": "Mali", "age": 26, "height": 187, "foot": "Left", "nationalTeam": false,
+    "stats": { "appearances": 14, "goals": 1, "assists": 1, "yellowCards": 3, "redCards": 0, "minutes": 1180, "cleanSheets": 6 },
+    "bio": "A left-footed Malian centre-back with excellent aerial presence."
+  },
+  {
+    "id": "p-jean-paul-hakizimana", "name": "Jean-Paul Hakizimana", "teamId": "rayon", "position": "DF", "number": 3, "nationality": "Rwanda", "age": 24, "height": 177, "foot": "Left", "nationalTeam": false,
+    "stats": { "appearances": 16, "goals": 0, "assists": 2, "yellowCards": 2, "redCards": 0, "minutes": 1340, "cleanSheets": 6 },
+    "bio": "A dependable left-back who balances defensive discipline with energetic overlaps."
+  },
+  {
+    "id": "p-ally-niyonzima", "name": "Ally Niyonzima", "teamId": "rayon", "position": "DF", "number": 2, "nationality": "Rwanda", "age": 22, "height": 174, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 11, "goals": 0, "assists": 1, "yellowCards": 1, "redCards": 0, "minutes": 780, "cleanSheets": 4 },
+    "bio": "A promising young right-back with excellent recovery speed."
+  },
+  {
+    "id": "p-emmanuel-gakwaya", "name": "Emmanuel Gakwaya", "teamId": "rayon", "position": "GK", "number": 16, "nationality": "Rwanda", "age": 23, "height": 186, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 2, "goals": 0, "assists": 0, "yellowCards": 0, "redCards": 0, "minutes": 180, "cleanSheets": 1 },
+    "bio": "A talented young keeper who provides strong competition at Rayon."
+  },
+  {
+    "id": "p-sharif-mugisha", "name": "Sharif Mugisha", "teamId": "rayon", "position": "MF", "number": 14, "nationality": "Rwanda", "age": 21, "height": 173, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 9, "goals": 1, "assists": 1, "yellowCards": 2, "redCards": 0, "minutes": 390, "cleanSheets": 0 },
+    "bio": "A lively young midfielder who brings energy off the bench."
+  },
+  {
+    "id": "p-cedric-ndizeye", "name": "Cedric Ndizeye", "teamId": "rayon", "position": "FW", "number": 11, "nationality": "Rwanda", "age": 22, "height": 175, "foot": "Left", "nationalTeam": false,
+    "stats": { "appearances": 12, "goals": 3, "assists": 2, "yellowCards": 0, "redCards": 0, "minutes": 610, "cleanSheets": 0 },
+    "bio": "A rapid left winger who stretches defences and loves to run in behind."
+  },
+  {
+    "id": "p-christian-haguma", "name": "Christian Haguma", "teamId": "rayon", "position": "DF", "number": 12, "nationality": "Rwanda", "age": 25, "height": 180, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 8, "goals": 0, "assists": 0, "yellowCards": 1, "redCards": 0, "minutes": 520, "cleanSheets": 2 },
+    "bio": "A reliable squad defender who can fill in across the back four."
+  },
+  {
+    "id": "p-patrick-niyigena", "name": "Patrick Niyigena", "teamId": "rayon", "position": "MF", "number": 15, "nationality": "Rwanda", "age": 24, "height": 176, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 10, "goals": 0, "assists": 2, "yellowCards": 2, "redCards": 0, "minutes": 540, "cleanSheets": 0 },
+    "bio": "A tidy passer who keeps Rayon moving in possession."
+  },
+  {
+    "id": "p-gilbert-rwabigwi", "name": "Gilbert Rwabigwi", "teamId": "rayon", "position": "FW", "number": 7, "nationality": "Rwanda", "age": 26, "height": 178, "foot": "Left", "nationalTeam": false,
+    "stats": { "appearances": 13, "goals": 2, "assists": 1, "yellowCards": 1, "redCards": 0, "minutes": 620, "cleanSheets": 0 },
+    "bio": "A hard-working forward who can play wide or through the middle."
+  },
+  {
+    "id": "p-yves-kirenga", "name": "Yves Kirenga", "teamId": "kiyovu", "position": "GK", "number": 1, "nationality": "Rwanda", "age": 29, "height": 187, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 18, "goals": 0, "assists": 0, "yellowCards": 1, "redCards": 0, "minutes": 1620, "cleanSheets": 8 },
+    "bio": "One of the most experienced goalkeepers in the league and a Kiyovu stalwart."
+  },
+  {
+    "id": "p-jimmy-mbaraga", "name": "Jimmy Mbaraga", "teamId": "kiyovu", "position": "DF", "number": 4, "nationality": "Rwanda", "age": 27, "height": 184, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 17, "goals": 1, "assists": 0, "yellowCards": 4, "redCards": 0, "minutes": 1480, "cleanSheets": 8 },
+    "bio": "Kiyovu's defensive organiser, dominant in the air and calm in possession."
+  },
+  {
+    "id": "p-blaise-nishimwe", "name": "Blaise Nishimwe", "teamId": "kiyovu", "position": "MF", "number": 8, "nationality": "Rwanda", "age": 25, "height": 175, "foot": "Left", "nationalTeam": false,
+    "stats": { "appearances": 18, "goals": 3, "assists": 5, "yellowCards": 2, "redCards": 0, "minutes": 1550, "cleanSheets": 0 },
+    "bio": "A creative midfielder with an excellent left foot and a knack for the killer pass."
+  },
+  {
+    "id": "p-emmanuel-mugisha", "name": "Emmanuel Mugisha", "teamId": "kiyovu", "position": "FW", "number": 9, "nationality": "Rwanda", "age": 26, "height": 182, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 18, "goals": 9, "assists": 2, "yellowCards": 2, "redCards": 0, "minutes": 1470, "cleanSheets": 0 },
+    "bio": "A powerful centre-forward who has carried Kiyovu's scoring load this season."
+  },
+  {
+    "id": "p-fabrice-ndayisenga", "name": "Fabrice Ndayisenga", "teamId": "kiyovu", "position": "MF", "number": 6, "nationality": "Rwanda", "age": 28, "height": 179, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 16, "goals": 1, "assists": 3, "yellowCards": 5, "redCards": 0, "minutes": 1380, "cleanSheets": 0 },
+    "bio": "A disciplined defensive midfielder who protects Kiyovu's back four."
+  },
+  {
+    "id": "p-samson-habimana", "name": "Samson Habimana", "teamId": "kiyovu", "position": "DF", "number": 3, "nationality": "Rwanda", "age": 24, "height": 178, "foot": "Left", "nationalTeam": false,
+    "stats": { "appearances": 15, "goals": 0, "assists": 2, "yellowCards": 3, "redCards": 0, "minutes": 1280, "cleanSheets": 6 },
+    "bio": "An athletic left-back known for his recovery tackles and willingness to get forward."
+  },
+  {
+    "id": "p-eric-ngabo", "name": "Eric Ngabo", "teamId": "kiyovu", "position": "FW", "number": 11, "nationality": "Rwanda", "age": 23, "height": 174, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 16, "goals": 4, "assists": 3, "yellowCards": 1, "redCards": 0, "minutes": 980, "cleanSheets": 0 },
+    "bio": "A lively forward who thrives when running at defenders."
+  },
+  {
+    "id": "p-patrick-nkurunziza", "name": "Patrick Nkurunziza", "teamId": "kiyovu", "position": "DF", "number": 5, "nationality": "Rwanda", "age": 29, "height": 185, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 14, "goals": 0, "assists": 0, "yellowCards": 2, "redCards": 0, "minutes": 1160, "cleanSheets": 5 },
+    "bio": "A seasoned centre-back whose positioning and leadership steady the side."
+  },
+  {
+    "id": "p-olivier-hakizimana", "name": "Olivier Hakizimana", "teamId": "kiyovu", "position": "MF", "number": 10, "nationality": "Rwanda", "age": 22, "height": 170, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 12, "goals": 2, "assists": 4, "yellowCards": 0, "redCards": 0, "minutes": 680, "cleanSheets": 0 },
+    "bio": "A gifted young playmaker tipped for a national team call-up."
+  },
+  {
+    "id": "p-jean-marie-vianney", "name": "Jean-Marie Vianney", "teamId": "kiyovu", "position": "GK", "number": 16, "nationality": "Rwanda", "age": 22, "height": 183, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 0, "goals": 0, "assists": 0, "yellowCards": 0, "redCards": 0, "minutes": 0, "cleanSheets": 0 },
+    "bio": "A young goalkeeper developing behind an experienced starter."
+  },
+  {
+    "id": "p-claude-munyaneza", "name": "Claude Munyaneza", "teamId": "kiyovu", "position": "DF", "number": 12, "nationality": "Rwanda", "age": 25, "height": 177, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 9, "goals": 0, "assists": 1, "yellowCards": 1, "redCards": 0, "minutes": 430, "cleanSheets": 2 },
+    "bio": "A versatile defender capable of covering both full-back positions."
+  },
+  {
+    "id": "p-alex-mugabo", "name": "Alex Mugabo", "teamId": "kiyovu", "position": "FW", "number": 7, "nationality": "Rwanda", "age": 24, "height": 179, "foot": "Left", "nationalTeam": false,
+    "stats": { "appearances": 11, "goals": 2, "assists": 1, "yellowCards": 0, "redCards": 0, "minutes": 470, "cleanSheets": 0 },
+    "bio": "A direct winger who offers pace and unpredictability in wide areas."
+  },
+  {
+    "id": "p-emmanuel-kayumba", "name": "Emmanuel Kayumba", "teamId": "as-kigali", "position": "GK", "number": 1, "nationality": "Rwanda", "age": 26, "height": 186, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 17, "goals": 0, "assists": 0, "yellowCards": 0, "redCards": 0, "minutes": 1530, "cleanSheets": 6 },
+    "bio": "A reliable shot-stopper with strong command of his area."
+  },
+  {
+    "id": "p-bernard-niyonkuru", "name": "Bernard Niyonkuru", "teamId": "as-kigali", "position": "DF", "number": 5, "nationality": "Rwanda", "age": 28, "height": 183, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 16, "goals": 1, "assists": 0, "yellowCards": 3, "redCards": 0, "minutes": 1410, "cleanSheets": 6 },
+    "bio": "A dominant aerial defender and a threat at attacking set pieces."
+  },
+  {
+    "id": "p-ephrem-ndayisaba", "name": "Ephrem Ndayisaba", "teamId": "as-kigali", "position": "MF", "number": 8, "nationality": "Rwanda", "age": 25, "height": 176, "foot": "Left", "nationalTeam": false,
+    "stats": { "appearances": 18, "goals": 3, "assists": 4, "yellowCards": 2, "redCards": 0, "minutes": 1580, "cleanSheets": 0 },
+    "bio": "The Citizens' metronome, always available and rarely wasteful in possession."
+  },
+  {
+    "id": "p-samuel-habimana", "name": "Samuel Habimana", "teamId": "as-kigali", "position": "FW", "number": 9, "nationality": "Rwanda", "age": 24, "height": 180, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 18, "goals": 5, "assists": 2, "yellowCards": 2, "redCards": 0, "minutes": 1420, "cleanSheets": 0 },
+    "bio": "AS Kigali's leading scorer, sharp in the box and excellent in the air."
+  },
+  {
+    "id": "p-alphonse-mugisha", "name": "Alphonse Mugisha", "teamId": "as-kigali", "position": "MF", "number": 6, "nationality": "Rwanda", "age": 27, "height": 178, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 17, "goals": 1, "assists": 3, "yellowCards": 4, "redCards": 0, "minutes": 1460, "cleanSheets": 0 },
+    "bio": "An industrious midfielder who does the unseen work for AS Kigali."
+  },
+  {
+    "id": "p-innocent-hakizimana", "name": "Innocent Hakizimana", "teamId": "as-kigali", "position": "DF", "number": 4, "nationality": "Rwanda", "age": 25, "height": 179, "foot": "Left", "nationalTeam": false,
+    "stats": { "appearances": 15, "goals": 0, "assists": 1, "yellowCards": 2, "redCards": 0, "minutes": 1260, "cleanSheets": 5 },
+    "bio": "A left-footed centre-back with a composed distribution style."
+  },
+  {
+    "id": "p-didier-nsengiyumva", "name": "Didier Nsengiyumva", "teamId": "as-kigali", "position": "DF", "number": 3, "nationality": "Rwanda", "age": 23, "height": 175, "foot": "Left", "nationalTeam": false,
+    "stats": { "appearances": 13, "goals": 0, "assists": 2, "yellowCards": 1, "redCards": 0, "minutes": 980, "cleanSheets": 4 },
+    "bio": "An attacking left-back with a dangerous delivery from wide areas."
+  },
+  {
+    "id": "p-fiston-murenzi", "name": "Fiston Murenzi", "teamId": "as-kigali", "position": "FW", "number": 11, "nationality": "Rwanda", "age": 22, "height": 174, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 14, "goals": 3, "assists": 2, "yellowCards": 0, "redCards": 0, "minutes": 720, "cleanSheets": 0 },
+    "bio": "A speedy winger with a bright future in the Rwandan game."
+  },
+  {
+    "id": "p-danny-niyibizi", "name": "Danny Niyibizi", "teamId": "police", "position": "GK", "number": 1, "nationality": "Rwanda", "age": 27, "height": 189, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 18, "goals": 0, "assists": 0, "yellowCards": 1, "redCards": 0, "minutes": 1620, "cleanSheets": 7 },
+    "bio": "An excellent shot-stopper whose consistency underpins Police's solid season."
+  },
+  {
+    "id": "p-pascal-niyonkuru", "name": "Pascal Niyonkuru", "teamId": "police", "position": "DF", "number": 5, "nationality": "Rwanda", "age": 29, "height": 185, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 17, "goals": 2, "assists": 0, "yellowCards": 5, "redCards": 0, "minutes": 1500, "cleanSheets": 6 },
+    "bio": "The leader of Police's defence and one of the league's strongest headers of the ball."
+  },
+  {
+    "id": "p-moses-kagabo", "name": "Moses Kagabo", "teamId": "police", "position": "MF", "number": 8, "nationality": "Rwanda", "age": 26, "height": 177, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 18, "goals": 2, "assists": 4, "yellowCards": 3, "redCards": 0, "minutes": 1560, "cleanSheets": 0 },
+    "bio": "A tireless central midfielder who sets Police's pressing tempo."
+  },
+  {
+    "id": "p-fabrice-nsengimana", "name": "Fabrice Nsengimana", "teamId": "police", "position": "FW", "number": 9, "nationality": "Rwanda", "age": 25, "height": 181, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 18, "goals": 7, "assists": 3, "yellowCards": 1, "redCards": 0, "minutes": 1490, "cleanSheets": 0 },
+    "bio": "Police's main goal threat, dangerous with both feet inside the penalty area."
+  },
+  {
+    "id": "p-eric-nshimiyimana", "name": "Eric Nshimiyimana", "teamId": "police", "position": "MF", "number": 6, "nationality": "Rwanda", "age": 24, "height": 174, "foot": "Left", "nationalTeam": false,
+    "stats": { "appearances": 16, "goals": 1, "assists": 3, "yellowCards": 4, "redCards": 0, "minutes": 1360, "cleanSheets": 0 },
+    "bio": "A left-footed midfielder with a strong work rate and good set-piece delivery."
+  },
+  {
+    "id": "p-jean-paul-uwase", "name": "Jean-Paul Uwase", "teamId": "police", "position": "DF", "number": 4, "nationality": "Rwanda", "age": 27, "height": 182, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 15, "goals": 0, "assists": 1, "yellowCards": 3, "redCards": 0, "minutes": 1310, "cleanSheets": 5 },
+    "bio": "A dependable centre-back who reads the game well."
+  },
+  {
+    "id": "p-patrick-hakizimana", "name": "Patrick Hakizimana", "teamId": "police", "position": "FW", "number": 11, "nationality": "Rwanda", "age": 23, "height": 176, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 14, "goals": 3, "assists": 2, "yellowCards": 0, "redCards": 0, "minutes": 780, "cleanSheets": 0 },
+    "bio": "A quick forward who often changes games from the bench."
+  },
+  {
+    "id": "p-gilbert-ndayisaba", "name": "Gilbert Ndayisaba", "teamId": "police", "position": "DF", "number": 3, "nationality": "Rwanda", "age": 26, "height": 178, "foot": "Left", "nationalTeam": false,
+    "stats": { "appearances": 13, "goals": 0, "assists": 1, "yellowCards": 2, "redCards": 0, "minutes": 1060, "cleanSheets": 4 },
+    "bio": "A solid left-back who defends narrow and rarely gets beaten one-on-one."
+  },
+  {
+    "id": "p-sadiki-munyaneza", "name": "Sadiki Munyaneza", "teamId": "police", "position": "MF", "number": 10, "nationality": "Rwanda", "age": 22, "height": 171, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 12, "goals": 2, "assists": 2, "yellowCards": 1, "redCards": 0, "minutes": 620, "cleanSheets": 0 },
+    "bio": "A creative young playmaker with excellent vision."
+  },
+  {
+    "id": "p-emmanuel-iratunga", "name": "Emmanuel Iratunga", "teamId": "police", "position": "GK", "number": 16, "nationality": "Rwanda", "age": 22, "height": 184, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 1, "goals": 0, "assists": 0, "yellowCards": 0, "redCards": 0, "minutes": 90, "cleanSheets": 0 },
+    "bio": "A young goalkeeper continuing his development at Police."
+  },
+  {
+    "id": "p-abdoul-mugisha", "name": "Abdoul Mugisha", "teamId": "police", "position": "DF", "number": 2, "nationality": "Rwanda", "age": 24, "height": 175, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 10, "goals": 0, "assists": 2, "yellowCards": 1, "redCards": 0, "minutes": 660, "cleanSheets": 3 },
+    "bio": "An energetic right-back who supports attacks well."
+  },
+  {
+    "id": "p-claude-nsengimana", "name": "Claude Nsengimana", "teamId": "police", "position": "FW", "number": 7, "nationality": "Rwanda", "age": 21, "height": 173, "foot": "Left", "nationalTeam": false,
+    "stats": { "appearances": 9, "goals": 1, "assists": 1, "yellowCards": 0, "redCards": 0, "minutes": 310, "cleanSheets": 0 },
+    "bio": "A left-sided forward who offers direct running off the bench."
+  },
+  {
+    "id": "p-olivier-kwizera", "name": "Olivier Kwizera", "teamId": "mukura", "position": "GK", "number": 1, "nationality": "Rwanda", "age": 26, "height": 187, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 17, "goals": 0, "assists": 0, "yellowCards": 1, "redCards": 0, "minutes": 1530, "cleanSheets": 6 },
+    "bio": "A commanding goalkeeper and one of Mukura's most consistent performers."
+  },
+  {
+    "id": "p-fiston-munyaneza", "name": "Fiston Munyaneza", "teamId": "mukura", "position": "DF", "number": 5, "nationality": "Rwanda", "age": 28, "height": 184, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 18, "goals": 1, "assists": 0, "yellowCards": 4, "redCards": 0, "minutes": 1590, "cleanSheets": 6 },
+    "bio": "A no-nonsense centre-back who leads by example."
+  },
+  {
+    "id": "p-arthur-niyigena", "name": "Arthur Niyigena", "teamId": "mukura", "position": "MF", "number": 8, "nationality": "Rwanda", "age": 24, "height": 176, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 17, "goals": 3, "assists": 4, "yellowCards": 2, "redCards": 0, "minutes": 1490, "cleanSheets": 0 },
+    "bio": "Mukura's creative spark, capable of unlocking defences with one pass."
+  },
+  {
+    "id": "p-kevin-mugisha", "name": "Kevin Mugisha", "teamId": "mukura", "position": "FW", "number": 9, "nationality": "Rwanda", "age": 25, "height": 180, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 18, "goals": 5, "assists": 2, "yellowCards": 1, "redCards": 0, "minutes": 1440, "cleanSheets": 0 },
+    "bio": "A hard-running striker whose movement creates space for others."
+  },
+  {
+    "id": "p-bertin-ndayisenga", "name": "Bertin Ndayisenga", "teamId": "mukura", "position": "MF", "number": 6, "nationality": "Rwanda", "age": 27, "height": 178, "foot": "Left", "nationalTeam": false,
+    "stats": { "appearances": 15, "goals": 1, "assists": 2, "yellowCards": 3, "redCards": 0, "minutes": 1310, "cleanSheets": 0 },
+    "bio": "A left-footed midfielder who brings balance and bite to the Mukura engine room."
+  },
+  {
+    "id": "p-placide-habimana", "name": "Placide Habimana", "teamId": "mukura", "position": "DF", "number": 4, "nationality": "Rwanda", "age": 24, "height": 179, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 14, "goals": 0, "assists": 1, "yellowCards": 2, "redCards": 0, "minutes": 1180, "cleanSheets": 4 },
+    "bio": "A mobile defender comfortable stepping into midfield."
+  },
+  {
+    "id": "p-innocent-hategimana", "name": "Innocent Hategimana", "teamId": "mukura", "position": "FW", "number": 11, "nationality": "Rwanda", "age": 23, "height": 174, "foot": "Left", "nationalTeam": false,
+    "stats": { "appearances": 13, "goals": 2, "assists": 3, "yellowCards": 0, "redCards": 0, "minutes": 780, "cleanSheets": 0 },
+    "bio": "A lively winger who thrives in one-on-one situations."
+  },
+  {
+    "id": "p-fidele-nshimiyimana", "name": "Fidèle Nshimiyimana", "teamId": "mukura", "position": "DF", "number": 3, "nationality": "Rwanda", "age": 26, "height": 176, "foot": "Left", "nationalTeam": false,
+    "stats": { "appearances": 13, "goals": 0, "assists": 2, "yellowCards": 1, "redCards": 0, "minutes": 1050, "cleanSheets": 4 },
+    "bio": "An attack-minded full-back with a strong left foot."
+  },
+  {
+    "id": "p-emmanuel-twagirayezu", "name": "Emmanuel Twagirayezu", "teamId": "mukura", "position": "MF", "number": 10, "nationality": "Rwanda", "age": 22, "height": 172, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 11, "goals": 2, "assists": 2, "yellowCards": 1, "redCards": 0, "minutes": 590, "cleanSheets": 0 },
+    "bio": "A promising attacking midfielder with excellent close control."
+  },
+  {
+    "id": "p-samuel-hakizimana", "name": "Samuel Hakizimana", "teamId": "mukura", "position": "GK", "number": 16, "nationality": "Rwanda", "age": 23, "height": 185, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 1, "goals": 0, "assists": 0, "yellowCards": 0, "redCards": 0, "minutes": 90, "cleanSheets": 0 },
+    "bio": "A young goalkeeper with good reflexes and a bright future."
+  },
+  {
+    "id": "p-jean-paul-munyaneza", "name": "Jean-Paul Munyaneza", "teamId": "musanze", "position": "GK", "number": 1, "nationality": "Rwanda", "age": 27, "height": 188, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 18, "goals": 0, "assists": 0, "yellowCards": 2, "redCards": 0, "minutes": 1620, "cleanSheets": 6 },
+    "bio": "A composed goalkeeper who commands his box well."
+  },
+  {
+    "id": "p-cedric-habimana", "name": "Cedric Habimana", "teamId": "musanze", "position": "DF", "number": 5, "nationality": "Rwanda", "age": 25, "height": 182, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 17, "goals": 1, "assists": 0, "yellowCards": 3, "redCards": 0, "minutes": 1490, "cleanSheets": 6 },
+    "bio": "Musanze's defensive leader, strong in the air and in the tackle."
+  },
+  {
+    "id": "p-fiston-niyonzima", "name": "Fiston Niyonzima", "teamId": "musanze", "position": "MF", "number": 8, "nationality": "Rwanda", "age": 24, "height": 175, "foot": "Left", "nationalTeam": false,
+    "stats": { "appearances": 18, "goals": 2, "assists": 4, "yellowCards": 2, "redCards": 0, "minutes": 1560, "cleanSheets": 0 },
+    "bio": "A creative left-footed midfielder who takes most of Musanze's set pieces."
+  },
+  {
+    "id": "p-blaise-mugisha", "name": "Blaise Mugisha", "teamId": "musanze", "position": "FW", "number": 9, "nationality": "Rwanda", "age": 26, "height": 181, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 18, "goals": 5, "assists": 2, "yellowCards": 1, "redCards": 0, "minutes": 1470, "cleanSheets": 0 },
+    "bio": "Musanze's focal point in attack, excellent at holding up play."
+  },
+  {
+    "id": "p-antoine-kayitare", "name": "Antoine Kayitare", "teamId": "musanze", "position": "MF", "number": 6, "nationality": "Rwanda", "age": 27, "height": 177, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 16, "goals": 1, "assists": 2, "yellowCards": 4, "redCards": 0, "minutes": 1390, "cleanSheets": 0 },
+    "bio": "A tough-tackling midfielder who gives Musanze a physical edge."
+  },
+  {
+    "id": "p-olivier-nsabimana", "name": "Olivier Nsabimana", "teamId": "musanze", "position": "DF", "number": 4, "nationality": "Rwanda", "age": 23, "height": 179, "foot": "Right", "nationalTeam": false,
+    "stats": { "appearances": 14, "goals": 0, "assists": 1, "yellowCards": 2, "redCards": 0, "minutes": 1140, "cleanSheets": 4 },
+    "bio": "A quick centre-back who defends well in wide areas."
+  },
+  {
+    "id": "p-enock-murenzi", "name": "Enock Murenzi", "teamId": "musanze", "position": "FW", "number": 11, "nationality": "Rwanda", "age": 22, "height": 173, "foot": "Left", "nationalTeam": false,
+    "stats": { "appearances": 13, "goals": 2, "assists": 2, "yellowCards": 0, "redCards": 0, "minutes": 710, "cleanSheets": 0 },
+    "bio": "A quick left winger with an eye for the spectacular."
+  },
+  {
+    "id": "p-jean-damascene-hakizimana", "name": "Jean-Damascène Hakizimana", "teamId": "musanze", "position": "DF", "number": 3, "nationality": "Rwanda", "age": 25, "height": 176, "foot": "Left", "nationalTeam": false,
+    "stats": { "appearances": 12, "goals": 0, "assists": 1, "yellowCards": 2, "redCards": 0, "minutes": 930, "cleanSheets": 3 },
+    "bio": "A dependable left-back with good crossing ability."
+  },
+  {
+    "id": "p-abdoul-rwatubyaye", "name": "Abdoul Rwatubyaye", "teamId": null, "club": "Free agent", "position": "DF", "number": 4, "nationality": "Rwanda", "age": 32, "height": 187, "foot": "Right", "nationalTeam": true,
+    "stats": { "appearances": 6, "goals": 1, "assists": 0, "yellowCards": 2, "redCards": 0, "minutes": 540, "cleanSheets": 2 },
+    "bio": "The experienced Amavubi defender has played in Morocco, Serbia and Ethiopia, bringing calm and leadership to the national squad."
+  },
+  {
+    "id": "p-steve-rubanguka", "name": "Steve Rubanguka", "teamId": null, "club": "Volos NFC (GRE)", "position": "MF", "number": 6, "nationality": "Rwanda", "age": 27, "height": 180, "foot": "Right", "nationalTeam": true,
+    "stats": { "appearances": 20, "goals": 2, "assists": 3, "yellowCards": 5, "redCards": 0, "minutes": 1620, "cleanSheets": 0 },
+    "bio": "A powerful midfielder playing his club football in Greece, Rubanguka is a key figure in Amavubi's engine room."
+  },
+  {
+    "id": "p-arthur-gitego", "name": "Arthur Gitego", "teamId": null, "club": "FK Vora (ALB)", "position": "FW", "number": 19, "nationality": "Rwanda", "age": 22, "height": 178, "foot": "Right", "nationalTeam": true,
+    "stats": { "appearances": 22, "goals": 4, "assists": 2, "yellowCards": 1, "redCards": 0, "minutes": 1480, "cleanSheets": 0 },
+    "bio": "A forward making his name in Albania, Gitego offers Amavubi a different option with his movement in behind."
+  },
+  {
+    "id": "p-meddie-kagere", "name": "Meddie Kagere", "teamId": null, "club": "Singida Black Stars (TAN)", "position": "FW", "number": 9, "nationality": "Rwanda", "age": 34, "height": 183, "foot": "Right", "nationalTeam": true,
+    "stats": { "appearances": 12, "goals": 4, "assists": 1, "yellowCards": 0, "redCards": 0, "minutes": 780, "cleanSheets": 0 },
+    "bio": "A veteran of Rwandan football with a prolific record in Tanzania, Kagere remains a valuable presence in the Amavubi squad."
+  },
+  {
+    "id": "p-emile-ndayishimiye", "name": "Emile Ndayishimiye", "teamId": null, "club": "KMC FC (TAN)", "position": "GK", "number": 23, "nationality": "Rwanda", "age": 27, "height": 186, "foot": "Right", "nationalTeam": true,
+    "stats": { "appearances": 14, "goals": 0, "assists": 0, "yellowCards": 1, "redCards": 0, "minutes": 1260, "cleanSheets": 4 },
+    "bio": "A reliable shot-stopper who provides competition for the number one jersey."
+  }
+]

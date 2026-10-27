@@ -1,0 +1,7 @@
+[
+  { "userId": "u1", "name": "Frimlong", "role": "ADMIN", "color": "#FF6B00", "status": "online", "workingOn": "APR FC vs Rayon Sports", "screen": "Live Match Control" },
+  { "userId": "u2", "name": "Alice Mukamana", "role": "EDITOR", "color": "#38BDF8", "status": "online", "workingOn": "Kiyovu Sports vs Police FC", "screen": "Live Match Control" },
+  { "userId": "u3", "name": "Eric Nsengimana", "role": "EDITOR", "color": "#A78BFA", "status": "online", "workingOn": "Derby day: APR and Rayon", "screen": "News" },
+  { "userId": "u4", "name": "Diane Uwase", "role": "EDITOR", "color": "#34D399", "status": "online", "workingOn": "Innocent Nshuti", "screen": "Players" },
+  { "userId": "u5", "name": "Kevin Habimana", "role": "EDITOR", "color": "#F472B6", "status": "away", "workingOn": "AS Kigali vs APR FC", "screen": "Fixtures" }
+]

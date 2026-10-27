@@ -1,0 +1,62 @@
+[
+  {
+    "id": "u1",
+    "name": "Frimlong",
+    "email": "admin@rwandascore.rw",
+    "password": "admin123",
+    "role": "ADMIN",
+    "status": "Active",
+    "phone": "+250 788 100 001",
+    "lastActiveMinutes": 0
+  },
+  {
+    "id": "u2",
+    "name": "Alice Mukamana",
+    "email": "alice@rwandascore.rw",
+    "password": "editor123",
+    "role": "EDITOR",
+    "status": "Active",
+    "phone": "+250 788 100 002",
+    "lastActiveMinutes": 1
+  },
+  {
+    "id": "u3",
+    "name": "Eric Nsengimana",
+    "email": "eric@rwandascore.rw",
+    "password": "editor123",
+    "role": "EDITOR",
+    "status": "Active",
+    "phone": "+250 788 100 003",
+    "lastActiveMinutes": 2
+  },
+  {
+    "id": "u4",
+    "name": "Diane Uwase",
+    "email": "diane@rwandascore.rw",
+    "password": "editor123",
+    "role": "EDITOR",
+    "status": "Active",
+    "phone": "+250 788 100 004",
+    "lastActiveMinutes": 6
+  },
+  {
+    "id": "u5",
+    "name": "Kevin Habimana",
+    "email": "kevin@rwandascore.rw",
+    "password": "editor123",
+    "role": "EDITOR",
+    "status": "Active",
+    "phone": "+250 788 100 005",
+    "lastActiveMinutes": 14
+  },
+  {
+    "id": "u6",
+    "name": "Sandra Ingabire",
+    "email": "sandra@rwandascore.rw",
+    "password": "editor123",
+    "role": "EDITOR",
+    "status": "Inactive",
+    "phone": "+250 788 100 006",
+    "lastActiveMinutes": 820
+  }
+]

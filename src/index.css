@@ -1,0 +1,157 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    color-scheme: dark;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-ink font-sans text-white antialiased;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Visible keyboard focus on every interactive element. */
+  :focus-visible {
+    outline: 2px solid #ff6b00;
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  ::selection {
+    background: rgba(255, 107, 0, 0.35);
+    color: #fff;
+  }
+
+  h1, h2, h3, h4 {
+    @apply tracking-tight;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-card border border-line bg-surface;
+  }
+
+  .card-hover {
+    @apply transition-colors duration-150 hover:border-[#3a3a3a];
+  }
+
+  .pill {
+    @apply inline-flex min-h-[36px] items-center justify-center gap-1.5 rounded-full border border-line px-3.5 py-1.5 text-[13px] font-semibold transition-colors duration-150;
+  }
+
+  .pill-idle {
+    @apply bg-surface2 text-muted hover:bg-hover hover:text-white;
+  }
+
+  .pill-active {
+    @apply border-accent/40 bg-accent/10 text-accent;
+  }
+
+  .btn {
+    @apply inline-flex min-h-[40px] items-center justify-center gap-2 rounded-full px-4 text-sm font-semibold transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .btn-accent {
+    @apply bg-accent text-ink hover:bg-accent-hover;
+  }
+
+  .btn-secondary {
+    @apply border border-line bg-surface2 text-white hover:bg-hover;
+  }
+
+  .btn-ghost {
+    @apply text-muted hover:bg-hover hover:text-white;
+  }
+
+  .btn-danger {
+    @apply border border-negative/30 bg-negative/10 text-negative hover:bg-negative/20;
+  }
+
+  .input {
+    @apply w-full rounded-lg border border-line bg-surface2 px-3.5 py-2.5 text-sm text-white placeholder:text-muted/70 focus:border-accent/60 focus:outline-none focus:ring-2 focus:ring-accent/20;
+  }
+
+  .label {
+    @apply mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full border border-line bg-surface2 px-3 py-1 text-xs font-medium text-muted transition-colors hover:border-accent/40 hover:text-white;
+  }
+
+  .section-title {
+    @apply text-[15px] font-bold text-white;
+  }
+
+  .link-muted {
+    @apply text-xs font-semibold text-muted transition-colors hover:text-accent;
+  }
+
+  .skeleton {
+    @apply rounded-md bg-[#2b2b2b];
+    background-image: linear-gradient(90deg, #262626 0px, #323232 40px, #262626 80px);
+    background-size: 600px 100%;
+    @apply animate-shimmer;
+  }
+
+  .status-live {
+    @apply text-accent;
+  }
+
+  .row-live {
+    box-shadow: inset 3px 0 0 0 #ff6b00;
+  }
+
+  .table-admin {
+    @apply w-full border-collapse text-left text-sm;
+  }
+
+  .table-admin th {
+    @apply whitespace-nowrap border-b border-line bg-surface2/60 px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-muted;
+  }
+
+  .table-admin td {
+    @apply border-b border-line/70 px-4 py-3 align-middle;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .pitch-lines {
+    background-color: #0f241a;
+    background-image:
+      linear-gradient(to right, rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 25%;
+  }
+}
