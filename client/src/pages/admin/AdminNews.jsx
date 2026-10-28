@@ -16,7 +16,7 @@ import { useI18n } from '../../hooks/useI18n'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle'
 import { useAuthStore } from '../../store/auth'
 import { useUiStore } from '../../store/ui'
-import { formatDateTime, toDateTimeInput } from '../../utils/format'
+import { formatDateTime } from '../../utils/format'
 import { cn } from '../../utils/cn'
 
 const categories = [
@@ -43,7 +43,6 @@ function defaultForm(author) {
     excerpt: '',
     body: '',
     featured: false,
-    publishedAt: toDateTimeInput(new Date()),
   }
 }
 
@@ -55,7 +54,6 @@ function articleToForm(article) {
     body: Array.isArray(article.content)
       ? article.content.join('\n\n')
       : article.content || article.body || '',
-    publishedAt: toDateTimeInput(article.publishedAt),
   }
 }
 
@@ -140,18 +138,6 @@ function NewsForm({ initial, onSubmit, onClose, isPending, error }) {
             className="input"
             value={form.author}
             onChange={(event) => set('author', event.target.value)}
-          />
-        </div>
-        <div>
-          <label htmlFor="news-published" className="label">
-            {t('admin.form.publishedAt')}
-          </label>
-          <input
-            id="news-published"
-            type="datetime-local"
-            className="input"
-            value={form.publishedAt}
-            onChange={(event) => set('publishedAt', event.target.value)}
           />
         </div>
         <div>
@@ -265,7 +251,12 @@ export default function AdminNews() {
       }
       closeEditor()
     } catch (error) {
-      setFormError(error.message)
+      const details = Array.isArray(error?.details) ? error.details : []
+      setFormError(
+        details.length
+          ? details.map((detail) => `${detail.field}: ${detail.message}`).join(' · ')
+          : error.message,
+      )
     }
   }
 

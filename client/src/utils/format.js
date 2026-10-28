@@ -80,6 +80,9 @@ export function formatTimeAgo(value, t) {
 }
 
 export function formatDateTime(value) {
+  if (value === null || value === undefined || value === '') return '—'
+  const date = toDate(value)
+  if (Number.isNaN(date.getTime())) return '—'
   return `${formatDate(value)}, ${formatTime(value)}`
 }
 

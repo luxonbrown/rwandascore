@@ -105,18 +105,31 @@ export const newsListQuery = z.object({
   featured: booleanString.optional(),
 });
 
-export const newsCreateSchema = z.object({
-  title: z.string().min(3).max(200),
+const normalizeNewsPayload = (value) => {
+  if (!value || typeof value !== 'object') return value
+  const next = { ...value }
+  if (next.content === undefined && typeof next.body === 'string') next.content = next.body
+  if (next.imageUrl === undefined && typeof next.image === 'string') next.imageUrl = next.image
+  if (next.imageUrl === '') next.imageUrl = null
+  delete next.body
+  delete next.image
+  return next
+}
+
+const newsCreateBase = z.object({
+  title: z.string().min(1).max(200),
   slug: z.string().max(200).optional(),
   excerpt: z.string().min(1).max(500),
   content: z.string().min(1),
   category: z.string().min(1).max(80),
-  imageUrl: z.string().url().nullable().optional(),
+  imageUrl: z.string().max(1000).nullable().optional(),
   status: z.enum(['draft', 'published']).optional(),
   featured: z.boolean().optional(),
 });
 
-export const newsUpdateSchema = newsCreateSchema.partial();
+export const newsCreateSchema = z.preprocess(normalizeNewsPayload, newsCreateBase);
+
+export const newsUpdateSchema = z.preprocess(normalizeNewsPayload, newsCreateBase.partial());
 
 export const teamCreateSchema = z.object({
   name: z.string().min(2).max(120),
