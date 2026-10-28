@@ -1,6 +1,8 @@
 node_modules
 dist
 dist-ssr
+client/dist
+server/dist
 *.local
 .env
 .env.*
@@ -13,3 +15,6 @@ yarn-error.log*
 !.vscode/extensions.json
 .idea
 .playwright-mcp
+server/uploads/*
+!server/uploads/.gitkeep
+server/uploads-test

@@ -1,0 +1,334 @@
+generator client {
+  provider = "prisma-client-js"
+  engineType = "binary"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  EDITOR
+  TEAM_MANAGER
+}
+
+enum CompetitionType {
+  league
+  cup
+  national
+}
+
+enum MatchStatus {
+  scheduled
+  live
+  ht
+  ft
+  postponed
+}
+
+enum MatchEventType {
+  goal
+  own_goal
+  penalty
+  yellow
+  red
+  substitution
+  shot
+  shot_on_target
+  shot_off_target
+  save
+  position
+}
+
+enum NewsStatus {
+  draft
+  published
+}
+
+enum Position {
+  GK
+  DF
+  MF
+  FW
+}
+
+model User {
+  id                 String    @id @default(cuid())
+  name               String
+  email              String    @unique
+  passwordHash       String    @map("password_hash")
+  role               Role      @default(EDITOR)
+  isActive           Boolean   @default(true) @map("is_active")
+  mustChangePassword Boolean   @default(false) @map("must_change_password")
+  lastLoginAt        DateTime? @map("last_login_at")
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+
+  refreshTokens RefreshToken[]
+  activityLogs  ActivityLog[]
+  news          News[]
+  managedTeam   Team?          @relation("TeamManager")
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique @map("token_hash")
+  userId    String    @map("user_id")
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime  @map("expires_at")
+  revokedAt DateTime? @map("revoked_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+model Stadium {
+  id        String   @id @default(cuid())
+  name      String
+  city      String
+  capacity  Int?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  teams   Team[]
+  matches Match[]
+
+  @@unique([name, city])
+  @@map("stadiums")
+}
+
+model Team {
+  id             String   @id @default(cuid())
+  name           String   @unique
+  shortName      String   @map("short_name")
+  initials       String
+  slug           String   @unique
+  city           String
+  stadiumId      String?  @map("stadium_id")
+  stadium        Stadium? @relation(fields: [stadiumId], references: [id], onDelete: SetNull)
+  founded        Int?
+  nickname       String?
+  coach          String?
+  primaryColor   String   @default("#FF6B00") @map("primary_color")
+  secondaryColor String   @default("#121212") @map("secondary_color")
+  logoUrl        String?  @map("logo_url")
+  isNational     Boolean  @default(false) @map("is_national")
+  description    String?  @db.Text
+  managerUserId String?  @unique @map("manager_user_id")
+  manager       User?    @relation("TeamManager", fields: [managerUserId], references: [id], onDelete: SetNull)
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  players     Player[]
+  homeMatches Match[]    @relation("HomeTeam")
+  awayMatches Match[]    @relation("AwayTeam")
+  events      MatchEvent[]
+  standings   Standing[]
+
+  @@map("teams")
+}
+
+model Competition {
+  id             String          @id @default(cuid())
+  name           String          @unique
+  shortName      String          @map("short_name")
+  slug           String          @unique
+  country        String          @default("Rwanda")
+  type           CompetitionType @default(league)
+  logoUrl        String?         @map("logo_url")
+  primaryColor   String          @default("#FF6B00") @map("primary_color")
+  secondaryColor String          @default("#121212") @map("secondary_color")
+  description    String?         @db.Text
+  teamCount      Int             @default(0) @map("team_count")
+  createdAt      DateTime        @default(now()) @map("created_at")
+  updatedAt      DateTime        @updatedAt @map("updated_at")
+
+  seasons Season[]
+  matches Match[]
+
+  @@map("competitions")
+}
+
+model Season {
+  id            String      @id @default(cuid())
+  competitionId String      @map("competition_id")
+  competition   Competition @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+  name          String
+  startDate     DateTime?   @map("start_date")
+  endDate       DateTime?   @map("end_date")
+  isCurrent     Boolean     @default(false) @map("is_current")
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+
+  matches   Match[]
+  standings Standing[]
+
+  @@unique([competitionId, name])
+  @@index([competitionId])
+  @@map("seasons")
+}
+
+model Player {
+  id             String    @id @default(cuid())
+  name           String
+  slug           String    @unique
+  teamId         String?   @map("team_id")
+  team           Team?     @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  position       Position  @default(MF)
+  number         Int?
+  nationality    String    @default("Rwanda")
+  dateOfBirth    DateTime? @map("date_of_birth")
+  height         Int?
+  foot           String?   @default("Right")
+  photoUrl       String?   @map("photo_url")
+  isNationalTeam Boolean   @default(false) @map("is_national_team")
+  bio            String?   @db.Text
+  appearances    Int       @default(0)
+  assists        Int       @default(0)
+  yellowCards    Int       @default(0) @map("yellow_cards")
+  redCards       Int       @default(0) @map("red_cards")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  events        MatchEvent[] @relation("EventPlayer")
+  relatedEvents MatchEvent[] @relation("EventRelatedPlayer")
+
+  @@index([teamId])
+  @@map("players")
+}
+
+model Match {
+  id            String      @id @default(cuid())
+  competitionId String      @map("competition_id")
+  competition   Competition @relation(fields: [competitionId], references: [id], onDelete: Restrict)
+  seasonId      String      @map("season_id")
+  season        Season      @relation(fields: [seasonId], references: [id], onDelete: Restrict)
+  homeTeamId    String      @map("home_team_id")
+  homeTeam      Team        @relation("HomeTeam", fields: [homeTeamId], references: [id], onDelete: Restrict)
+  awayTeamId    String      @map("away_team_id")
+  awayTeam      Team        @relation("AwayTeam", fields: [awayTeamId], references: [id], onDelete: Restrict)
+  kickoffAt     DateTime    @map("kickoff_at")
+  status        MatchStatus @default(scheduled)
+  minute        Int         @default(0)
+  homeScore     Int         @default(0) @map("home_score")
+  awayScore     Int         @default(0) @map("away_score")
+  round         String?
+  venue         String?
+  stadiumId     String?     @map("stadium_id")
+  stadium       Stadium?    @relation(fields: [stadiumId], references: [id], onDelete: SetNull)
+  city          String?
+  referee       String?
+  attendance    Int?
+  stats         Json?
+  lineups       Json?
+  version       Int         @default(1)
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+
+  events MatchEvent[]
+
+  @@index([status])
+  @@index([kickoffAt])
+  @@index([competitionId])
+  @@index([seasonId])
+  @@index([homeTeamId])
+  @@index([awayTeamId])
+  @@map("matches")
+}
+
+model MatchEvent {
+  id              String         @id @default(cuid())
+  matchId         String         @map("match_id")
+  match           Match          @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  teamId          String?        @map("team_id")
+  team            Team?          @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  playerId        String?        @map("player_id")
+  player          Player?        @relation("EventPlayer", fields: [playerId], references: [id], onDelete: SetNull)
+  relatedPlayerId String?        @map("related_player_id")
+  relatedPlayer   Player?        @relation("EventRelatedPlayer", fields: [relatedPlayerId], references: [id], onDelete: SetNull)
+  type            MatchEventType
+  minute          Int
+  note            String?        @db.Text
+  x               Float?
+  y               Float?
+  createdAt       DateTime       @default(now()) @map("created_at")
+
+  @@index([matchId])
+  @@index([playerId])
+  @@map("match_events")
+}
+
+model Standing {
+  id           String   @id @default(cuid())
+  seasonId     String   @map("season_id")
+  season       Season   @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  teamId       String   @map("team_id")
+  team         Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  played       Int      @default(0)
+  won          Int      @default(0)
+  drawn        Int      @default(0)
+  lost         Int      @default(0)
+  goalsFor     Int      @default(0) @map("goals_for")
+  goalsAgainst Int      @default(0) @map("goals_against")
+  points       Int      @default(0)
+  position     Int
+  form         String?  @db.VarChar(10)
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@unique([seasonId, teamId])
+  @@index([seasonId, position])
+  @@map("standings")
+}
+
+model News {
+  id          String     @id @default(cuid())
+  title       String
+  slug        String     @unique
+  excerpt     String     @db.Text
+  content     String     @db.LongText
+  category    String
+  imageUrl    String?    @map("image_url")
+  authorId    String?    @map("author_id")
+  author      User?      @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  status      NewsStatus @default(draft)
+  featured    Boolean    @default(false)
+  publishedAt DateTime?  @map("published_at")
+  views       Int        @default(0)
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+
+  @@index([status, publishedAt])
+  @@index([category])
+  @@map("news")
+}
+
+model ActivityLog {
+  id          String   @id @default(cuid())
+  userId      String?  @map("user_id")
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action      String
+  module      String
+  recordType  String?  @map("record_type")
+  recordId    String?  @map("record_id")
+  description String   @db.Text
+  ipAddress   String?  @map("ip_address")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@index([createdAt])
+  @@index([module])
+  @@map("activity_logs")
+}
+
+model Setting {
+  key       String   @id
+  value     String   @db.Text
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("settings")
+}

@@ -1,0 +1,49 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: rwandascore-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: rwandascore
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  api:
+    build:
+      context: ./server
+    container_name: rwandascore-api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DATABASE_URL: mysql://root:root@db:3306/rwandascore
+      FRONTEND_URL: http://localhost:5173
+      PUBLIC_BASE_URL: http://localhost:4000
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-change-me-access-secret-0123456789abcdef}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-change-me-refresh-secret-0123456789abcdef}
+      JWT_ACCESS_EXPIRES_IN: 15m
+      JWT_REFRESH_EXPIRES_IN: 7d
+      BCRYPT_ROUNDS: 10
+      UPLOAD_DIR: /app/uploads
+      MAX_UPLOAD_BYTES: 2097152
+      SEED_ADMIN_NAME: System Administrator
+      SEED_ADMIN_EMAIL: admin@rwandascore.rw
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-Admin@12345}
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./server/uploads:/app/uploads
+
+volumes:
+  mysql_data:

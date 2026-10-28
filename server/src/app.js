@@ -1,0 +1,44 @@
+import cors from 'cors';
+import express from 'express';
+import helmet from 'helmet';
+import path from 'node:path';
+import { env } from './config/env.js';
+import { errorHandler, notFoundHandler } from './middleware/error.js';
+import { uploadDir } from './middleware/upload.js';
+import { publicRouter } from './routes/public.routes.js';
+import { authRouter } from './routes/auth.routes.js';
+import { adminRouter } from './routes/admin.routes.js';
+import { managerRouter } from './routes/manager.routes.js';
+
+export function createApp() {
+  const app = express();
+  const allowedOrigins = env.FRONTEND_URL.split(',').map((item) => item.trim()).filter(Boolean);
+
+  app.disable('x-powered-by');
+  app.set('trust proxy', 1);
+  app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
+  app.use(cors({
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(new Error('Origin is not allowed by CORS'));
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Authorization', 'Content-Type', 'If-Match'],
+  }));
+  app.use(express.json({ limit: '1mb' }));
+  app.use('/uploads', express.static(path.resolve(uploadDir), {
+    fallthrough: false,
+    maxAge: env.NODE_ENV === 'production' ? '7d' : 0,
+    immutable: env.NODE_ENV === 'production',
+  }));
+
+  app.get('/health', (req, res) => res.json({ status: 'ok', service: 'rwandascore-api' }));
+  app.use('/api/v1', publicRouter);
+  app.use('/api/v1/auth', authRouter);
+  app.use('/api/v1/admin', adminRouter);
+  app.use('/api/v1/manager', managerRouter);
+  app.use(notFoundHandler);
+  app.use(errorHandler);
+  return app;
+}
