@@ -37,6 +37,7 @@ export async function listNews({
   search,
   featured,
   publicOnly = true,
+  includeContent = false,
 }) {
   const where = {
     ...(publicOnly ? { status: 'published' } : status ? { status } : {}),
@@ -64,7 +65,7 @@ export async function listNews({
   ]);
 
   return {
-    items: articles.map((article) => serializeNews(article)),
+    items: articles.map((article) => serializeNews(article, { includeContent })),
     total,
     page,
     pageSize,

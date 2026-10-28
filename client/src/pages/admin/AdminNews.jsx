@@ -51,7 +51,10 @@ function articleToForm(article) {
   return {
     ...defaultForm(),
     ...article,
-    body: Array.isArray(article.body) ? article.body.join('\n\n') : article.body || '',
+    image: article.imageUrl || article.image || '',
+    body: Array.isArray(article.content)
+      ? article.content.join('\n\n')
+      : article.content || article.body || '',
     publishedAt: toDateTimeInput(article.publishedAt),
   }
 }
@@ -242,10 +245,15 @@ export default function AdminNews() {
 
   const save = async (form) => {
     setFormError('')
-    const { id, ...rest } = form
+    const { id } = form
     const payload = {
-      ...rest,
-      publishedAt: form.publishedAt ? new Date(form.publishedAt).toISOString() : new Date().toISOString(),
+      title: form.title,
+      slug: form.slug?.trim() || undefined,
+      excerpt: form.excerpt?.trim() || form.body.slice(0, 200),
+      content: form.body,
+      category: form.category,
+      imageUrl: form.image?.trim() || null,
+      featured: Boolean(form.featured),
     }
     try {
       if (id) {

@@ -132,7 +132,7 @@ adminRouter.post('/matches/:id/live/halftime', contentEditors, validate({ params
 adminRouter.post('/matches/:id/live/secondhalf', contentEditors, validate({ params: idParam, body: liveActionSchema }), liveStatus('live'));
 adminRouter.post('/matches/:id/live/fulltime', contentEditors, validate({ params: idParam, body: liveActionSchema }), liveStatus('ft'));
 
-adminRouter.get('/news', contentEditors, validate({ query: newsListQuery }), send(({ query }) => listNews({ ...query, publicOnly: false })));
+adminRouter.get('/news', contentEditors, validate({ query: newsListQuery }), send(({ query }) => listNews({ ...query, publicOnly: false, includeContent: true })));
 adminRouter.post('/news', contentEditors, validate({ body: newsCreateSchema }), send(({ body, user }) => createNews(body, user, ip(user)), 201));
 adminRouter.get('/news/:id', contentEditors, validate({ params: idParam }), send(({ params }) => getNewsById(params.id)));
 adminRouter.put('/news/:id', contentEditors, validate({ params: idParam, body: newsUpdateSchema }), send(({ params, body, user }) => updateNews(params.id, body, user, ip(user))));
