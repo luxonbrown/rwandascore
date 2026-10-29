@@ -10,6 +10,7 @@ import { publicRouter } from './routes/public.routes.js';
 import { authRouter } from './routes/auth.routes.js';
 import { adminRouter } from './routes/admin.routes.js';
 import { managerRouter } from './routes/manager.routes.js';
+import { serializeTeam } from './utils/serializers.js';
 
 let teamInsertProbe;
 
@@ -34,7 +35,9 @@ async function probeTeamInsert() {
           isNational: false,
           description: '',
         },
+        include: { stadium: true },
       });
+      serializeTeam(created);
       await tx.activityLog.create({
         data: {
           userId: null,
@@ -134,6 +137,7 @@ export function createApp() {
 
     teamInsertProbe ??= probeTeamInsert();
     payload.teamInsertProbe = await teamInsertProbe;
+    payload.teamCount = await prisma.team.count();
 
     res.json(payload);
   });
