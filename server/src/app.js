@@ -3,6 +3,7 @@ import express from 'express';
 import helmet from 'helmet';
 import path from 'node:path';
 import { env } from './config/env.js';
+import { prisma } from './config/prisma.js';
 import { errorHandler, notFoundHandler } from './middleware/error.js';
 import { uploadDir } from './middleware/upload.js';
 import { publicRouter } from './routes/public.routes.js';
@@ -33,11 +34,30 @@ export function createApp() {
     immutable: env.NODE_ENV === 'production',
   }));
 
-  app.get('/health', (req, res) => res.json({
-    status: 'ok',
-    service: 'rwandascore-api',
-    commit: process.env.RENDER_GIT_COMMIT?.slice(0, 7) ?? null,
-  }));
+  app.get('/health', async (req, res) => {
+    const payload = {
+      status: 'ok',
+      service: 'rwandascore-api',
+      commit: process.env.RENDER_GIT_COMMIT?.slice(0, 7) ?? null,
+    };
+
+    try {
+      await prisma.$queryRaw`SELECT 1`;
+      payload.database = 'ok';
+    } catch (error) {
+      payload.database = 'error';
+      payload.databaseCode = error?.code ?? error?.name ?? null;
+    }
+
+    try {
+      payload.activityLogCount = await prisma.activityLog.count();
+    } catch (error) {
+      payload.activityLogCount = null;
+      payload.activityLogCode = error?.code ?? error?.name ?? null;
+    }
+
+    res.json(payload);
+  });
   app.use('/api/v1', publicRouter);
   app.use('/api/v1/auth', authRouter);
   app.use('/api/v1/admin', adminRouter);

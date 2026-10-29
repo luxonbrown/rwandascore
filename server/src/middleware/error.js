@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { ZodError } from 'zod';
 import { Prisma } from '@prisma/client';
 import { ApiError } from '../utils/errors.js';
@@ -72,14 +73,18 @@ export function errorHandler(error, req, res, next) {
     });
   }
 
+  const requestId = randomUUID();
+
   if (!isTest) {
-    console.error(error);
+    console.error(`[${requestId}]`, error);
   }
 
   return res.status(500).json({
     error: {
       code: 'INTERNAL_ERROR',
       message: 'An unexpected error occurred',
+      requestId,
+      ...(error?.code ? { prismaCode: String(error.code) } : {}),
     },
   });
 }
