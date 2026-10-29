@@ -33,7 +33,11 @@ export function createApp() {
     immutable: env.NODE_ENV === 'production',
   }));
 
-  app.get('/health', (req, res) => res.json({ status: 'ok', service: 'rwandascore-api' }));
+  app.get('/health', (req, res) => res.json({
+    status: 'ok',
+    service: 'rwandascore-api',
+    commit: process.env.RENDER_GIT_COMMIT?.slice(0, 7) ?? null,
+  }));
   app.use('/api/v1', publicRouter);
   app.use('/api/v1/auth', authRouter);
   app.use('/api/v1/admin', adminRouter);

@@ -131,7 +131,34 @@ export const newsCreateSchema = z.preprocess(normalizeNewsPayload, newsCreateBas
 
 export const newsUpdateSchema = z.preprocess(normalizeNewsPayload, newsCreateBase.partial());
 
-export const teamCreateSchema = z.object({
+const normalizeTeamPayload = (value) => {
+  if (!value || typeof value !== 'object') return value;
+  const next = { ...value };
+  if (next.coach && typeof next.coach === 'object') {
+    next.coach = typeof next.coach.name === 'string' && next.coach.name.trim() ? next.coach.name : null;
+  }
+  if (next.colors && typeof next.colors === 'object') {
+    if (next.primaryColor === undefined && next.colors.primary !== undefined) next.primaryColor = next.colors.primary;
+    if (next.secondaryColor === undefined && next.colors.secondary !== undefined) next.secondaryColor = next.colors.secondary;
+  }
+  if (next.logoUrl === undefined && typeof next.logo === 'string') next.logoUrl = next.logo;
+  if (next.isNational === undefined && next.national !== undefined) next.isNational = Boolean(next.national);
+  if (next.logoUrl === '') next.logoUrl = null;
+  if (next.stadiumId === '') next.stadiumId = null;
+  if (next.founded === '') next.founded = null;
+  if ((next.initials === undefined || next.initials === '') && typeof next.shortName === 'string' && next.shortName.trim()) {
+    next.initials = next.shortName.trim().slice(0, 3).toUpperCase();
+  }
+  delete next.colors;
+  delete next.logo;
+  delete next.national;
+  delete next.competitionIds;
+  delete next.stadium;
+  delete next.coachNationality;
+  return next;
+};
+
+const teamCreateBase = z.object({
   name: z.string().min(2).max(120),
   shortName: z.string().min(2).max(40),
   initials: z.string().min(1).max(6),
@@ -147,9 +174,11 @@ export const teamCreateSchema = z.object({
   description: z.string().max(5000).nullable().optional(),
 });
 
-export const teamUpdateSchema = teamCreateSchema.partial().extend({
+export const teamCreateSchema = z.preprocess(normalizeTeamPayload, teamCreateBase);
+
+export const teamUpdateSchema = z.preprocess(normalizeTeamPayload, teamCreateBase.partial().extend({
   slug: z.string().max(120).optional(),
-});
+}));
 
 export const playerCreateSchema = z.object({
   name: z.string().min(2).max(120),

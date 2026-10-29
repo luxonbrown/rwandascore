@@ -16,6 +16,7 @@ import {
 import { useI18n } from '../../hooks/useI18n'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle'
 import { useUiStore } from '../../store/ui'
+import { describeApiError } from '../../services/api'
 import { cn } from '../../utils/cn'
 
 const emptyForm = {
@@ -364,7 +365,7 @@ export default function AdminTeams() {
       }
       closeEditor()
     } catch (error) {
-      setFormError(error.message)
+      setFormError(describeApiError(error))
     }
   }
 
@@ -375,7 +376,7 @@ export default function AdminTeams() {
       pushToast(t('admin.recordDeleted'))
       setPendingDelete(null)
     } catch (error) {
-      pushToast(error.message, 'error')
+      pushToast(describeApiError(error), 'error')
     }
   }
 
