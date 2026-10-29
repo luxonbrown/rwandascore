@@ -4,8 +4,8 @@ export const isMockMode = import.meta.env.VITE_USE_MOCK_DATA === 'true'
 const useMock = isMockMode
 const base = (import.meta.env.VITE_API_URL || 'http://localhost:4000/api/v1').replace(/\/$/, '')
 const authKey = 'rwandascore_auth_v1'
-export class ApiError extends Error { constructor(message, status = 400, details = undefined) { super(message); this.name = 'ApiError'; this.status = status; this.details = details } }
-export function describeApiError(error) { const details = Array.isArray(error?.details) ? error.details : []; return details.length ? details.map((detail) => [detail.field, detail.message].filter(Boolean).join(': ')).join(' · ') : error?.message || 'Request failed' }
+export class ApiError extends Error { constructor(message, status = 400, details = undefined, meta = {}) { super(message); this.name = 'ApiError'; this.status = status; this.details = details; Object.assign(this, meta) } }
+export function describeApiError(error) { const details = Array.isArray(error?.details) ? error.details : []; const base = details.length ? details.map((detail) => [detail.field, detail.message].filter(Boolean).join(': ')).join(' · ') : error?.message || 'Request failed'; const meta = [error?.prismaCode, error?.requestId].filter(Boolean).join(' · '); return meta ? `${base} (${meta})` : base }
 export const LIVE_STATUSES = ['LIVE', 'HT']
 export const dayKeyOf = mock.dayKeyOf
 export const todayKey = mock.todayKey
@@ -38,7 +38,7 @@ async function request(path, { method = 'GET', body, headers = {}, auth = false 
     if (!refreshed || response.status === 401) clearLocalAuth()
   }
   const data = response.status === 204 ? null : await response.json().catch(() => ({}))
-  if (!response.ok) throw new ApiError(data?.error?.message || data?.message || `Request failed (${response.status})`, response.status, data?.error?.details)
+  if (!response.ok) throw new ApiError(data?.error?.message || data?.message || `Request failed (${response.status})`, response.status, data?.error?.details, { code: data?.error?.code, requestId: data?.error?.requestId, prismaCode: data?.error?.prismaCode })
   return data
 }
 const qs = (obj = {}) => { const p = new URLSearchParams(); Object.entries(obj).forEach(([k,v]) => { if (v !== undefined && v !== null && v !== '') p.set(k, Array.isArray(v) ? v.join(',') : String(v)) }); return p.size ? `?${p}` : '' }
