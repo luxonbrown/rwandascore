@@ -73,6 +73,13 @@ export function createApp() {
       ]);
       payload.teamSchema = columns;
       payload.teamTriggers = triggers;
+      payload.activityLogSchema = await prisma.$queryRaw`
+        SELECT COLUMN_NAME AS columnName, COLUMN_TYPE AS columnType, IS_NULLABLE AS isNullable,
+               COLUMN_DEFAULT AS columnDefault, EXTRA AS extra
+        FROM information_schema.columns
+        WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'activity_logs'
+        ORDER BY ORDINAL_POSITION
+      `;
     } catch (error) {
       payload.teamSchema = null;
       payload.teamSchemaCode = error?.code ?? error?.name ?? null;
