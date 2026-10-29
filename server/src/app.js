@@ -11,6 +11,53 @@ import { authRouter } from './routes/auth.routes.js';
 import { adminRouter } from './routes/admin.routes.js';
 import { managerRouter } from './routes/manager.routes.js';
 
+let teamInsertProbe;
+
+async function probeTeamInsert() {
+  try {
+    await prisma.$transaction(async (tx) => {
+      const stamp = Date.now();
+      const created = await tx.team.create({
+        data: {
+          name: `Aperi FC Probe ${stamp}`,
+          shortName: 'APR',
+          initials: 'APR',
+          slug: `aperi-fc-probe-${stamp}`,
+          city: 'Kigali',
+          stadiumId: null,
+          founded: 1900,
+          nickname: 'apr',
+          coach: 'kamavinga',
+          primaryColor: '#FF6B00',
+          secondaryColor: '#121212',
+          logoUrl: null,
+          isNational: false,
+          description: '',
+        },
+      });
+      await tx.activityLog.create({
+        data: {
+          userId: null,
+          action: 'probe',
+          module: 'Health',
+          recordType: 'team',
+          recordId: created.id,
+          description: 'Team insert health probe',
+        },
+      });
+      throw new Error('__probe_rollback__');
+    });
+    return 'unexpected-commit';
+  } catch (error) {
+    if (error?.message === '__probe_rollback__') return 'ok';
+    return {
+      code: error?.code ?? null,
+      name: error?.name ?? null,
+      message: String(error?.message ?? '').slice(0, 300),
+    };
+  }
+}
+
 export function createApp() {
   const app = express();
   const allowedOrigins = env.FRONTEND_URL.split(',').map((item) => item.trim()).filter(Boolean);
@@ -84,6 +131,9 @@ export function createApp() {
       payload.teamSchema = null;
       payload.teamSchemaCode = error?.code ?? error?.name ?? null;
     }
+
+    teamInsertProbe ??= probeTeamInsert();
+    payload.teamInsertProbe = await teamInsertProbe;
 
     res.json(payload);
   });
