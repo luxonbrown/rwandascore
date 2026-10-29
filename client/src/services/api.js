@@ -5,6 +5,7 @@ const useMock = isMockMode
 const base = (import.meta.env.VITE_API_URL || 'http://localhost:4000/api/v1').replace(/\/$/, '')
 const authKey = 'rwandascore_auth_v1'
 export class ApiError extends Error { constructor(message, status = 400, details = undefined) { super(message); this.name = 'ApiError'; this.status = status; this.details = details } }
+export function describeApiError(error) { const details = Array.isArray(error?.details) ? error.details : []; return details.length ? details.map((detail) => [detail.field, detail.message].filter(Boolean).join(': ')).join(' · ') : error?.message || 'Request failed' }
 export const LIVE_STATUSES = ['LIVE', 'HT']
 export const dayKeyOf = mock.dayKeyOf
 export const todayKey = mock.todayKey
@@ -51,7 +52,7 @@ export const createManagedPlayer = (body) => manager('/players', { method: 'POST
 export const updateManagedPlayer = (id, body) => manager(`/players/${id}`, { method: 'PUT', body })
 export const deleteManagedPlayer = (id) => manager(`/players/${id}`, { method: 'DELETE' })
 const userPayload = (payload) => {
-  const { status, phone, password, ...fields } = payload
+  const { status, phone: _phone, password, ...fields } = payload
   return { ...fields, ...(password ? { password } : {}), ...(status !== undefined ? { isActive: status === 'Active' } : {}) }
 }
 const userShape = (user) => ({
@@ -61,9 +62,24 @@ const userShape = (user) => ({
   phone: user.phone || '',
 })
 const matchPayload = (payload) => {
-  const { date, homeScore, awayScore, ...fields } = payload
+  const { date, homeScore: _homeScore, awayScore: _awayScore, ...fields } = payload
   const status = ({ UPCOMING: 'scheduled', LIVE: 'live', HT: 'ht', FT: 'ft', POSTPONED: 'postponed' })[fields.status] || fields.status
   return { ...fields, ...(date ? { kickoffAt: date } : {}), ...(status ? { status } : {}) }
+}
+const emptyToNull = (value) => (typeof value === 'string' && value.trim() === '' ? null : value)
+const teamPayload = (payload) => {
+  const { coach, colors, national, logo, stadium: _stadium, competitionIds: _competitionIds, founded, ...fields } = payload
+  const out = { ...fields }
+  if (coach !== undefined) out.coach = emptyToNull(typeof coach === 'string' ? coach : coach?.name)
+  if (colors !== undefined) {
+    if (colors?.primary !== undefined) out.primaryColor = colors.primary
+    if (colors?.secondary !== undefined) out.secondaryColor = colors.secondary
+  }
+  if (national !== undefined) out.isNational = Boolean(national)
+  if (logo !== undefined) out.logoUrl = emptyToNull(logo)
+  if (founded !== undefined) out.founded = founded === '' || founded === null ? null : Number(founded)
+  if (out.stadiumId !== undefined) out.stadiumId = out.stadiumId || null
+  return out
 }
 
 export async function getMatches(filters = {}) { if (useMock) return mock.getMatches(filters); return unwrap(await get(`/matches${qs({ ...filters, status: Array.isArray(filters.status) ? filters.status.map((s) => s.toLowerCase()).join(',') : filters.status?.toLowerCase() })}`)).map(matchShape) }
@@ -84,6 +100,7 @@ export async function getArticle(slug) { if (useMock) return mock.getArticle(slu
 export async function searchAll(query) { if (useMock) return mock.searchAll(query); return get(`/search${qs({q:query})}`) }
 export async function getFavouritesData(filters={}) { if (useMock) return mock.getFavouritesData(filters); const [teams, players] = await Promise.all([getTeams(), getPlayers()]); return { teams: teams.filter(x => filters.teamIds?.includes(x.id)), players: players.filter(x => filters.playerIds?.includes(x.id)) } }
 export async function login(email,password) { if (useMock) return mock.login(email,password); const data=await request('/auth/login',{method:'POST',body:{email:email.trim(),password}}); persistTokens({accessToken:data.accessToken,refreshToken:data.refreshToken}); return { user:data.user, token:data.accessToken } }
+export async function changePassword(currentPassword,newPassword) { if (useMock) return { success:true }; return request('/auth/change-password',{method:'POST',auth:true,body:{currentPassword,newPassword}}) }
 export async function getUserById(id) { if (useMock) return mock.getUserById(id); const data=await request('/auth/me',{auth:true}); return data.user?.id===id ? { ...data.user, status:data.user.isActive?'Active':'Inactive' } : null }
 export async function getActivity(limit=12) { if (useMock) return mock.getActivity(limit); return unwrap(await admin(`/activity-logs${qs({pageSize:limit})}`)) }
 export async function getAdminDashboard() { if (useMock) return mock.getAdminDashboard(); return admin('/dashboard-stats',{auth:true}) }
@@ -96,7 +113,7 @@ export async function adminList(collection) {
   if (collection === 'users') return items.map(userShape)
   return items
 }
-export async function adminCreateItem(collection,payload,actor) { if(useMock)return mock.adminCreateItem(collection,payload,actor); return admin(routes[collection],{method:'POST',body:collection==='users'?userPayload(payload):(collection==='fixtures'||collection==='matches')?matchPayload(payload):payload}) }
+export async function adminCreateItem(collection,payload,actor) { if(useMock)return mock.adminCreateItem(collection,payload,actor); return admin(routes[collection],{method:'POST',body:collection==='users'?userPayload(payload):collection==='teams'?teamPayload(payload):(collection==='fixtures'||collection==='matches')?matchPayload(payload):payload}) }
 export async function adminUpdateItem(collection,id,payload,actor) {
   if(useMock)return mock.adminUpdateItem(collection,id,payload,actor)
   if (collection === 'users') {
@@ -108,7 +125,7 @@ export async function adminUpdateItem(collection,id,payload,actor) {
     const current = await getMatch(id)
     return admin(`${routes[collection]}/${id}`,{method:'PUT',body:{...matchPayload(payload),version:current.version}})
   }
-  return admin(`${routes[collection]}/${id}`,{method:'PUT',body:payload})
+  return admin(`${routes[collection]}/${id}`,{method:'PUT',body:collection==='teams'?teamPayload(payload):payload})
 }
 export async function adminDeleteItem(collection,id,actor) { if(useMock)return mock.adminDeleteItem(collection,id,actor); const body=collection==='matches'||collection==='fixtures'?{version:(await getMatch(id)).version}:undefined; return admin(`${routes[collection]}/${id}`,{method:'DELETE',body}) }
 export async function adminUpdateLiveMatch(matchId,updates,actor) { if(useMock)return mock.adminUpdateLiveMatch(matchId,updates,actor); const current=await getMatch(matchId); const version=updates.version ?? current.version; const action=updates.status==='HT'?'halftime':updates.status==='FT'?'fulltime':updates.status==='LIVE'?'minute':'minute'; return admin(`/matches/${matchId}/live/${action}`,{method:'POST',body:{version,minute:updates.minute}}) }

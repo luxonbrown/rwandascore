@@ -24,6 +24,7 @@ const emptyForm = {
   initials: '',
   city: '',
   stadium: '',
+  stadiumId: '',
   founded: '',
   nickname: '',
   coachName: '',
@@ -40,13 +41,16 @@ function teamToForm(team) {
   return {
     ...emptyForm,
     ...team,
-    coachName: team.coach?.name || '',
+    coachName: team.coach?.name || (typeof team.coach === 'string' ? team.coach : ''),
     coachNationality: team.coach?.nationality || 'Rwanda',
-    primaryColor: team.colors?.primary || '#FF6B00',
-    secondaryColor: team.colors?.secondary || '#121212',
-    founded: team.founded || '',
-    logo: team.logo || '',
+    primaryColor: team.primaryColor || team.colors?.primary || '#FF6B00',
+    secondaryColor: team.secondaryColor || team.colors?.secondary || '#121212',
+    founded: team.founded ?? '',
+    stadium: team.stadium || '',
+    stadiumId: team.stadiumId || '',
+    logo: team.logoUrl || team.logo || '',
     competitionIds: team.competitionIds || [],
+    national: team.isNational ?? team.national ?? false,
   }
 }
 
@@ -86,6 +90,7 @@ function TeamForm({ initial, competitions, onSubmit, onClose, isPending, error }
             id="team-name"
             className="input"
             required
+            minLength={2}
             value={form.name}
             onChange={(event) => set('name', event.target.value)}
           />
@@ -97,6 +102,8 @@ function TeamForm({ initial, competitions, onSubmit, onClose, isPending, error }
           <input
             id="team-short"
             className="input"
+            required
+            minLength={2}
             value={form.shortName}
             onChange={(event) => set('shortName', event.target.value)}
           />
@@ -108,6 +115,7 @@ function TeamForm({ initial, competitions, onSubmit, onClose, isPending, error }
           <input
             id="team-initials"
             className="input uppercase"
+            required
             maxLength={3}
             value={form.initials}
             onChange={(event) => set('initials', event.target.value.toUpperCase())}
@@ -134,6 +142,7 @@ function TeamForm({ initial, competitions, onSubmit, onClose, isPending, error }
           <input
             id="team-city"
             className="input"
+            required
             value={form.city}
             onChange={(event) => set('city', event.target.value)}
           />
@@ -213,6 +222,8 @@ function TeamForm({ initial, competitions, onSubmit, onClose, isPending, error }
             />
             <input
               className="input uppercase"
+              required
+              pattern="#[0-9a-fA-F]{6}"
               value={form.primaryColor}
               onChange={(event) => set('primaryColor', event.target.value)}
             />
@@ -233,6 +244,8 @@ function TeamForm({ initial, competitions, onSubmit, onClose, isPending, error }
             />
             <input
               className="input uppercase"
+              required
+              pattern="#[0-9a-fA-F]{6}"
               value={form.secondaryColor}
               onChange={(event) => set('secondaryColor', event.target.value)}
             />
@@ -331,6 +344,7 @@ export default function AdminTeams() {
       initials: form.initials,
       city: form.city,
       stadium: form.stadium,
+      stadiumId: form.stadiumId,
       founded: form.founded,
       nickname: form.nickname,
       coach: { name: form.coachName, nationality: form.coachNationality },
