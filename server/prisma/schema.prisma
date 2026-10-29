@@ -116,7 +116,7 @@ model Team {
   coach          String?
   primaryColor   String   @default("#FF6B00") @map("primary_color")
   secondaryColor String   @default("#121212") @map("secondary_color")
-  logoUrl        String?  @map("logo_url")
+  logoUrl        String?  @map("logo_url") @db.Text
   isNational     Boolean  @default(false) @map("is_national")
   description    String?  @db.Text
   managerUserId String?  @unique @map("manager_user_id")
@@ -316,7 +316,7 @@ model ActivityLog {
   recordType  String?  @map("record_type")
   recordId    String?  @map("record_id")
   description String   @db.Text
-  ipAddress   String?  @map("ip_address")
+  ipAddress   String?  @map("ip_address") @db.VarChar(512)
   createdAt   DateTime @default(now()) @map("created_at")
 
   @@index([userId])

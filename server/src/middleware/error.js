@@ -85,6 +85,15 @@ export function errorHandler(error, req, res, next) {
       message: 'An unexpected error occurred',
       requestId,
       ...(error?.code ? { prismaCode: String(error.code) } : {}),
+      ...(error?.code === 'P2000' && error?.meta
+        ? {
+            prismaMeta: {
+              modelName: error.meta.modelName ?? null,
+              columnName: error.meta.columnName ?? null,
+              columnType: error.meta.columnType ?? null,
+            },
+          }
+        : {}),
     },
   });
 }
