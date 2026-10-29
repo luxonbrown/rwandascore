@@ -11,41 +11,64 @@ import { authRouter } from './routes/auth.routes.js';
 import { adminRouter } from './routes/admin.routes.js';
 import { managerRouter } from './routes/manager.routes.js';
 import { serializeTeam } from './utils/serializers.js';
+import { uniqueSlug } from './utils/slug.js';
+import { teamCreateSchema } from './validators/index.js';
 
 let teamInsertProbe;
 
 async function probeTeamInsert() {
   try {
+    const stamp = Date.now();
+    const raw = {
+      name: `Aperi FC Probe ${stamp}`,
+      shortName: 'APR',
+      initials: 'APR',
+      city: 'Kigali',
+      stadium: 'Amahoro stadium',
+      stadiumId: '',
+      founded: '1900',
+      nickname: 'apr',
+      coach: { name: 'kamavinga', nationality: 'Rwanda' },
+      colors: { primary: '#FF6B00', secondary: '#121212' },
+      competitionIds: ['amavubi', 'peace-cup', 'rwanda-premier-league'],
+      national: false,
+      description: '',
+      logo: '',
+    };
+    const data = teamCreateSchema.parse(raw);
+    const slug = await uniqueSlug(prisma.team, data.name);
+    const admin = await prisma.user.findFirst({ where: { role: 'ADMIN' }, select: { id: true } });
+
     await prisma.$transaction(async (tx) => {
-      const stamp = Date.now();
       const created = await tx.team.create({
         data: {
-          name: `Aperi FC Probe ${stamp}`,
-          shortName: 'APR',
-          initials: 'APR',
-          slug: `aperi-fc-probe-${stamp}`,
-          city: 'Kigali',
-          stadiumId: null,
-          founded: 1900,
-          nickname: 'apr',
-          coach: 'kamavinga',
-          primaryColor: '#FF6B00',
-          secondaryColor: '#121212',
-          logoUrl: null,
-          isNational: false,
-          description: '',
+          name: data.name,
+          shortName: data.shortName,
+          initials: data.initials,
+          slug,
+          city: data.city,
+          stadiumId: data.stadiumId ?? null,
+          founded: data.founded ?? null,
+          nickname: data.nickname ?? null,
+          coach: data.coach ?? null,
+          primaryColor: data.primaryColor ?? '#FF6B00',
+          secondaryColor: data.secondaryColor ?? '#121212',
+          logoUrl: data.logoUrl ?? null,
+          isNational: data.isNational ?? false,
+          description: data.description ?? null,
         },
         include: { stadium: true },
       });
       serializeTeam(created);
       await tx.activityLog.create({
         data: {
-          userId: null,
-          action: 'probe',
-          module: 'Health',
+          userId: admin?.id ?? null,
+          action: 'create',
+          module: 'Teams',
           recordType: 'team',
           recordId: created.id,
-          description: 'Team insert health probe',
+          description: `Created team ${created.name}`,
+          ipAddress: '::ffff:127.0.0.1',
         },
       });
       throw new Error('__probe_rollback__');
@@ -56,7 +79,7 @@ async function probeTeamInsert() {
     return {
       code: error?.code ?? null,
       name: error?.name ?? null,
-      message: String(error?.message ?? '').slice(0, 300),
+      message: String(error?.message ?? '').slice(0, 500),
     };
   }
 }
