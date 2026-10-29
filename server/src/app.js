@@ -56,6 +56,28 @@ export function createApp() {
       payload.activityLogCode = error?.code ?? error?.name ?? null;
     }
 
+    try {
+      const [columns, triggers] = await Promise.all([
+        prisma.$queryRaw`
+          SELECT COLUMN_NAME AS columnName, COLUMN_TYPE AS columnType, IS_NULLABLE AS isNullable,
+                 COLUMN_DEFAULT AS columnDefault, EXTRA AS extra
+          FROM information_schema.columns
+          WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'teams'
+          ORDER BY ORDINAL_POSITION
+        `,
+        prisma.$queryRaw`
+          SELECT TRIGGER_NAME AS triggerName, EVENT_MANIPULATION AS eventType, ACTION_TIMING AS timing
+          FROM information_schema.triggers
+          WHERE TRIGGER_SCHEMA = DATABASE() AND EVENT_OBJECT_TABLE = 'teams'
+        `,
+      ]);
+      payload.teamSchema = columns;
+      payload.teamTriggers = triggers;
+    } catch (error) {
+      payload.teamSchema = null;
+      payload.teamSchemaCode = error?.code ?? error?.name ?? null;
+    }
+
     res.json(payload);
   });
   app.use('/api/v1', publicRouter);
