@@ -500,6 +500,8 @@
       "manageLive": "Manage live",
       "manageLineups": "Set lineups",
       "lineupsTitle": "Set match lineups",
+      "lineupsFormHint": "Choose the starting players and substitutes for both teams before saving this fixture.",
+      "selectTeamsForLineups": "Select the home and away teams to choose their registered players for the lineups.",
       "upcomingOnly": "Available until kickoff",
       "formation": "Formation",
       "goalkeeper": "Goalkeeper",

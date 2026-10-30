@@ -239,8 +239,14 @@ export async function getHeadToHead(homeTeamId, awayTeamId, limit = 10) {
 
 export async function createMatch(data, actor, ipAddress = null) {
   await assertMatchReferences(prisma, data);
+  if (data.lineups && (data.status ?? 'scheduled') !== 'scheduled') {
+    throw badRequest('Lineups can only be set for an upcoming match');
+  }
 
   const created = await prisma.$transaction(async (tx) => {
+    const storedLineups = data.lineups
+      ? await buildStoredLineups(tx, data.lineups, data.homeTeamId, data.awayTeamId)
+      : undefined;
     const match = await tx.match.create({
       data: {
         competitionId: data.competitionId,
@@ -256,6 +262,7 @@ export async function createMatch(data, actor, ipAddress = null) {
         stadiumId: data.stadiumId ?? null,
         referee: data.referee ?? null,
         attendance: data.attendance ?? null,
+        ...(storedLineups ? { lineups: storedLineups } : {}),
       },
     });
 
@@ -391,6 +398,25 @@ function formatLineupSide(lineup, playerMap) {
   };
 }
 
+async function buildStoredLineups(tx, lineups, homeTeamId, awayTeamId) {
+  const playerIds = [...lineups.home.starters, ...lineups.home.bench, ...lineups.away.starters, ...lineups.away.bench];
+  const players = await tx.player.findMany({ where: { id: { in: [...new Set(playerIds)] } } });
+  const playerMap = new Map(players.map((player) => [player.id, player]));
+  if (playerMap.size !== new Set(playerIds).size) {
+    throw badRequest('One or more selected players no longer exist');
+  }
+  for (const [side, teamId] of [['home', homeTeamId], ['away', awayTeamId]]) {
+    const ids = [...lineups[side].starters, ...lineups[side].bench];
+    if (ids.some((playerId) => playerMap.get(playerId)?.teamId !== teamId)) {
+      throw badRequest(`Every ${side} lineup player must belong to that team`);
+    }
+  }
+  return {
+    home: formatLineupSide(lineups.home, playerMap),
+    away: formatLineupSide(lineups.away, playerMap),
+  };
+}
+
 export async function updateMatchLineups(id, { version, lineups }, actor, ipAddress = null) {
   const result = await prisma.$transaction(async (tx) => {
     const match = await tx.match.findUnique({ where: { id }, include: matchInclude });
@@ -404,23 +430,7 @@ export async function updateMatchLineups(id, { version, lineups }, actor, ipAddr
       throw badRequest('Lineups can only be set for an upcoming match');
     }
 
-    const playerIds = [...lineups.home.starters, ...lineups.home.bench, ...lineups.away.starters, ...lineups.away.bench];
-    const players = await tx.player.findMany({ where: { id: { in: [...new Set(playerIds)] } } });
-    const playerMap = new Map(players.map((player) => [player.id, player]));
-    if (playerMap.size !== new Set(playerIds).size) {
-      throw badRequest('One or more selected players no longer exist');
-    }
-    for (const [side, teamId] of [['home', match.homeTeamId], ['away', match.awayTeamId]]) {
-      const ids = [...lineups[side].starters, ...lineups[side].bench];
-      if (ids.some((playerId) => playerMap.get(playerId)?.teamId !== teamId)) {
-        throw badRequest(`Every ${side} lineup player must belong to that team`);
-      }
-    }
-
-    const storedLineups = {
-      home: formatLineupSide(lineups.home, playerMap),
-      away: formatLineupSide(lineups.away, playerMap),
-    };
+    const storedLineups = await buildStoredLineups(tx, lineups, match.homeTeamId, match.awayTeamId);
     const changed = await tx.match.updateMany({
       where: { id, version: match.version },
       data: { lineups: storedLineups, version: match.version + 1 },

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Pencil, Plus, Radio, Trash2, UsersRound } from 'lucide-react'
 import AdminPageHeader from '../../components/admin/AdminPageHeader'
-import LineupEditorModal from '../../components/admin/LineupEditorModal'
+import LineupEditorModal, { LineupEditorFields, emptyLineupSide, lineupFormFromSaved, lineupFormToPayload } from '../../components/admin/LineupEditorModal'
 import TableFrame from '../../components/admin/TableFrame'
 import FormModal from '../../components/admin/FormModal'
 import ConfirmDeleteModal from '../../components/admin/ConfirmDeleteModal'
@@ -61,12 +61,16 @@ function fixtureToForm(match) {
     city: match.city || '',
     referee: match.referee || '',
     attendance: match.attendance ?? '',
+    lineups: match.lineups || null,
   }
 }
 
-function FixtureForm({ initial, teams, competitions, seasons, onSubmit, onClose, isPending, error }) {
+function FixtureForm({ initial, teams, competitions, seasons, players, onSubmit, onClose, isPending, error }) {
   const { t } = useI18n()
   const [form, setForm] = useState(initial)
+  const [lineupForm, setLineupForm] = useState(() => lineupFormFromSaved(initial.lineups))
+  const [lineupsTouched, setLineupsTouched] = useState(false)
+  const [localError, setLocalError] = useState('')
   const set = (key, value) => setForm((current) => ({ ...current, [key]: value }))
 
   return (
@@ -76,10 +80,16 @@ function FixtureForm({ initial, teams, competitions, seasons, onSubmit, onClose,
       title={initial.id ? t('admin.fixtures.editTitle') : t('admin.fixtures.new')}
       onSubmit={(event) => {
         event.preventDefault()
-        onSubmit(form)
+        const lineups = lineupsTouched ? lineupFormToPayload(lineupForm) : undefined
+        if (lineups && (!lineups.home.starters.length || !lineups.away.starters.length)) {
+          setLocalError(t('admin.fixtures.needStarters'))
+          return
+        }
+        setLocalError('')
+        onSubmit({ ...form, lineups })
       }}
       isPending={isPending}
-      error={error}
+      error={localError || error}
       submitLabel={initial.id ? t('admin.save') : t('admin.create')}
     >
       <div className="grid gap-4 sm:grid-cols-2">
@@ -137,7 +147,13 @@ function FixtureForm({ initial, teams, competitions, seasons, onSubmit, onClose,
             className="input"
             required
             value={form.homeTeamId}
-            onChange={(event) => set('homeTeamId', event.target.value)}
+            onChange={(event) => {
+              set('homeTeamId', event.target.value)
+              if (event.target.value !== form.homeTeamId && initial.lineups) {
+                setLineupForm((value) => ({ ...value, home: emptyLineupSide() }))
+                setLineupsTouched(true)
+              }
+            }}
           >
             <option value="">{t('admin.form.selectPlaceholder')}</option>
             {teams.map((team) => (
@@ -156,7 +172,13 @@ function FixtureForm({ initial, teams, competitions, seasons, onSubmit, onClose,
             className="input"
             required
             value={form.awayTeamId}
-            onChange={(event) => set('awayTeamId', event.target.value)}
+            onChange={(event) => {
+              set('awayTeamId', event.target.value)
+              if (event.target.value !== form.awayTeamId && initial.lineups) {
+                setLineupForm((value) => ({ ...value, away: emptyLineupSide() }))
+                setLineupsTouched(true)
+              }
+            }}
           >
             <option value="">{t('admin.form.selectPlaceholder')}</option>
             {teams.map((team) => (
@@ -166,6 +188,21 @@ function FixtureForm({ initial, teams, competitions, seasons, onSubmit, onClose,
             ))}
           </select>
         </div>
+        {form.status === 'UPCOMING' ? (
+          <LineupEditorFields
+            homeTeam={teams.find((team) => team.id === form.homeTeamId)}
+            awayTeam={teams.find((team) => team.id === form.awayTeamId)}
+            homeTeamId={form.homeTeamId}
+            awayTeamId={form.awayTeamId}
+            players={players}
+            value={lineupForm}
+            onChange={(value) => {
+              setLineupForm(value)
+              setLineupsTouched(true)
+              setLocalError('')
+            }}
+          />
+        ) : null}
         <div>
           <label htmlFor="fixture-kickoff" className="label">
             {t('admin.form.kicksOff')} *
@@ -290,7 +327,7 @@ export default function AdminFixtures() {
 
   const save = async (form) => {
     setFormError('')
-    const { kicksOff, id, ...rest } = form
+    const { kicksOff, id, lineups, ...rest } = form
     const payload = {
       ...rest,
       date: new Date(kicksOff).toISOString(),
@@ -302,6 +339,7 @@ export default function AdminFixtures() {
     try {
       if (id) {
         await updateItem.mutateAsync({ id, ...payload })
+        if (lineups) await updateLineups.mutateAsync({ matchId: id, lineups })
         pushToast(t('admin.recordSaved'))
       } else {
         await createItem.mutateAsync(payload)
@@ -505,6 +543,7 @@ export default function AdminFixtures() {
           teams={teams}
           competitions={competitions}
           seasons={seasons}
+          players={playersQuery.data || []}
           onSubmit={save}
           onClose={closeEditor}
           isPending={createItem.isPending || updateItem.isPending}

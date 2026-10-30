@@ -500,6 +500,8 @@
       "manageLive": "Cunga live",
       "manageLineups": "Shyiramo lineup",
       "lineupsTitle": "Shyiramo lineup y'umukino",
+      "lineupsFormHint": "Hitamo abakinnyi babanza n'abasimbura ba buri kipe mbere yo kubika uyu mukino.",
+      "selectTeamsForLineups": "Banza uhitemo ikipe yakiriye n'iyasuye kugira ngo ubone abakinnyi banditswe muri zo.",
       "upcomingOnly": "Birakorwa mbere y'uko umukino utangira",
       "formation": "Imiterere y'abakinnyi",
       "goalkeeper": "Umunyezamu",

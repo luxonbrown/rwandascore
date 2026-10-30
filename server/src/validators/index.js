@@ -59,6 +59,19 @@ export const matchListQuery = z.object({
   order: z.enum(['asc', 'desc']).default('desc'),
 });
 
+const lineupSideSchema = z.object({
+  formation: z.enum(['4-3-3', '4-4-2', '4-2-3-1', '3-5-2', '5-3-2']),
+  starters: z.array(id).min(1).max(11),
+  bench: z.array(id).max(12),
+}).superRefine((lineup, ctx) => {
+  const ids = [...lineup.starters, ...lineup.bench];
+  if (new Set(ids).size !== ids.length) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'A player can only appear once in a lineup' });
+  }
+});
+
+const matchLineupsSchema = z.object({ home: lineupSideSchema, away: lineupSideSchema });
+
 export const matchCreateSchema = z.object({
   competitionId: id,
   seasonId: id,
@@ -73,6 +86,7 @@ export const matchCreateSchema = z.object({
   stadiumId: nullableId,
   referee: z.string().max(120).optional(),
   attendance: z.coerce.number().int().min(0).max(200000).optional(),
+  lineups: matchLineupsSchema.optional(),
 });
 
 export const matchUpdateSchema = matchCreateSchema.partial().extend({
@@ -83,17 +97,6 @@ export const matchStatusSchema = z.object({
   version: z.coerce.number().int().min(1),
   status: matchStatus.optional(),
   minute: z.coerce.number().int().min(0).max(130).optional(),
-});
-
-const lineupSideSchema = z.object({
-  formation: z.enum(['4-3-3', '4-4-2', '4-2-3-1', '3-5-2', '5-3-2']),
-  starters: z.array(id).min(1).max(11),
-  bench: z.array(id).max(12),
-}).superRefine((lineup, ctx) => {
-  const ids = [...lineup.starters, ...lineup.bench];
-  if (new Set(ids).size !== ids.length) {
-    ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'A player can only appear once in a lineup' });
-  }
 });
 
 export const matchLineupsUpdateSchema = z.object({

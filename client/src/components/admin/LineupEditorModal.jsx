@@ -4,7 +4,7 @@ import { useI18n } from '../../hooks/useI18n'
 
 const formations = ['4-3-3', '4-4-2', '4-2-3-1', '3-5-2', '5-3-2']
 
-function emptySide() {
+export function emptyLineupSide() {
   return {
     formation: '4-3-3',
     starters: Array(11).fill(''),
@@ -23,6 +23,18 @@ function sideFromSaved(lineup) {
     starters: [...starters, ...Array(Math.max(0, 11 - starters.length)).fill('')].slice(0, 11),
     bench,
   }
+}
+
+export function lineupFormFromSaved(lineups) {
+  return { home: sideFromSaved(lineups?.home), away: sideFromSaved(lineups?.away) }
+}
+
+export function lineupFormToPayload(form) {
+  return Object.fromEntries(['home', 'away'].map((side) => [side, {
+    formation: form[side].formation,
+    starters: form[side].starters.filter(Boolean),
+    bench: form[side].bench,
+  }]))
 }
 
 function rowGroups(formation, t) {
@@ -149,23 +161,39 @@ function TeamLineupEditor({ team, players, value, onChange, t }) {
   )
 }
 
+export function LineupEditorFields({ homeTeam, awayTeam, homeTeamId, awayTeamId, players, value, onChange }) {
+  const { t } = useI18n()
+  const homePlayers = players.filter((player) => player.teamId === homeTeamId)
+  const awayPlayers = players.filter((player) => player.teamId === awayTeamId)
+
+  if (!homeTeamId || !awayTeamId) {
+    return <p className="rounded-lg bg-surface2/60 p-3 text-xs text-muted sm:col-span-2">{t('admin.fixtures.selectTeamsForLineups')}</p>
+  }
+
+  return (
+    <div className="space-y-3 sm:col-span-2">
+      <div>
+        <h3 className="text-sm font-bold text-white">{t('admin.fixtures.lineupsTitle')}</h3>
+        <p className="mt-1 text-xs text-muted">{t('admin.fixtures.lineupsFormHint')}</p>
+      </div>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <TeamLineupEditor team={homeTeam} players={homePlayers} value={value.home} onChange={(home) => onChange({ ...value, home })} t={t} />
+        <TeamLineupEditor team={awayTeam} players={awayPlayers} value={value.away} onChange={(away) => onChange({ ...value, away })} t={t} />
+      </div>
+    </div>
+  )
+}
+
 export default function LineupEditorModal({ match, players, isPending, onClose, onSave }) {
   const { t } = useI18n()
-  const [form, setForm] = useState(() => ({
-    home: sideFromSaved(match.lineups?.home),
-    away: sideFromSaved(match.lineups?.away),
-  }))
+  const [form, setForm] = useState(() => lineupFormFromSaved(match.lineups))
   const [error, setError] = useState('')
   const homePlayers = players.filter((player) => player.teamId === match.homeTeamId)
   const awayPlayers = players.filter((player) => player.teamId === match.awayTeamId)
 
   const submit = (event) => {
     event.preventDefault()
-    const lineups = Object.fromEntries(['home', 'away'].map((side) => [side, {
-      formation: form[side].formation,
-      starters: form[side].starters.filter(Boolean),
-      bench: form[side].bench,
-    }]))
+    const lineups = lineupFormToPayload(form)
     if (!lineups.home.starters.length || !lineups.away.starters.length) {
       setError(t('admin.fixtures.needStarters'))
       return
