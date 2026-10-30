@@ -59,11 +59,15 @@ export async function listPlayers({
   const counts = await goalCounts(players.map((player) => player.id));
   const withStats = players.map((player) =>
     serializePlayer(player, {
-      goals: counts.get(player.id) ?? 0,
+      goals: counts.get(player.id) ?? player.goals ?? 0,
       assists: player.assists ?? 0,
       appearances: player.appearances ?? 0,
       yellow: player.yellowCards ?? 0,
       red: player.redCards ?? 0,
+      yellowCards: player.yellowCards ?? 0,
+      redCards: player.redCards ?? 0,
+      minutes: player.minutes ?? 0,
+      cleanSheets: player.cleanSheets ?? 0,
     }),
   );
 
@@ -117,11 +121,15 @@ export async function getPlayer(identifier) {
 
   return {
     ...serializePlayer(player, {
-      goals,
+      goals: goals || player.goals || 0,
       assists: player.assists ?? 0,
       appearances: player.appearances ?? 0,
       yellow: player.yellowCards ?? 0,
       red: player.redCards ?? 0,
+      yellowCards: player.yellowCards ?? 0,
+      redCards: player.redCards ?? 0,
+      minutes: player.minutes ?? 0,
+      cleanSheets: player.cleanSheets ?? 0,
     }),
     team: player.team ? serializeTeam(player.team) : null,
     teammates: teammates.map((teammate) => serializePlayer(teammate)),

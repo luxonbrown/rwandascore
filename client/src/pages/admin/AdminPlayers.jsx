@@ -58,9 +58,10 @@ function playerToForm(player) {
     number: player.number ?? '',
     age: player.age ?? '',
     height: player.height ?? '',
-    ...Object.fromEntries(
-      statFields.map((key) => [key, player.stats?.[key] ?? 0]),
-    ),
+    ...Object.fromEntries(statFields.map((key) => {
+      const statKey = key === 'yellowCards' || key === 'redCards' ? key.replace('Cards', '') : key
+      return [key, player.stats?.[key] ?? player.stats?.[statKey] ?? player[key] ?? 0]
+    })),
   }
 }
 

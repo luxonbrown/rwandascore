@@ -241,7 +241,9 @@ export default function TeamDetail() {
                   {team.coach ? (
                     <div className="flex items-start justify-between gap-3 border-t border-line pt-2.5">
                       <dt className="text-muted">{t('teams.coach')}</dt>
-                      <dd className="text-right font-semibold text-white">{team.coach.name}</dd>
+                      <dd className="text-right font-semibold text-white">
+                        {typeof team.coach === 'string' ? team.coach : team.coach.name}
+                      </dd>
                     </div>
                   ) : null}
                 </dl>

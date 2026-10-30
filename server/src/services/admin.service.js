@@ -267,15 +267,32 @@ export async function deleteStadium(id, actor, ipAddress = null) {
   return { success: true };
 }
 
-export async function createTeam(data, actor, ipAddress = null) {
-  if (data.stadiumId) {
-    const stadium = await prisma.stadium.findUnique({ where: { id: data.stadiumId } });
-    if (!stadium) throw badRequest('Stadium not found');
+async function resolveTeamStadium(tx, data) {
+  const name = typeof data.stadium === 'string' ? data.stadium.trim() : '';
+  if (name) {
+    const city = data.city?.trim();
+    return (await tx.stadium.upsert({
+      where: { name_city: { name, city } },
+      update: {},
+      create: { name, city },
+      select: { id: true },
+    })).id;
   }
 
+  if (data.stadiumId) {
+    const stadium = await tx.stadium.findUnique({ where: { id: data.stadiumId }, select: { id: true } });
+    if (!stadium) throw badRequest('Stadium not found');
+    return stadium.id;
+  }
+
+  return null;
+}
+
+export async function createTeam(data, actor, ipAddress = null) {
   const slug = await uniqueSlug(prisma.team, data.name);
 
   const team = await prisma.$transaction(async (tx) => {
+    const stadiumId = await resolveTeamStadium(tx, data);
     const created = await tx.team.create({
       data: {
         name: data.name,
@@ -283,7 +300,7 @@ export async function createTeam(data, actor, ipAddress = null) {
         initials: data.initials,
         slug,
         city: data.city,
-        stadiumId: data.stadiumId ?? null,
+        stadiumId,
         founded: data.founded ?? null,
         nickname: data.nickname ?? null,
         coach: data.coach ?? null,
@@ -313,22 +330,22 @@ export async function createTeam(data, actor, ipAddress = null) {
 }
 
 export async function updateTeam(id, data, actor, ipAddress = null) {
-  if (data.stadiumId) {
-    const stadium = await prisma.stadium.findUnique({ where: { id: data.stadiumId } });
-    if (!stadium) throw badRequest('Stadium not found');
-  }
-
   const team = await prisma.$transaction(async (tx) => {
     const existing = await tx.team.findUnique({ where: { id } });
     if (!existing) throw notFound('Team not found');
 
     const updateData = {};
+    if (data.stadium !== undefined || data.stadiumId !== undefined) {
+      updateData.stadiumId = await resolveTeamStadium(tx, {
+        ...data,
+        city: data.city ?? existing.city,
+      });
+    }
     for (const field of [
       'name',
       'shortName',
       'initials',
       'city',
-      'stadiumId',
       'founded',
       'nickname',
       'coach',
@@ -418,12 +435,20 @@ export async function createPlayer(data, actor, ipAddress = null) {
         position: data.position ?? 'MF',
         number: data.number ?? null,
         nationality: data.nationality ?? 'Rwanda',
+        age: data.age ?? null,
         dateOfBirth: parseDate(data.dateOfBirth),
         height: data.height ?? null,
         foot: data.foot ?? null,
         photoUrl: data.photoUrl ?? null,
         isNationalTeam: data.isNationalTeam ?? false,
         bio: data.bio ?? null,
+        appearances: data.appearances ?? 0,
+        goals: data.goals ?? 0,
+        assists: data.assists ?? 0,
+        yellowCards: data.yellowCards ?? 0,
+        redCards: data.redCards ?? 0,
+        minutes: data.minutes ?? 0,
+        cleanSheets: data.cleanSheets ?? 0,
       },
       include: { team: { include: { stadium: true } } },
     });
@@ -461,11 +486,19 @@ export async function updatePlayer(id, data, actor, ipAddress = null) {
       'position',
       'number',
       'nationality',
+      'age',
       'height',
       'foot',
       'photoUrl',
       'isNationalTeam',
       'bio',
+      'appearances',
+      'goals',
+      'assists',
+      'yellowCards',
+      'redCards',
+      'minutes',
+      'cleanSheets',
     ]) {
       if (data[field] !== undefined) updateData[field] = data[field];
     }
@@ -540,12 +573,20 @@ export async function createCompetition(data, actor, ipAddress = null) {
         country: data.country ?? 'Rwanda',
         type: data.type ?? 'league',
         logoUrl: data.logoUrl ?? null,
+        logoText: data.logoText ?? null,
         primaryColor: data.primaryColor ?? '#FF6B00',
         secondaryColor: data.secondaryColor ?? '#121212',
         description: data.description ?? null,
         teamCount: data.teamCount ?? 0,
       },
     });
+
+    const seasonName = data.season?.trim();
+    const season = seasonName
+      ? await tx.season.create({
+          data: { competitionId: created.id, name: seasonName, isCurrent: true },
+        })
+      : null;
 
     await logActivity(tx, {
       userId: actor?.id,
@@ -557,16 +598,21 @@ export async function createCompetition(data, actor, ipAddress = null) {
       ipAddress,
     });
 
-    return created;
+    return { competition: created, season };
   });
 
-  return serializeCompetition(competition);
+  return {
+    ...serializeCompetition(competition.competition),
+    season: competition.season?.name ?? null,
+    currentSeason: competition.season ? serializeSeason(competition.season) : null,
+  };
 }
 
 export async function updateCompetition(id, data, actor, ipAddress = null) {
   const competition = await prisma.$transaction(async (tx) => {
     const existing = await tx.competition.findUnique({ where: { id } });
     if (!existing) throw notFound('Competition not found');
+    let season = await tx.season.findFirst({ where: { competitionId: id, isCurrent: true } });
 
     const updateData = {};
     for (const field of [
@@ -575,6 +621,7 @@ export async function updateCompetition(id, data, actor, ipAddress = null) {
       'country',
       'type',
       'logoUrl',
+      'logoText',
       'primaryColor',
       'secondaryColor',
       'description',
@@ -587,6 +634,21 @@ export async function updateCompetition(id, data, actor, ipAddress = null) {
       updateData.slug = await uniqueSlug(tx.competition, data.name, id);
     } else if (data.slug) {
       updateData.slug = await uniqueSlug(tx.competition, data.slug, id);
+    }
+
+    if (data.season !== undefined) {
+      const seasonName = data.season.trim();
+      await tx.season.updateMany({
+        where: { competitionId: id, isCurrent: true },
+        data: { isCurrent: false },
+      });
+      season = seasonName
+        ? await tx.season.upsert({
+            where: { competitionId_name: { competitionId: id, name: seasonName } },
+            update: { isCurrent: true },
+            create: { competitionId: id, name: seasonName, isCurrent: true },
+          })
+        : null;
     }
 
     const updated = await tx.competition.update({ where: { id }, data: updateData });
@@ -609,10 +671,14 @@ export async function updateCompetition(id, data, actor, ipAddress = null) {
       ipAddress,
     });
 
-    return updated;
+    return { competition: updated, season };
   });
 
-  return serializeCompetition(competition);
+  return {
+    ...serializeCompetition(competition.competition),
+    season: competition.season?.name ?? null,
+    currentSeason: competition.season ? serializeSeason(competition.season) : null,
+  };
 }
 
 export async function deleteCompetition(id, actor, ipAddress = null) {

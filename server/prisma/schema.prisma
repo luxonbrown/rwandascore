@@ -141,6 +141,7 @@ model Competition {
   country        String          @default("Rwanda")
   type           CompetitionType @default(league)
   logoUrl        String?         @map("logo_url")
+  logoText       String?         @map("logo_text")
   primaryColor   String          @default("#FF6B00") @map("primary_color")
   secondaryColor String          @default("#121212") @map("secondary_color")
   description    String?         @db.Text
@@ -182,6 +183,7 @@ model Player {
   position       Position  @default(MF)
   number         Int?
   nationality    String    @default("Rwanda")
+  age            Int?
   dateOfBirth    DateTime? @map("date_of_birth")
   height         Int?
   foot           String?   @default("Right")
@@ -189,9 +191,12 @@ model Player {
   isNationalTeam Boolean   @default(false) @map("is_national_team")
   bio            String?   @db.Text
   appearances    Int       @default(0)
+  goals          Int       @default(0)
   assists        Int       @default(0)
   yellowCards    Int       @default(0) @map("yellow_cards")
   redCards       Int       @default(0) @map("red_cards")
+  minutes        Int       @default(0)
+  cleanSheets    Int       @default(0) @map("clean_sheets")
   createdAt      DateTime  @default(now()) @map("created_at")
   updatedAt      DateTime  @updatedAt @map("updated_at")
 

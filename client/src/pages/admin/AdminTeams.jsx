@@ -442,7 +442,9 @@ export default function AdminTeams() {
                   </td>
                   <td className="px-4 py-3 text-xs text-muted">{team.city || '—'}</td>
                   <td className="px-4 py-3 text-xs text-muted">{team.stadium || '—'}</td>
-                  <td className="px-4 py-3 text-xs text-muted">{team.coach?.name || '—'}</td>
+                  <td className="px-4 py-3 text-xs text-muted">
+                    {(typeof team.coach === 'string' ? team.coach : team.coach?.name) || '—'}
+                  </td>
                   <td className="px-4 py-3">
                     <div className="flex justify-end gap-1">
                       <button

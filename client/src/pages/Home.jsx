@@ -119,10 +119,11 @@ export default function Home() {
               className="card group flex items-center gap-3 p-4 transition-colors hover:border-white/15"
             >
               <span
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-xs font-black"
+                className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg text-xs font-black"
                 style={{ backgroundColor: competition.color, color: competition.secondaryColor || '#fff' }}
               >
-                {competition.logoText}
+                {competition.logoText || competition.shortName}
+                {competition.logoUrl ? <img src={competition.logoUrl} alt="" className="absolute inset-0 z-10 h-full w-full bg-surface object-contain" onError={(event) => { event.currentTarget.style.display = 'none' }} /> : null}
               </span>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-bold text-white group-hover:text-accent">

@@ -19,6 +19,7 @@ const emptyForm = {
   type: 'league',
   season: siteConfig.season,
   country: 'Rwanda',
+  logoUrl: '',
   logoText: '',
   color: '#FF6B00',
   secondaryColor: '#121212',
@@ -29,6 +30,7 @@ const emptyForm = {
 function CompetitionForm({ initial, onSubmit, onClose, isPending, error }) {
   const { t } = useI18n()
   const [form, setForm] = useState(initial)
+  const [logoLoadError, setLogoLoadError] = useState(false)
 
   const set = (key, value) => setForm((current) => ({ ...current, [key]: value }))
 
@@ -107,6 +109,40 @@ function CompetitionForm({ initial, onSubmit, onClose, isPending, error }) {
             value={form.country}
             onChange={(event) => set('country', event.target.value)}
           />
+        </div>
+        <div>
+          <label htmlFor="comp-logo-url" className="label">
+            {t('admin.form.logoUrl')}
+          </label>
+          <input
+            id="comp-logo-url"
+            type="url"
+            className="input"
+            placeholder="https://example.com/logo.png"
+            value={form.logoUrl || ''}
+            onChange={(event) => {
+              setLogoLoadError(false)
+              set('logoUrl', event.target.value)
+            }}
+          />
+          {form.logoUrl ? (
+            <div className="mt-2 flex items-center gap-3 rounded-lg border border-line bg-surface2 p-2">
+              <img
+                src={form.logoUrl}
+                alt="Competition logo preview"
+                className="h-10 w-10 rounded object-contain"
+                onLoad={() => setLogoLoadError(false)}
+                onError={() => setLogoLoadError(true)}
+              />
+              {logoLoadError ? (
+                <p className="text-xs text-danger" role="status">
+                  This URL did not load as an image. Enter a direct, publicly accessible image URL.
+                </p>
+              ) : (
+                <p className="text-xs text-muted">Logo preview</p>
+              )}
+            </div>
+          ) : null}
         </div>
         <div>
           <label htmlFor="comp-logo-text" className="label">
@@ -220,18 +256,20 @@ export default function AdminCompetitions() {
     setEditor({
       ...emptyForm,
       ...competition,
+      color: competition.primaryColor || competition.color || emptyForm.color,
       teamCount: competition.teamCount || 0,
     })
   }
 
   const save = async (form) => {
     setFormError('')
+    const payload = { ...form, logoUrl: form.logoUrl?.trim() || null, primaryColor: form.color }
     try {
       if (form.id) {
-        await updateItem.mutateAsync({ id: form.id, ...form })
+        await updateItem.mutateAsync({ id: form.id, ...payload })
         pushToast(t('admin.recordSaved'))
       } else {
-        await createItem.mutateAsync(form)
+        await createItem.mutateAsync(payload)
         pushToast(t('admin.recordCreated'))
       }
       closeEditor()
@@ -294,10 +332,18 @@ export default function AdminCompetitions() {
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       <span
-                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[10px] font-black text-white"
+                        className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg text-[10px] font-black text-white"
                         style={{ backgroundColor: competition.color || '#FF6B00' }}
                       >
-                        {competition.logoText || competition.name.slice(0, 3)}
+                        {competition.logoText || competition.shortName || competition.name.slice(0, 3)}
+                        {competition.logoUrl ? (
+                          <img
+                            src={competition.logoUrl}
+                            alt=""
+                            className="absolute inset-0 z-10 h-full w-full bg-surface object-contain"
+                            onError={(event) => { event.currentTarget.style.display = 'none' }}
+                          />
+                        ) : null}
                       </span>
                       <div className="min-w-0">
                         <p className="truncate font-semibold text-white">{competition.name}</p>
@@ -308,7 +354,9 @@ export default function AdminCompetitions() {
                   <td className="px-4 py-3 text-xs text-muted">
                     {t(`competitions.${competition.type || 'league'}`)}
                   </td>
-                  <td className="px-4 py-3 text-xs text-muted">{competition.season}</td>
+                  <td className="px-4 py-3 text-xs text-muted">
+                    {competition.currentSeason?.name || competition.season || '—'}
+                  </td>
                   <td className="px-4 py-3 text-xs font-semibold text-white">
                     {competition.teamCount || '—'}
                   </td>

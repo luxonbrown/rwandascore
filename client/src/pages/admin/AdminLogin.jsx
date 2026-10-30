@@ -17,12 +17,21 @@ export default function AdminLogin() {
   const user = useAuthStore((state) => state.user)
   const login = useAuthStore((state) => state.login)
   const isLoggingIn = useAuthStore((state) => state.isLoggingIn)
+  const isSessionChecked = useAuthStore((state) => state.isSessionChecked)
   const location = useLocation()
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
+
+  if (!isSessionChecked) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-ink text-sm text-muted">
+        <Loader2 size={18} className="mr-2 animate-spin" /> Checking session…
+      </div>
+    )
+  }
 
   if (user) {
     return <Navigate to={user.role === 'TEAM_MANAGER' ? '/manager' : '/admin'} replace />

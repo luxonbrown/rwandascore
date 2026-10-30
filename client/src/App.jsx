@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import PublicLayout from './components/layout/PublicLayout'
 import AdminLayout from './components/admin/AdminLayout'
@@ -41,6 +42,11 @@ function RoleDashboard() {
 
 export default function App() {
   useDataSync()
+  const hydrateSession = useAuthStore((state) => state.hydrateSession)
+
+  useEffect(() => {
+    void hydrateSession()
+  }, [hydrateSession])
 
   return (
     <Routes>

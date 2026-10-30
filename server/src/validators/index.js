@@ -7,6 +7,10 @@ const isoDate = z
   .string()
   .refine((value) => !Number.isNaN(Date.parse(value)), 'Invalid date');
 const nullableDate = isoDate.nullable().optional();
+const nullableInteger = (min, max = Number.MAX_SAFE_INTEGER) => z.preprocess(
+  (value) => value === '' ? null : value,
+  z.coerce.number().int().min(min).max(max).nullable().optional(),
+);
 const booleanString = z.enum(['true', 'false']).transform((value) => value === 'true');
 
 const page = z.coerce.number().int().min(1).default(1);
@@ -153,7 +157,6 @@ const normalizeTeamPayload = (value) => {
   delete next.logo;
   delete next.national;
   delete next.competitionIds;
-  delete next.stadium;
   delete next.coachNationality;
   return next;
 };
@@ -163,6 +166,7 @@ const teamCreateBase = z.object({
   shortName: z.string().min(2).max(40),
   initials: z.string().min(1).max(6),
   city: z.string().min(1).max(120),
+  stadium: z.string().trim().max(120).nullable().optional(),
   stadiumId: nullableId,
   founded: z.coerce.number().int().min(1900).max(2100).nullable().optional(),
   nickname: z.string().max(120).nullable().optional(),
@@ -184,14 +188,22 @@ export const playerCreateSchema = z.object({
   name: z.string().min(2).max(120),
   teamId: nullableId,
   position: position.optional(),
-  number: z.coerce.number().int().min(0).max(99).nullable().optional(),
+  number: nullableInteger(0, 99),
   nationality: z.string().max(80).optional(),
+  age: nullableInteger(14, 100),
   dateOfBirth: nullableDate,
-  height: z.coerce.number().int().min(100).max(250).nullable().optional(),
+  height: nullableInteger(100, 250),
   foot: z.enum(['Left', 'Right', 'Both']).nullable().optional(),
   photoUrl: z.string().url().nullable().optional(),
   isNationalTeam: z.boolean().optional(),
   bio: z.string().max(5000).nullable().optional(),
+  appearances: nullableInteger(0),
+  goals: nullableInteger(0),
+  assists: nullableInteger(0),
+  yellowCards: nullableInteger(0),
+  redCards: nullableInteger(0),
+  minutes: nullableInteger(0),
+  cleanSheets: nullableInteger(0),
 });
 
 export const playerUpdateSchema = playerCreateSchema.partial();
@@ -213,6 +225,8 @@ export const competitionCreateSchema = z.object({
   country: z.string().max(80).optional(),
   type: competitionType.optional(),
   logoUrl: z.string().url().nullable().optional(),
+  logoText: z.string().trim().max(4).nullable().optional(),
+  season: z.string().trim().max(80).optional(),
   primaryColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(),
   secondaryColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(),
   description: z.string().max(5000).nullable().optional(),

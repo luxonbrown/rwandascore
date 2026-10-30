@@ -94,7 +94,23 @@ export function createApp() {
   app.use(cors({
     origin(origin, callback) {
       if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
-      return callback(new Error('Origin is not allowed by CORS'));
+
+      // Vite may select a different port when its default port is occupied.
+      // Allow loopback origins during local development while keeping the
+      // production allowlist explicit.
+      if (env.NODE_ENV === 'development') {
+        try {
+          const { hostname, protocol } = new URL(origin);
+          if (
+            ['localhost', '127.0.0.1', '[::1]'].includes(hostname) &&
+            ['http:', 'https:'].includes(protocol)
+          ) return callback(null, true);
+        } catch {
+          // Invalid Origin values fall through to the normal rejection.
+        }
+      }
+
+      return callback(null, false);
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],

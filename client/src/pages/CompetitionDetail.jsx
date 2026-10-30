@@ -104,13 +104,14 @@ export default function CompetitionDetail() {
           </Link>
           <div className="flex flex-wrap items-start gap-4">
             <span
-              className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl text-xl font-black shadow-lift"
+              className="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl text-xl font-black shadow-lift"
               style={{
                 backgroundColor: competition.color,
                 color: competition.secondaryColor || '#fff',
               }}
             >
-              {competition.logoText}
+              {competition.logoText || competition.shortName}
+              {competition.logoUrl ? <img src={competition.logoUrl} alt="" className="absolute inset-0 z-10 h-full w-full bg-surface object-contain" onError={(event) => { event.currentTarget.style.display = 'none' }} /> : null}
             </span>
             <div className="min-w-0 flex-1">
               <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-accent">

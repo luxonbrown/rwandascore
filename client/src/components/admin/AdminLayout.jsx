@@ -5,6 +5,7 @@ import {
   ExternalLink,
   History,
   LayoutDashboard,
+  Loader2,
   LogOut,
   Menu,
   Newspaper,
@@ -114,6 +115,7 @@ function SidebarContent({ user, onNavigate, onLogout }) {
 export default function AdminLayout() {
   const { t } = useI18n()
   const user = useAuthStore((state) => state.user)
+  const isSessionChecked = useAuthStore((state) => state.isSessionChecked)
   const logout = useAuthStore((state) => state.logout)
   const location = useLocation()
   const navigate = useNavigate()
@@ -131,6 +133,14 @@ export default function AdminLayout() {
     document.addEventListener('keydown', onKeyDown)
     return () => document.removeEventListener('keydown', onKeyDown)
   }, [menuOpen])
+
+  if (!isSessionChecked) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-ink text-sm text-muted">
+        <Loader2 size={18} className="mr-2 animate-spin" /> Checking session…
+      </div>
+    )
+  }
 
   if (!user) {
     return <Navigate to="/admin/login" state={{ from: location }} replace />

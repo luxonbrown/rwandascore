@@ -64,13 +64,14 @@ export default function Competitions() {
                   <div className="relative">
                     <div className="flex items-start justify-between gap-3">
                       <span
-                        className="flex h-14 w-14 items-center justify-center rounded-xl text-lg font-black shadow-card"
+                        className="relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-xl text-lg font-black shadow-card"
                         style={{
                           backgroundColor: competition.color,
                           color: competition.secondaryColor || '#fff',
                         }}
                       >
-                        {competition.logoText}
+                        {competition.logoText || competition.shortName}
+                        {competition.logoUrl ? <img src={competition.logoUrl} alt="" className="absolute inset-0 z-10 h-full w-full bg-surface object-contain" onError={(event) => { event.currentTarget.style.display = 'none' }} /> : null}
                       </span>
                       <span className="flex h-8 w-8 items-center justify-center rounded-full border border-line bg-surface2 text-muted transition-colors group-hover:border-accent/40 group-hover:text-accent">
                         <ArrowUpRight size={15} />

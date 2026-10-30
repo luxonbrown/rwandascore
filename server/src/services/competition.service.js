@@ -26,7 +26,7 @@ export async function listCompetitions() {
     orderBy: { name: 'asc' },
     include: {
       seasons: {
-        where: { isCurrent: true },
+        orderBy: [{ isCurrent: 'desc' }, { updatedAt: 'desc' }],
         take: 1,
       },
     },
@@ -35,7 +35,8 @@ export async function listCompetitions() {
   return {
     items: competitions.map((competition) => ({
       ...serializeCompetition(competition),
-      currentSeason: competition.seasons[0] ? serializeSeason(competition.seasons[0]) : null,
+      season: competition.seasons[0]?.name ?? null,
+      currentSeason: competition.seasons[0]?.isCurrent ? serializeSeason(competition.seasons[0]) : null,
     })),
     total: competitions.length,
     page: 1,
@@ -55,6 +56,7 @@ export async function getCompetition(identifier) {
 
   return {
     ...serializeCompetition(competition),
+    season: seasons.find((season) => season.isCurrent)?.name ?? seasons[0]?.name ?? null,
     seasons: seasons.map(serializeSeason),
   };
 }
