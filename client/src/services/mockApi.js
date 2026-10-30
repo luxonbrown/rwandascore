@@ -684,7 +684,7 @@ export async function getNews({
   limit,
 } = {}) {
   await wait(100, 220)
-  let articles = [...loadDb().news].sort(
+  let articles = loadDb().news.filter((article) => article.status !== 'draft').sort(
     (a, b) => new Date(b.publishedAt) - new Date(a.publishedAt),
   )
 
@@ -712,7 +712,7 @@ export async function getNews({
 export async function getArticle(slug) {
   await wait(100, 200)
   const db = loadDb()
-  const article = db.news.find((item) => item.slug === slug || item.id === slug)
+  const article = db.news.find((item) => (item.slug === slug || item.id === slug) && item.status !== 'draft')
   if (!article) throw new ApiError('Article not found', 404)
   const related = db.news
     .filter((item) => item.id !== article.id && item.category === article.category)
@@ -968,6 +968,8 @@ export async function adminCreateItem(collection, payload, actor) {
         age: Number(payload.age) || 22,
         height: Number(payload.height) || null,
         foot: payload.foot || 'Right',
+        faceId: payload.faceId || payload.photoUrl || null,
+        photoUrl: payload.faceId || payload.photoUrl || null,
         nationalTeam: Boolean(payload.nationalTeam),
         stats: {
           appearances: Number(payload.appearances) || 0,
@@ -993,6 +995,7 @@ export async function adminCreateItem(collection, payload, actor) {
         source: payload.source || 'RwandaScore Newsroom',
         author: payload.author || actor?.name || 'RwandaScore',
         publishedAt: publishedAt.toISOString(),
+        status: payload.status || 'draft',
         featured: Boolean(payload.featured),
         image: payload.image || DEFAULT_NEWS_IMAGE,
         body: Array.isArray(payload.body)
@@ -1095,7 +1098,7 @@ export async function adminUpdateItem(collection, id, payload, actor) {
         if (payload[key] !== undefined) item[key] = payload[key]
       })
     } else if (collection === 'players') {
-      const allowed = ['name', 'teamId', 'position', 'number', 'nationality', 'age', 'height', 'foot', 'nationalTeam', 'bio']
+      const allowed = ['name', 'teamId', 'position', 'number', 'nationality', 'age', 'height', 'foot', 'faceId', 'nationalTeam', 'bio']
       allowed.forEach((key) => {
         if (payload[key] !== undefined) item[key] = payload[key]
       })
@@ -1125,6 +1128,10 @@ export async function adminUpdateItem(collection, id, payload, actor) {
               .split(/\n\s*\n/)
               .map((paragraph) => paragraph.trim())
               .filter(Boolean)
+      }
+      if (payload.status !== undefined) {
+        item.status = payload.status
+        if (payload.status === 'published' && !item.publishedAt) item.publishedAt = new Date().toISOString()
       }
       if (payload.publishedAt) {
         const publishedAt = new Date(payload.publishedAt)
@@ -1296,6 +1303,26 @@ export async function adminUpdateLiveMatch(matchId, updates, actor) {
   })
 }
 
+export async function adminUpdateMatchLiveBackground(matchId, imageUrl, actor) {
+  await wait(100, 220)
+  return mutateDb('live', (db) => {
+    const match = db.matches.find((item) => item.id === matchId)
+    if (!match) throw new ApiError('Match not found', 404)
+    match.stats = { ...(match.stats || {}) }
+    if (imageUrl?.trim()) match.stats.liveBackgroundImageUrl = imageUrl.trim()
+    else delete match.stats.liveBackgroundImageUrl
+    match.version = Number(match.version || 0) + 1
+    match.updatedAt = new Date().toISOString()
+    pushActivity(db, actor, {
+      action: 'Updated Match Background',
+      module: competitionOf(db, match.competitionId)?.name || 'Match Centre',
+      record: `${teamOf(db, match.homeTeamId)?.name || 'Home'} vs ${teamOf(db, match.awayTeamId)?.name || 'Away'}`,
+      description: 'Updated live match background image',
+    })
+    return decorateMatch(db, match)
+  })
+}
+
 export async function adminUpdateMatchLineups(matchId, lineups, actor) {
   await wait(100, 220)
 
@@ -1326,6 +1353,7 @@ export async function adminUpdateMatchLineups(matchId, lineups, actor) {
             name: byId.get(id).name,
             number: byId.get(id).number ?? '',
             position: byId.get(id).position,
+            photoUrl: byId.get(id).photoUrl || byId.get(id).faceId || null,
             rating: null,
           })),
         }
@@ -1338,6 +1366,7 @@ export async function adminUpdateMatchLineups(matchId, lineups, actor) {
           name: byId.get(id).name,
           number: byId.get(id).number ?? '',
           position: byId.get(id).position,
+          photoUrl: byId.get(id).photoUrl || byId.get(id).faceId || null,
           rating: null,
         })),
       }

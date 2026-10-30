@@ -17,8 +17,9 @@ const workspaces = [
 
 export default function EditorDashboard() {
   useDocumentTitle('Live desk')
-  const matches = useAdminCollection('fixtures')
+  const matches = useAdminCollection('fixtures', { refetchInterval: 10000 })
   const live = (matches.data || []).filter((match) => ['LIVE', 'HT'].includes(match.status))
+  const clockAlerts = live.filter((match) => match.clock?.awaitingStoppage || match.clock?.awaitingFullTime)
   const upcoming = (matches.data || []).filter((match) => match.status === 'UPCOMING').slice(0, 5)
   return <>
     <AdminPageHeader title="Match operations" subtitle="Prepare Rwanda fixtures, then cover every match live" />
@@ -28,6 +29,7 @@ export default function EditorDashboard() {
         <div className="flex shrink-0 flex-wrap gap-2"><Link className="btn btn-secondary" to="/admin/fixtures?new=1"><CalendarPlus size={16}/> Prepare fixture</Link><Link className="btn btn-accent" to="/admin/live"><Radio size={16}/> Live desk <ArrowUpRight size={15}/></Link></div>
       </section>
       {matches.error ? <p role="alert" className="text-sm text-negative">{matches.error.message}</p> : null}
+      {clockAlerts.length ? <section className="card overflow-hidden border border-accent/40"><div className="border-b border-line p-4"><h2 className="font-bold text-white">Live clock alerts</h2><p className="mt-1 text-xs text-muted">A match clock paused and needs your stoppage-time or period-end decision.</p></div><div className="divide-y divide-line">{clockAlerts.map((match) => <Link key={match.id} to={`/admin/live?matchId=${match.id}`} className="flex items-center justify-between gap-3 p-4 hover:bg-hover"><span><span className="block text-sm font-semibold text-white">{match.homeTeam?.name} vs {match.awayTeam?.name}</span><span className="mt-1 block text-xs text-muted">{match.clock.period === 1 ? 'First half reached 45 minutes' : `Second half paused at ${match.minute} minutes`}</span></span><span className="rounded-full bg-accent/10 px-3 py-1 text-xs font-bold text-accent">Open · {match.minute}&apos;</span></Link>)}</div></section> : null}
       <section className="grid gap-4 sm:grid-cols-2">
         <div className="card p-5"><div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-muted"><Activity size={15} className="text-negative"/> Matches live</div><p className="mt-3 text-3xl font-black text-white">{live.length}</p><p className="mt-1 text-xs text-muted">Active matches available to report</p></div>
         <div className="card p-5"><div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-muted"><Radio size={15} className="text-accent"/> Scheduled</div><p className="mt-3 text-3xl font-black text-white">{upcoming.length}</p><p className="mt-1 text-xs text-muted">Next fixtures in the queue</p></div>

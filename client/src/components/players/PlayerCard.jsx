@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom'
-import { ArrowUpRight } from 'lucide-react'
 import TeamCrest from '../ui/TeamCrest'
 import FavouriteButton from '../ui/FavouriteButton'
 import { useI18n } from '../../hooks/useI18n'
@@ -16,13 +15,9 @@ export default function PlayerCard({ player, team, className }) {
       <FavouriteButton kind="player" id={player.id} className="absolute right-3 top-3" />
       <Link to={`/players/${player.id}`} className="group block">
         <div className="flex items-center gap-3 pr-9">
-          <span
-            className="relative flex h-14 w-12 shrink-0 items-end justify-center overflow-hidden rounded-lg pb-1 text-lg font-extrabold"
-            style={{ backgroundColor: primary, color: secondary }}
-          >
-            <span className="relative z-10">{player.number ?? '—'}</span>
-            <span className="absolute -right-1 -top-1 h-5 w-5 rounded-full bg-white/10" />
-            <span className="absolute -bottom-2 -left-2 h-7 w-7 rounded-full bg-black/10" />
+          <span className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-surface2">
+            {(player.faceId || player.photoUrl) ? <img src={player.faceId || player.photoUrl} alt={player.name} loading="lazy" className="absolute inset-0 h-full w-full object-cover" onError={(event) => { event.currentTarget.style.display = 'none' }} /> : null}
+            {!player.faceId && !player.photoUrl ? <span className="grid h-full w-full place-items-center text-2xl font-bold" style={{ backgroundColor: primary, color: secondary }}>{player.name?.trim()?.[0]?.toUpperCase() || '?'}</span> : null}
           </span>
           <div className="min-w-0">
             <h3 className="truncate text-sm font-bold text-white group-hover:text-accent">
@@ -57,9 +52,8 @@ export default function PlayerCard({ player, team, className }) {
             </p>
           </div>
         </div>
-        <span className="mt-3 inline-flex items-center gap-1 text-[11px] font-semibold text-muted group-hover:text-accent">
-          {t('players.viewProfile')}
-          <ArrowUpRight size={12} />
+        <span className="mt-3 inline-flex items-center rounded-full border border-line bg-surface2 px-3 py-1 text-[11px] font-bold text-white">
+          #{player.number ?? '—'}
         </span>
       </Link>
     </div>

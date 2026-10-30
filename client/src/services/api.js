@@ -102,6 +102,8 @@ export const updateManagedMatchLineup = (matchId, version, lineup) => manager(`/
 export const createManagedPlayer = (body) => manager('/players', { method: 'POST', body })
 export const updateManagedPlayer = (id, body) => manager(`/players/${id}`, { method: 'PUT', body })
 export const deleteManagedPlayer = (id) => manager(`/players/${id}`, { method: 'DELETE' })
+export const uploadManagedPlayerFace = (file) => { const body = new FormData(); body.append('file', file); return manager('/player-face', { method: 'POST', body }) }
+export const uploadAdminPlayerFace = (file) => { const body = new FormData(); body.append('file', file); return admin('/player-face', { method: 'POST', body }) }
 const userPayload = (payload) => {
   const { status, phone: _phone, password, ...fields } = payload
   return { ...fields, ...(password ? { password } : {}), ...(status !== undefined ? { isActive: status === 'Active' } : {}) }
@@ -157,8 +159,34 @@ export async function getTeamDetail(id) {
 }
 export async function getPlayers(filters={}) { if (useMock) return mock.getPlayers(filters); return get(`/players${qs(filters)}`) }
 export async function getPlayer(id) { if (useMock) return mock.getPlayer(id); const data = await get(`/players/${id}`); return data?.player ? data : { ...data, player: data, team: data?.team ?? null, teammates: data?.teammates || [], scorerRank: data?.scorerRank ?? null } }
-export async function getNews(filters={}) { if (useMock) return mock.getNews(filters); return unwrap(await get(`/news${qs(filters)}`)) }
-export async function getArticle(slug) { if (useMock) return mock.getArticle(slug); return get(`/news/${slug}`) }
+function newsShape(article = {}) {
+  const content = article.content ?? article.body ?? ''
+  const body = Array.isArray(content)
+    ? content
+    : String(content).split(/\r?\n\s*\r?\n/).map((part) => part.trim()).filter(Boolean)
+  return {
+    ...article,
+    image: article.image ?? article.imageUrl ?? null,
+    body,
+    source: article.source || article.author || 'RwandaScore Newsroom',
+    author: article.author || 'RwandaScore Newsroom',
+  }
+}
+export async function getNews(filters={}) {
+  if (useMock) return mock.getNews(filters)
+  const first = await get(`/news${qs({ page: 1, pageSize: 100, ...filters })}`)
+  const items = unwrap(first)
+  const remainingPages = Number(first?.totalPages || 1) - 1
+  const pages = remainingPages > 0
+    ? await Promise.all(Array.from({ length: remainingPages }, (_, index) => get(`/news${qs({ page: index + 2, pageSize: 100, ...filters })}`)))
+    : []
+  return [...items, ...pages.flatMap(unwrap)].map(newsShape)
+}
+export async function getArticle(slug) {
+  if (useMock) return mock.getArticle(slug)
+  const data = await get(`/news/${slug}`)
+  return { ...data, article: data?.article ? newsShape(data.article) : data?.article, related: (data?.related || []).map(newsShape) }
+}
 export async function searchAll(query) { if (useMock) return mock.searchAll(query); return get(`/search${qs({q:query})}`) }
 export async function getFavouritesData(filters={}) { if (useMock) return mock.getFavouritesData(filters); const [teams, playerPage] = await Promise.all([getTeams(), getPlayers({ pageSize: 100 })]); const players = playerPage.items || []; return { teams: teams.filter(x => filters.teamIds?.includes(x.id)), players: players.filter(x => filters.playerIds?.includes(x.id)) } }
 export async function login(email,password) { if (useMock) return mock.login(email,password); const data=await request('/auth/login',{method:'POST',body:{email:email.trim(),password}}); persistTokens({accessToken:data.accessToken,refreshToken:data.refreshToken}); return { user:data.user, token:data.accessToken } }
@@ -209,7 +237,12 @@ export async function adminUpdateItem(collection,id,payload,actor) {
   return admin(`${routes[collection]}/${id}`,{method:'PUT',body:collection==='teams'?teamPayload(payload):payload})
 }
 export async function adminDeleteItem(collection,id,actor) { if(useMock)return mock.adminDeleteItem(collection,id,actor); const body=collection==='matches'||collection==='fixtures'?{version:(await getMatch(id)).version}:undefined; return admin(`${routes[collection]}/${id}`,{method:'DELETE',body}) }
-export async function adminUpdateLiveMatch(matchId,updates,actor) { if(useMock)return mock.adminUpdateLiveMatch(matchId,updates,actor); const current=await getMatch(matchId); const version=updates.version ?? current.version; const action=updates.status==='HT'?'halftime':updates.status==='FT'?'fulltime':updates.status==='LIVE'?'minute':'minute'; return admin(`/matches/${matchId}/live/${action}`,{method:'POST',body:{version,minute:updates.minute}}) }
+export async function adminUpdateLiveMatch(matchId,updates,actor) { if(useMock)return mock.adminUpdateLiveMatch(matchId,updates,actor); const current=await getMatch(matchId); const version=updates.version ?? current.version; const action=updates.status==='HT'?'halftime':updates.status==='FT'?'fulltime':updates.status==='LIVE'?'minute':'minute'; return admin(`/matches/${matchId}/live/${action}`,{method:'POST',body:{version,minute:updates.minute,...(updates.stoppageMinutes!==undefined?{stoppageMinutes:updates.stoppageMinutes}:{})}}) }
+export async function adminUpdateMatchLiveBackground(matchId, imageUrl, actor) {
+  if (useMock) return mock.adminUpdateMatchLiveBackground(matchId, imageUrl, actor)
+  const current = await getMatch(matchId)
+  return admin(`/matches/${matchId}/live/background`, { method: 'PUT', body: { version: current.version, imageUrl } })
+}
 export async function adminUpdateMatchLineups(matchId,lineups,actor) {
   if (useMock) return mock.adminUpdateMatchLineups(matchId,lineups,actor)
   const current = await getMatch(matchId)

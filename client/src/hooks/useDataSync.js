@@ -10,7 +10,7 @@ export function useDataSync() {
   useEffect(() => {
     const publicQueryRoots = new Set([
       'matches', 'match', 'competition', 'standings', 'top-scorers',
-      'teams', 'team', 'players', 'player',
+      'teams', 'team', 'players', 'player', 'news', 'article',
     ])
     const refreshPublicData = () => queryClient.invalidateQueries({
       predicate: (query) => publicQueryRoots.has(query.queryKey[0]),
@@ -38,7 +38,7 @@ export function useDataSync() {
       socket.onmessage = ({ data }) => {
         try {
           const message = JSON.parse(data)
-          if (['match:update', 'match:event', 'match:removed', 'standings:update'].includes(message.type)) {
+          if (['match:update', 'match:event', 'match:removed', 'standings:update', 'news:published'].includes(message.type)) {
             refreshPublicData()
           }
         } catch {

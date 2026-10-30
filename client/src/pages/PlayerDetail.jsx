@@ -15,7 +15,6 @@ const statKeys = [
   ['appearances', 'players.appearances'],
   ['goals', 'players.goals'],
   ['assists', 'players.assists'],
-  ['minutes', 'players.minutes'],
   ['yellowCards', 'players.yellowCards'],
   ['redCards', 'players.redCards'],
 ]
@@ -69,7 +68,7 @@ export default function PlayerDetail() {
               className="relative flex h-32 w-28 shrink-0 items-end justify-center overflow-hidden rounded-2xl pb-3 shadow-lift"
               style={{ backgroundColor: primary, color: secondary }}
             >
-              {player.photoUrl ? <img src={player.photoUrl} alt={player.name} className="absolute inset-0 h-full w-full object-cover" onError={(event) => { event.currentTarget.style.display = 'none' }} /> : null}
+              {(player.faceId || player.photoUrl) ? <img src={player.faceId || player.photoUrl} alt={player.name} className="absolute inset-0 h-full w-full object-cover" onError={(event) => { event.currentTarget.style.display = 'none' }} /> : null}
               <span className="relative z-10 rounded-lg bg-black/55 px-2 text-3xl font-black">#{player.number ?? '—'}</span>
               <span className="absolute -right-4 -top-4 h-16 w-16 rounded-full bg-white/10" />
               <span className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10" />
@@ -140,7 +139,7 @@ export default function PlayerDetail() {
 
             <section className="card p-5">
               <h2 className="section-title mb-2">{t('players.bio')}</h2>
-              <p className="text-sm leading-relaxed text-white/70">{player.bio}</p>
+              <p className="text-sm leading-relaxed text-white/70">{player.bio?.trim() || 'No biography has been added for this player yet.'}</p>
             </section>
 
             {teammates.length ? (

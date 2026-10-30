@@ -113,7 +113,7 @@ export default function News() {
           <EmptyState
             icon={Newspaper}
             title={t('news.noArticles')}
-            body={t('news.noArticlesBody')}
+            body={isFiltered ? t('news.noArticlesBody') : 'No published stories are available yet. Publish an article from Admin → News to show it here.'}
             action={
               <button
                 type="button"

@@ -9,6 +9,14 @@ const newsInclude = {
   author: { select: { id: true, name: true, role: true } },
 };
 
+async function recordNewsActivity(data) {
+  try {
+    await logActivity(prisma, data);
+  } catch (error) {
+    console.warn('Unable to write news activity log:', error.message);
+  }
+}
+
 async function uniqueSlug(title, excludeId = null) {
   const base = slugify(title) || 'news';
   let candidate = base;
@@ -134,17 +142,17 @@ export async function createNews(data, actor, ipAddress = null) {
       include: newsInclude,
     });
 
-    await logActivity(tx, {
-      userId: actor?.id,
-      action: 'create',
-      module: 'News',
-      recordType: 'news',
-      recordId: created.id,
-      description: `Created news article "${created.title}"`,
-      ipAddress,
-    });
-
     return created;
+  }, { maxWait: 10_000, timeout: 20_000 });
+
+  await recordNewsActivity({
+    userId: actor?.id,
+    action: 'create',
+    module: 'News',
+    recordType: 'news',
+    recordId: article.id,
+    description: `Created news article "${article.title}"`,
+    ipAddress,
   });
 
   if (article.status === 'published') {
@@ -192,17 +200,17 @@ export async function updateNews(id, data, actor, ipAddress = null) {
       include: newsInclude,
     });
 
-    await logActivity(tx, {
-      userId: actor?.id,
-      action: 'update',
-      module: 'News',
-      recordType: 'news',
-      recordId: updated.id,
-      description: `Updated news article "${updated.title}"`,
-      ipAddress,
-    });
-
     return updated;
+  }, { maxWait: 10_000, timeout: 20_000 });
+
+  await recordNewsActivity({
+    userId: actor?.id,
+    action: 'update',
+    module: 'News',
+    recordType: 'news',
+    recordId: article.id,
+    description: `Updated news article "${article.title}"`,
+    ipAddress,
   });
 
   if (article.status === 'published') {
@@ -213,21 +221,22 @@ export async function updateNews(id, data, actor, ipAddress = null) {
 }
 
 export async function deleteNews(id, actor, ipAddress = null) {
-  await prisma.$transaction(async (tx) => {
+  const deleted = await prisma.$transaction(async (tx) => {
     const existing = await tx.news.findUnique({ where: { id } });
     if (!existing) throw notFound('News article not found');
 
     await tx.news.delete({ where: { id } });
+    return existing;
+  }, { maxWait: 10_000, timeout: 20_000 });
 
-    await logActivity(tx, {
-      userId: actor?.id,
-      action: 'delete',
-      module: 'News',
-      recordType: 'news',
-      recordId: id,
-      description: `Deleted news article "${existing.title}"`,
-      ipAddress,
-    });
+  await recordNewsActivity({
+    userId: actor?.id,
+    action: 'delete',
+    module: 'News',
+    recordType: 'news',
+    recordId: id,
+    description: `Deleted news article "${deleted.title}"`,
+    ipAddress,
   });
 
   return { success: true };
@@ -248,17 +257,17 @@ export async function setNewsPublished(id, published, actor, ipAddress = null) {
       include: newsInclude,
     });
 
-    await logActivity(tx, {
-      userId: actor?.id,
-      action: published ? 'publish' : 'unpublish',
-      module: 'News',
-      recordType: 'news',
-      recordId: id,
-      description: `${published ? 'Published' : 'Unpublished'} news article "${updated.title}"`,
-      ipAddress,
-    });
-
     return updated;
+  }, { maxWait: 10_000, timeout: 20_000 });
+
+  await recordNewsActivity({
+    userId: actor?.id,
+    action: published ? 'publish' : 'unpublish',
+    module: 'News',
+    recordType: 'news',
+    recordId: id,
+    description: `${published ? 'Published' : 'Unpublished'} news article "${article.title}"`,
+    ipAddress,
   });
 
   if (published) broadcast('news:published', { news: serializeNews(article) });

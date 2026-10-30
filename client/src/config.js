@@ -16,7 +16,9 @@ export const siteConfig = {
   livePollingMs: 15000,
   // WebSocket updates keep live scores, standings and scorer lists in sync;
   // REST polling remains the fallback when the socket is unavailable.
-  enableWebSocket: true,
+  // Local development uses REST polling by default; set VITE_ENABLE_WEBSOCKET=true
+  // when running the API's WebSocket listener locally. Production keeps sockets on.
+  enableWebSocket: import.meta.env.PROD || import.meta.env.VITE_ENABLE_WEBSOCKET === 'true',
   websocketUrl: import.meta.env.VITE_WS_URL || 'ws://localhost:4000/ws/live',
   socials: {
     x: 'https://x.com',

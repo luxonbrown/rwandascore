@@ -37,7 +37,7 @@ export default function Home() {
   const competitionsQuery = useCompetitions()
   const premierLeague = findPremierLeague(competitionsQuery.data)
   const premierLeagueFixturesQuery = useMatches(
-    { competitionId: premierLeague?.id, status: 'UPCOMING', order: 'asc', pageSize: 4 },
+    { competitionId: premierLeague?.id, status: 'UPCOMING', from: new Date().toISOString(), order: 'asc', pageSize: 4 },
     { enabled: Boolean(premierLeague) },
   )
   const standingsQuery = useStandings(premierLeague?.id || 'rwanda-premier-league', { enabled: Boolean(premierLeague) })

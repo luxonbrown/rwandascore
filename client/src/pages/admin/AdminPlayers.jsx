@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { Pencil, Plus, Trash2 } from 'lucide-react'
 import AdminPageHeader from '../../components/admin/AdminPageHeader'
 import TableFrame from '../../components/admin/TableFrame'
+import PlayerFaceField from '../../components/admin/PlayerFaceField'
 import FormModal from '../../components/admin/FormModal'
 import ConfirmDeleteModal from '../../components/admin/ConfirmDeleteModal'
 import SearchField from '../../components/ui/SearchField'
@@ -13,6 +14,7 @@ import {
   useDeleteAdminItem,
   useUpdateAdminItem,
 } from '../../hooks/useAdmin'
+import { uploadAdminPlayerFace } from '../../services/api'
 import { useI18n } from '../../hooks/useI18n'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle'
 import { useUiStore } from '../../store/ui'
@@ -40,6 +42,7 @@ const emptyForm = {
   age: '',
   height: '',
   foot: 'Right',
+  faceId: '',
   nationalTeam: false,
   bio: '',
   appearances: 0,
@@ -55,6 +58,7 @@ function playerToForm(player) {
   return {
     ...emptyForm,
     ...player,
+    faceId: player.faceId || player.photoUrl || '',
     number: player.number ?? '',
     age: player.age ?? '',
     height: player.height ?? '',
@@ -96,6 +100,7 @@ function PlayerForm({ initial, teams, onSubmit, onClose, isPending, error }) {
             onChange={(event) => set('name', event.target.value)}
           />
         </div>
+        <PlayerFaceField value={form.faceId} onChange={(value) => set('faceId', value)} upload={uploadAdminPlayerFace} />
         <div>
           <label htmlFor="player-team" className="label">
             {t('admin.form.team')} *
@@ -293,6 +298,7 @@ export default function AdminPlayers() {
       teamId: form.teamId || null,
       position: form.position,
       number: form.number,
+      faceId: form.faceId || null,
       nationality: form.nationality,
       age: form.age,
       height: form.height,

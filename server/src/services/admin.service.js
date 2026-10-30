@@ -439,7 +439,7 @@ export async function createPlayer(data, actor, ipAddress = null) {
         dateOfBirth: parseDate(data.dateOfBirth),
         height: data.height ?? null,
         foot: data.foot ?? null,
-        photoUrl: data.photoUrl ?? null,
+        photoUrl: data.faceId ?? data.photoUrl ?? null,
         isNationalTeam: data.isNationalTeam ?? false,
         bio: data.bio ?? null,
         appearances: data.appearances ?? 0,
@@ -464,7 +464,7 @@ export async function createPlayer(data, actor, ipAddress = null) {
     });
 
     return created;
-  });
+  }, { maxWait: 10_000, timeout: 15_000 });
 
   return serializePlayer(player);
 }
@@ -482,7 +482,6 @@ export async function updatePlayer(id, data, actor, ipAddress = null) {
     const updateData = {};
     for (const field of [
       'name',
-      'teamId',
       'position',
       'number',
       'nationality',
@@ -502,6 +501,13 @@ export async function updatePlayer(id, data, actor, ipAddress = null) {
     ]) {
       if (data[field] !== undefined) updateData[field] = data[field];
     }
+    // Prisma's checked update input exposes the relation as `team`, while the
+    // scalar `teamId` belongs to the unchecked input. Use the relation form so
+    // team reassignment works reliably with the generated client.
+    if (data.teamId !== undefined) {
+      updateData.team = data.teamId ? { connect: { id: data.teamId } } : { disconnect: true };
+    }
+    if (data.faceId !== undefined) updateData.photoUrl = data.faceId;
     if (data.dateOfBirth !== undefined) updateData.dateOfBirth = parseDate(data.dateOfBirth);
 
     if (data.name && data.name !== existing.name) {
@@ -535,7 +541,7 @@ export async function updatePlayer(id, data, actor, ipAddress = null) {
     });
 
     return updated;
-  });
+  }, { maxWait: 10_000, timeout: 15_000 });
 
   return serializePlayer(player);
 }

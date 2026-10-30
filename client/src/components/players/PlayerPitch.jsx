@@ -20,8 +20,8 @@ function Marker({ player, team, top, featured = false, delay = 0 }) {
       className={`pitch-player${featured ? ' pitch-player-featured' : ''}`}
       style={{ left: `${laneX[player.position] ?? 53}%`, top: `${top}%`, animationDelay: `${delay}ms`, '--marker-color': primary, '--marker-ink': secondary }}
     >
-      {player.photoUrl && !photoFailed ? <img className="pitch-player-photo" src={player.photoUrl} alt="" loading="lazy" onError={() => setPhotoFailed(true)} /> : <span className="pitch-player-number">{player.number ?? '—'}</span>}
-      {player.photoUrl && !photoFailed ? <span className="pitch-player-photo-number">#{player.number ?? '—'}</span> : null}
+      {(player.faceId || player.photoUrl) && !photoFailed ? <img className="pitch-player-photo" src={player.faceId || player.photoUrl} alt={player.name} loading="lazy" onError={() => setPhotoFailed(true)} /> : <span className="pitch-player-number">{player.number ?? '—'}</span>}
+      {(player.faceId || player.photoUrl) && !photoFailed ? <span className="pitch-player-photo-number">#{player.number ?? '—'}</span> : null}
       <span className="pitch-player-name">{player.name}</span>
       <span className="pitch-player-position">{player.position}</span>
     </Link>

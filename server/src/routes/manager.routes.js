@@ -1,9 +1,10 @@
 import { Router } from 'express';
 import { prisma } from '../config/prisma.js';
 import { requireAuth, requirePasswordChanged, requireRole } from '../middleware/auth.js';
+import { uploadImage, uploadedFileUrl } from '../middleware/upload.js';
 import { validate } from '../middleware/validate.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
-import { notFound } from '../utils/errors.js';
+import { badRequest, notFound } from '../utils/errors.js';
 import { listPlayers } from '../services/player.service.js';
 import { listMatches, updateManagerMatchLineup } from '../services/match.service.js';
 import { createPlayer, updatePlayer, deletePlayer } from '../services/admin.service.js';
@@ -19,6 +20,11 @@ async function assignedTeam(userId) {
   if (!team) throw notFound('No team is assigned to this manager');
   return team;
 }
+
+const requireAssignedTeam = asyncHandler(async (req, res, next) => {
+  await assignedTeam(req.user.id);
+  next();
+});
 
 managerRouter.get('/team', asyncHandler(async (req, res) => {
   const team = await prisma.team.findFirst({ where: { managerUserId: req.user.id }, include: { stadium: true } });
@@ -71,6 +77,11 @@ managerRouter.get('/players', asyncHandler(async (req, res) => {
   const team = await prisma.team.findFirst({ where: { managerUserId: req.user.id }, select: { id: true } });
   if (!team) return res.json({ items: [], total: 0, page: 1, pageSize: 100, totalPages: 0 });
   return res.json(await listPlayers({ page: 1, pageSize: 100, teamId: team.id }));
+}));
+managerRouter.post('/player-face', requireAssignedTeam, uploadImage.single('file'), asyncHandler(async (req, res) => {
+  if (!req.file) throw badRequest('Drop a player image to upload');
+  const url = uploadedFileUrl(req.file.filename);
+  res.status(201).json({ faceId: url, url });
 }));
 // Managers can see fixtures and results involving their own club, but receive no
 // match mutation routes. The assigned team filter always overrides query input.

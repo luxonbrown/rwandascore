@@ -15,10 +15,10 @@ import { listCompetitions, getCompetition } from '../services/competition.servic
 import { listTeams } from '../services/team.service.js';
 import { listPlayers } from '../services/player.service.js';
 import { listNews, getNewsById, createNews, updateNews, deleteNews, setNewsPublished } from '../services/news.service.js';
-import { createMatch, listMatches, updateMatch, updateMatchLineups, deleteMatch, addMatchEvent, deleteMatchEvent, updateMatchStatus } from '../services/match.service.js';
+import { createMatch, listMatches, updateMatch, updateMatchLineups, deleteMatch, addMatchEvent, deleteMatchEvent, updateMatchStatus, updateMatchLiveBackground } from '../services/match.service.js';
 import { serializeActivity, serializeCompetition, serializeSeason, serializeStadium, serializeTeam, serializePlayer } from '../utils/serializers.js';
 import {
-  activityListQuery, competitionCreateSchema, competitionUpdateSchema, eventCreateSchema, matchLineupsUpdateSchema,
+  activityListQuery, competitionCreateSchema, competitionUpdateSchema, eventCreateSchema, matchLineupsUpdateSchema, liveBackgroundSchema,
   idParam, liveActionSchema, matchCreateSchema, matchListQuery, matchStatusSchema, matchUpdateSchema, matchVersionSchema, newsCreateSchema,
   newsListQuery, newsPublishSchema, newsUpdateSchema, paginationQuery, playerCreateSchema, playerListQuery,
   playerUpdateSchema, resetPasswordSchema, seasonCreateSchema, seasonListQuery,
@@ -137,6 +137,10 @@ adminRouter.put('/teams/:id', contentEditors, validate({ params: idParam, body: 
 adminRouter.delete('/teams/:id', contentEditors, validate({ params: idParam }), send(({ params, user }) => import('../services/admin.service.js').then(({ deleteTeam }) => deleteTeam(params.id, user, ip(user)))));
 
 adminRouter.get('/players', contentEditors, validate({ query: playerListQuery }), send(({ query }) => listPlayers(query)));
+adminRouter.post('/player-face', contentEditors, uploadImage.single('file'), asyncHandler(async (req, res) => {
+  if (!req.file) throw badRequest('Drop a player image to upload');
+  res.status(201).json({ faceId: uploadedFileUrl(req.file.filename), url: uploadedFileUrl(req.file.filename) });
+}));
 adminRouter.post('/players', contentEditors, validate({ body: playerCreateSchema }), send(({ body, user }) => import('../services/admin.service.js').then(({ createPlayer }) => createPlayer(body, user, ip(user))), 201));
 adminRouter.put('/players/:id', contentEditors, validate({ params: idParam, body: playerUpdateSchema }), send(({ params, body, user }) => import('../services/admin.service.js').then(({ updatePlayer }) => updatePlayer(params.id, body, user, ip(user)))));
 adminRouter.delete('/players/:id', contentEditors, validate({ params: idParam }), send(({ params, user }) => import('../services/admin.service.js').then(({ deletePlayer }) => deletePlayer(params.id, user, ip(user)))));
@@ -155,6 +159,7 @@ const liveStatus = (status) => asyncHandler(async (req, res) => {
   res.json(result);
 });
 adminRouter.post('/matches/:id/live/start', contentEditors, validate({ params: idParam, body: matchStatusSchema }), liveStatus('live'));
+adminRouter.put('/matches/:id/live/background', contentEditors, validate({ params: idParam, body: liveBackgroundSchema }), send(({ params, body }) => updateMatchLiveBackground(params.id, body)));
 adminRouter.post('/matches/:id/live/minute', contentEditors, validate({ params: idParam, body: matchStatusSchema }), asyncHandler(async (req, res) => res.json(await updateMatchStatus(req.params.id, { ...req.body, status: 'live' }, req.user, ip(req)))));
 adminRouter.post('/matches/:id/live/goal', contentEditors, validate({ params: idParam, body: eventCreateSchema }), asyncHandler(async (req, res) => res.status(201).json(await addMatchEvent(req.params.id, { ...req.body, type: req.body.type || 'goal' }, req.user, ip(req)))));
 adminRouter.post('/matches/:id/live/card', contentEditors, validate({ params: idParam, body: eventCreateSchema }), asyncHandler(async (req, res) => {

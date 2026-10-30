@@ -8,6 +8,7 @@ import {
   adminResetDemoData,
   adminUpdateItem,
   adminUpdateLiveMatch,
+  adminUpdateMatchLiveBackground,
   adminUpdateMatchLineups,
   getActivity,
   getAdminDashboard,
@@ -80,6 +81,15 @@ export function useUpdateLiveMatch() {
   const invalidate = useInvalidateAll()
   return useMutation({
     mutationFn: ({ matchId, updates }) => adminUpdateLiveMatch(matchId, updates, actor),
+    onSuccess: invalidate,
+  })
+}
+
+export function useUpdateMatchLiveBackground() {
+  const actor = useAuthStore((state) => state.user)
+  const invalidate = useInvalidateAll()
+  return useMutation({
+    mutationFn: ({ matchId, imageUrl }) => adminUpdateMatchLiveBackground(matchId, imageUrl, actor),
     onSuccess: invalidate,
   })
 }

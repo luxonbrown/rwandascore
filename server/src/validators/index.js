@@ -97,6 +97,12 @@ export const matchStatusSchema = z.object({
   version: z.coerce.number().int().min(1),
   status: matchStatus.optional(),
   minute: z.coerce.number().int().min(0).max(130).optional(),
+  stoppageMinutes: z.coerce.number().int().min(0).max(30).optional(),
+});
+
+export const liveBackgroundSchema = z.object({
+  version: z.coerce.number().int().min(1),
+  imageUrl: z.union([z.string().url().max(2048), z.literal(''), z.null()]),
 });
 
 export const matchLineupsUpdateSchema = z.object({
@@ -116,6 +122,7 @@ export const matchVersionSchema = z.object({ version: z.coerce.number().int().mi
 export const liveActionSchema = z.object({
   version: z.coerce.number().int().min(1),
   minute: z.coerce.number().int().min(0).max(130).optional(),
+  stoppageMinutes: z.coerce.number().int().min(0).max(30).optional(),
 });
 
 export const eventCreateSchema = z.object({
@@ -225,6 +232,7 @@ export const playerCreateSchema = z.object({
   height: nullableInteger(100, 250),
   foot: z.enum(['Left', 'Right', 'Both']).nullable().optional(),
   photoUrl: z.string().url().nullable().optional(),
+  faceId: z.string().url().nullable().optional(),
   isNationalTeam: z.boolean().optional(),
   bio: z.string().max(5000).nullable().optional(),
   appearances: nullableInteger(0),

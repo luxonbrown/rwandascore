@@ -19,7 +19,7 @@ export function verifyPassword(password, hash) {
   return bcrypt.compare(password, hash);
 }
 
-async function issueSession(client, user, ipAddress) {
+async function issueSession(client, user) {
   const accessToken = signAccessToken(user);
   const refreshToken = generateRefreshToken();
 
@@ -31,19 +31,16 @@ async function issueSession(client, user, ipAddress) {
     },
   });
 
-  await client.activityLog.create({
-    data: {
-      userId: user.id,
-      action: 'login',
-      module: 'Auth',
-      recordType: 'user',
-      recordId: user.id,
-      description: `${user.name} signed in`,
-      ipAddress,
-    },
-  });
-
   return { accessToken, refreshToken };
+}
+
+async function recordAuthActivity(data) {
+  try {
+    // Audit history is useful, but it must not hold up or fail authentication.
+    await logActivity(prisma, data);
+  } catch (error) {
+    console.warn('Unable to write authentication activity log:', error.message);
+  }
 }
 
 export async function login({ email, password }, ipAddress = null) {
@@ -68,8 +65,18 @@ export async function login({ email, password }, ipAddress = null) {
       where: { id: user.id },
       data: { lastLoginAt: now },
     });
-    const tokens = await issueSession(tx, updatedUser, ipAddress);
+    const tokens = await issueSession(tx, updatedUser);
     return { ...tokens, user: updatedUser };
+  }, { maxWait: 10000, timeout: 15000 });
+
+  await recordAuthActivity({
+    userId: session.user.id,
+    action: 'login',
+    module: 'Auth',
+    recordType: 'user',
+    recordId: session.user.id,
+    description: `${session.user.name} signed in`,
+    ipAddress,
   });
 
   return {
@@ -114,22 +121,20 @@ export async function refresh({ refreshToken }, ipAddress = null) {
       },
     });
 
-    await tx.activityLog.create({
-      data: {
-        userId: record.userId,
-        action: 'refresh_token',
-        module: 'Auth',
-        recordType: 'user',
-        recordId: record.userId,
-        description: `${record.user.name} refreshed their session`,
-        ipAddress,
-      },
-    });
-
     return {
       accessToken: signAccessToken(record.user),
       user: record.user,
     };
+  }, { maxWait: 10000, timeout: 15000 });
+
+  await recordAuthActivity({
+    userId: record.userId,
+    action: 'refresh_token',
+    module: 'Auth',
+    recordType: 'user',
+    recordId: record.userId,
+    description: `${record.user.name} refreshed their session`,
+    ipAddress,
   });
 
   return {
@@ -170,15 +175,16 @@ export async function changePassword(userId, { currentPassword, newPassword }, i
       where: { userId: user.id, revokedAt: null },
       data: { revokedAt: new Date() },
     });
-    await logActivity(tx, {
-      userId: user.id,
-      action: 'change_password',
-      module: 'Auth',
-      recordType: 'user',
-      recordId: user.id,
-      description: `${user.name} changed their password`,
-      ipAddress,
-    });
+  }, { maxWait: 10000, timeout: 15000 });
+
+  await recordAuthActivity({
+    userId: user.id,
+    action: 'change_password',
+    module: 'Auth',
+    recordType: 'user',
+    recordId: user.id,
+    description: `${user.name} changed their password`,
+    ipAddress,
   });
 
   return { success: true };

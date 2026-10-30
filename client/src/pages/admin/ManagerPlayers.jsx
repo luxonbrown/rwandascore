@@ -2,10 +2,57 @@ import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Pencil, Plus, Trash2, Users } from 'lucide-react'
 import AdminPageHeader from '../../components/admin/AdminPageHeader'
+import PlayerFaceField from '../../components/admin/PlayerFaceField'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle'
-import { createManagedPlayer, deleteManagedPlayer, getManagedPlayers, getManagedTeam, updateManagedPlayer } from '../../services/api'
+import {
+  createManagedPlayer,
+  deleteManagedPlayer,
+  getManagedPlayers,
+  getManagedTeam,
+  updateManagedPlayer,
+  uploadManagedPlayerFace,
+} from '../../services/api'
 
-const blankPlayer = { name: '', position: 'MF', number: '', nationality: 'Rwanda' }
+const statFields = [
+  ['appearances', 'Appearances'],
+  ['goals', 'Goals'],
+  ['assists', 'Assists'],
+  ['minutes', 'Minutes'],
+  ['yellowCards', 'Yellow cards'],
+  ['redCards', 'Red cards'],
+  ['cleanSheets', 'Clean sheets'],
+]
+
+const blankPlayer = {
+  name: '',
+  position: 'MF',
+  number: '',
+  nationality: 'Rwanda',
+  age: '',
+  height: '',
+  foot: 'Right',
+  faceId: '',
+  bio: '',
+  appearances: 0,
+  goals: 0,
+  assists: 0,
+  minutes: 0,
+  yellowCards: 0,
+  redCards: 0,
+  cleanSheets: 0,
+}
+
+function playerToForm(player) {
+  return {
+    ...blankPlayer,
+    ...player,
+    faceId: player.faceId || player.photoUrl || '',
+    number: player.number ?? '',
+    age: player.age ?? '',
+    height: player.height ?? '',
+    ...Object.fromEntries(statFields.map(([key]) => [key, player.stats?.[key] ?? player[key] ?? 0])),
+  }
+}
 
 export default function ManagerPlayers() {
   useDocumentTitle('Team player roster')
@@ -16,9 +63,17 @@ export default function ManagerPlayers() {
   const [error, setError] = useState('')
   const refresh = () => client.invalidateQueries({ queryKey: ['manager', 'players'] })
   const savePlayer = useMutation({
-    mutationFn: (value) => value.id
-      ? updateManagedPlayer(value.id, value)
-      : createManagedPlayer(value),
+    mutationFn: (value) => {
+      const payload = {
+        ...value,
+        number: value.number === '' ? null : Number(value.number),
+        age: value.age === '' ? null : Number(value.age),
+        height: value.height === '' ? null : Number(value.height),
+        faceId: value.faceId || null,
+        ...Object.fromEntries(statFields.map(([key]) => [key, Number(value[key]) || 0])),
+      }
+      return value.id ? updateManagedPlayer(value.id, payload) : createManagedPlayer(payload)
+    },
     onSuccess: () => { setPlayer(null); setError(''); refresh() },
     onError: (cause) => setError(cause.message),
   })
@@ -29,6 +84,7 @@ export default function ManagerPlayers() {
   })
   const team = teamQuery.data
   const players = playersQuery.data || []
+  const setField = (key, value) => setPlayer((current) => ({ ...current, [key]: value }))
 
   return <>
     <AdminPageHeader title="Player roster" subtitle={team ? `Manage players registered to ${team.name}` : 'Manage players registered to your assigned club'} />
@@ -41,9 +97,24 @@ export default function ManagerPlayers() {
           <div className="flex items-center gap-2"><Users size={18} className="text-accent"/><div><h2 className="font-bold text-white">{team?.name || 'Team'} roster</h2><p className="mt-1 text-xs text-muted">Changes are limited to your assigned club.</p></div></div>
           <button className="btn btn-accent" onClick={() => { setPlayer({ ...blankPlayer }); setError('') }} disabled={!team}><Plus size={16}/> Add player</button>
         </div>
-        {playersQuery.isLoading ? <p className="p-5 text-sm text-muted">Loading roster…</p> : players.length ? <div className="divide-y divide-line">{players.map((item) => <div key={item.id} className="flex items-center justify-between gap-4 p-4"><div><p className="font-semibold text-white">{item.name}</p><p className="mt-1 text-xs text-muted">{item.position} · {item.number ? `#${item.number} · ` : ''}{item.nationality || 'Rwanda'}</p></div><div className="flex gap-1"><button className="rounded p-2 text-muted hover:bg-hover hover:text-white" aria-label={`Edit ${item.name}`} onClick={() => { setPlayer({ name: item.name, position: item.position, number: item.number || '', nationality: item.nationality || 'Rwanda', id: item.id }); setError('') }}><Pencil size={15}/></button><button className="rounded p-2 text-muted hover:bg-negative/10 hover:text-negative" aria-label={`Remove ${item.name}`} onClick={() => { if (window.confirm(`Remove ${item.name} from your team roster?`)) removePlayer.mutate(item.id) }}><Trash2 size={15}/></button></div></div>)}</div> : <p className="p-5 text-sm text-muted">No players are registered to this team yet.</p>}
+        {playersQuery.isLoading ? <p className="p-5 text-sm text-muted">Loading roster…</p> : players.length ? <div className="divide-y divide-line">{players.map((item) => <div key={item.id} className="flex items-center justify-between gap-4 p-4"><div><p className="font-semibold text-white">{item.name}</p><p className="mt-1 text-xs text-muted">{item.position} · {item.number ? `#${item.number} · ` : ''}{item.nationality || 'Rwanda'}</p></div><div className="flex gap-1"><button className="rounded p-2 text-muted hover:bg-hover hover:text-white" aria-label={`Edit ${item.name}`} onClick={() => { setPlayer({ ...playerToForm(item), id: item.id }); setError('') }}><Pencil size={15}/></button><button className="rounded p-2 text-muted hover:bg-negative/10 hover:text-negative" aria-label={`Remove ${item.name}`} onClick={() => { if (window.confirm(`Remove ${item.name} from your team roster?`)) removePlayer.mutate(item.id) }}><Trash2 size={15}/></button></div></div>)}</div> : <p className="p-5 text-sm text-muted">No players are registered to this team yet.</p>}
       </section>
     </div>
-    {player ? <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/70 p-4" role="presentation"><form className="card w-full max-w-lg space-y-4 p-5" onSubmit={(event) => { event.preventDefault(); savePlayer.mutate({ ...player, number: player.number === '' ? null : Number(player.number) }) }}><div><h2 className="text-lg font-bold text-white">{player.id ? 'Edit player' : 'Add player'}</h2><p className="mt-1 text-xs text-muted">Roster changes apply only to {team?.name}.</p></div><label className="block"><span className="label">Player name *</span><input className="input" required minLength={2} value={player.name} onChange={(event) => setPlayer({ ...player, name: event.target.value })}/></label><div className="grid grid-cols-2 gap-3"><label><span className="label">Position</span><select className="input" value={player.position} onChange={(event) => setPlayer({ ...player, position: event.target.value })}>{['GK','DF','MF','FW'].map((position) => <option key={position}>{position}</option>)}</select></label><label><span className="label">Squad number</span><input className="input" type="number" min="0" max="99" value={player.number} onChange={(event) => setPlayer({ ...player, number: event.target.value })}/></label></div><label className="block"><span className="label">Nationality</span><input className="input" value={player.nationality} onChange={(event) => setPlayer({ ...player, nationality: event.target.value })}/></label><div className="flex justify-end gap-2"><button type="button" className="btn btn-secondary" onClick={() => setPlayer(null)}>Cancel</button><button className="btn btn-accent" disabled={savePlayer.isPending}>{savePlayer.isPending ? 'Saving…' : 'Save player'}</button></div></form></div> : null}
+    {player ? <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/70 p-4" role="presentation"><form className="card max-h-[90vh] w-full max-w-2xl space-y-4 overflow-y-auto p-5" onSubmit={(event) => { event.preventDefault(); savePlayer.mutate(player) }}>
+      <div><h2 className="text-lg font-bold text-white">{player.id ? 'Edit player' : 'Add player'}</h2><p className="mt-1 text-xs text-muted">Player profile, season statistics, and biography are saved to your club roster.</p></div>
+      <label className="block"><span className="label">Player name *</span><input className="input" required minLength={2} value={player.name} onChange={(event) => setField('name', event.target.value)}/></label>
+      <PlayerFaceField value={player.faceId || ''} onChange={(faceId) => setField('faceId', faceId)} upload={uploadManagedPlayerFace}/>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <label><span className="label">Position</span><select className="input" value={player.position} onChange={(event) => setField('position', event.target.value)}>{['GK','DF','MF','FW'].map((position) => <option key={position}>{position}</option>)}</select></label>
+        <label><span className="label">Squad number</span><input className="input" type="number" min="0" max="99" value={player.number} onChange={(event) => setField('number', event.target.value)}/></label>
+        <label><span className="label">Nationality</span><input className="input" value={player.nationality} onChange={(event) => setField('nationality', event.target.value)}/></label>
+        <label><span className="label">Age</span><input className="input" type="number" min="14" max="100" value={player.age} onChange={(event) => setField('age', event.target.value)}/></label>
+        <label><span className="label">Height (cm)</span><input className="input" type="number" min="100" max="250" value={player.height} onChange={(event) => setField('height', event.target.value)}/></label>
+        <label><span className="label">Preferred foot</span><select className="input" value={player.foot || 'Right'} onChange={(event) => setField('foot', event.target.value)}>{['Right','Left','Both'].map((foot) => <option key={foot}>{foot}</option>)}</select></label>
+      </div>
+      <div><h3 className="label mb-2">This season</h3><div className="grid grid-cols-2 gap-3 sm:grid-cols-4">{statFields.map(([key, label]) => <label key={key}><span className="label">{label}</span><input className="input" type="number" min="0" value={player[key] ?? 0} onChange={(event) => setField(key, event.target.value)}/></label>)}</div></div>
+      <label className="block"><span className="label">Biography</span><textarea className="input min-h-24" maxLength={5000} value={player.bio || ''} onChange={(event) => setField('bio', event.target.value)}/></label>
+      <div className="flex justify-end gap-2"><button type="button" className="btn btn-secondary" onClick={() => setPlayer(null)}>Cancel</button><button className="btn btn-accent" disabled={savePlayer.isPending}>{savePlayer.isPending ? 'Saving…' : 'Save player'}</button></div>
+    </form></div> : null}
   </>
 }

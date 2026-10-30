@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { CircleDot, Radio, Trash2 } from 'lucide-react'
+import { Link, useSearchParams } from 'react-router-dom'
+import { CircleDot, ImagePlus, Radio, Save, Trash2 } from 'lucide-react'
 import AdminPageHeader from '../../components/admin/AdminPageHeader'
 import ConfirmDeleteModal from '../../components/admin/ConfirmDeleteModal'
 import EmptyState from '../../components/ui/EmptyState'
@@ -14,6 +14,7 @@ import {
   useAdminMatchEvents,
   useDeleteMatchEvent,
   useUpdateLiveMatch,
+  useUpdateMatchLiveBackground,
 } from '../../hooks/useAdmin'
 import { useI18n } from '../../hooks/useI18n'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle'
@@ -59,17 +60,38 @@ function squadNames(roster = []) {
 function ScoreEditor({ match, onUpdate, isPending }) {
   const { t } = useI18n()
   const [minute, setMinute] = useState(match.minute ?? 0)
+  const [minuteOverride, setMinuteOverride] = useState(null)
+  const [stoppageMinutes, setStoppageMinutes] = useState('')
   const [status, setStatus] = useState(['LIVE', 'HT', 'FT'].includes(match.status) ? match.status : 'LIVE')
 
   useEffect(() => {
     setMinute(match.minute ?? 0)
+    setMinuteOverride(null)
     setStatus(['LIVE', 'HT', 'FT'].includes(match.status) ? match.status : 'LIVE')
-  }, [match])
+    setStoppageMinutes('')
+  }, [match.id, match.minute, match.status, match.clock?.awaitingStoppage, match.clock?.awaitingFullTime])
 
-  const submit = (nextStatus = status) => {
+  useEffect(() => {
+    const clock = match.clock
+    if (match.status !== 'LIVE' || !clock?.running || !clock.startedAt) return undefined
+
+    const tick = () => {
+      const elapsed = Math.floor(Math.max(0, Date.now() - new Date(clock.startedAt).getTime()) / 60_000)
+      const target = Number(clock.targetMinute) || (clock.period === 1 ? 45 : 90)
+      setMinute(Math.min(target, Number(clock.baseMinute || 0) + elapsed))
+    }
+    tick()
+    const timer = window.setInterval(tick, 1000)
+    return () => window.clearInterval(timer)
+  }, [match.id, match.status, match.clock?.running, match.clock?.startedAt, match.clock?.baseMinute, match.clock?.targetMinute, match.clock?.period])
+
+  const displayedMinute = minuteOverride ?? minute
+
+  const submit = (nextStatus = status, extra = {}) => {
     onUpdate({
-      minute: Number(minute),
+      minute: Number(displayedMinute),
       status: nextStatus,
+      ...extra,
     })
   }
 
@@ -81,7 +103,7 @@ function ScoreEditor({ match, onUpdate, isPending }) {
             {match.competition?.shortName || match.competition?.name}
             {match.round ? ` · ${match.round}` : ''}
           </p>
-          <StatusBadge status={match.status} minute={match.minute} />
+          <StatusBadge status={match.status} minute={displayedMinute} showMinute />
         </div>
         <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
           <div className="flex flex-col items-center gap-2 text-center sm:flex-row sm:text-left">
@@ -126,8 +148,8 @@ function ScoreEditor({ match, onUpdate, isPending }) {
               min="0"
               max="120"
               className="input text-center text-lg font-bold"
-              value={minute}
-              onChange={(event) => setMinute(event.target.value)}
+              value={displayedMinute}
+              onChange={(event) => setMinuteOverride(event.target.value)}
             />
           </div>
           <p className="flex items-end justify-center pb-2 text-xs font-semibold text-muted">Goals are added from the match timeline.</p>
@@ -172,6 +194,19 @@ function ScoreEditor({ match, onUpdate, isPending }) {
             </button>
           ))}
         </div>
+        {match.clock?.awaitingStoppage || match.clock?.awaitingFullTime ? (
+          <div className="space-y-3 rounded-xl border border-accent/30 bg-accent/5 p-4">
+            <div>
+              <p className="text-sm font-bold text-white">{match.clock.period === 1 ? 'First half paused at 45 minutes' : `Second half paused at ${match.minute} minutes`}</p>
+              <p className="mt-1 text-xs text-muted">Add stoppage time and resume, or confirm the period has ended.</p>
+            </div>
+            <div className="flex flex-wrap items-end gap-2">
+              <label className="w-36"><span className="label">Stoppage minutes</span><input className="input" type="number" min="1" max="30" value={stoppageMinutes} onChange={(event) => setStoppageMinutes(event.target.value)} placeholder="e.g. 4" /></label>
+              <button type="button" className="btn btn-accent" disabled={isPending || !Number(stoppageMinutes)} onClick={() => submit('LIVE', { minute: match.minute, stoppageMinutes: Number(stoppageMinutes) })}>Resume with added time</button>
+              <button type="button" className="btn btn-secondary" disabled={isPending} onClick={() => submit(match.clock.period === 1 ? 'HT' : 'FT', { minute: match.minute })}>Confirm {match.clock.period === 1 ? 'half-time' : 'full-time'}</button>
+            </div>
+          </div>
+        ) : null}
         <button type="submit" className="btn btn-accent w-full" disabled={isPending}>
           <Radio size={15} />
           {isPending ? t('admin.live.updating') : t('admin.live.update')}
@@ -425,13 +460,16 @@ export default function AdminLive() {
   useDocumentTitle(t('admin.liveControl'))
   const pushToast = useUiStore((state) => state.pushToast)
   const user = useAuthStore((state) => state.user)
-  const fixturesQuery = useAdminCollection('fixtures')
+  const [searchParams, setSearchParams] = useSearchParams()
+  const fixturesQuery = useAdminCollection('fixtures', { refetchInterval: 10000 })
   const playersQuery = useAdminCollection('players')
   const dashboardQuery = useAdminDashboard({ enabled: user?.role === 'ADMIN' })
   const updateLive = useUpdateLiveMatch()
+  const updateBackground = useUpdateMatchLiveBackground()
   const addEvent = useAddMatchEvent()
   const deleteEvent = useDeleteMatchEvent()
-  const [selectedId, setSelectedId] = useState('')
+  const [selectedId, setSelectedId] = useState(() => searchParams.get('matchId') || '')
+  const [backgroundUrl, setBackgroundUrl] = useState('')
   const eventsQuery = useAdminMatchEvents(selectedId)
 
   const today = dayKeyOf(new Date())
@@ -448,9 +486,12 @@ export default function AdminLive() {
       return
     }
     if (!selectedId || !candidates.some((match) => match.id === selectedId)) {
-      setSelectedId(candidates[0].id)
+      const preferredId = searchParams.get('matchId')
+      const nextId = preferredId && candidates.some((match) => match.id === preferredId) ? preferredId : candidates[0].id
+      setSelectedId(nextId)
+      setSearchParams({ matchId: nextId }, { replace: true })
     }
-  }, [candidates, selectedId])
+  }, [candidates, selectedId, searchParams, setSearchParams])
 
   if (fixturesQuery.isError) {
     return (
@@ -465,11 +506,25 @@ export default function AdminLive() {
 
   const match = candidates.find((item) => item.id === selectedId)
 
+  useEffect(() => {
+    setBackgroundUrl(match?.stats?.liveBackgroundImageUrl || '')
+  }, [match?.id, match?.stats?.liveBackgroundImageUrl])
+
   const updateScore = async (updates, reset) => {
     try {
       await updateLive.mutateAsync({ matchId: match.id, updates })
       pushToast(t('admin.live.updated'))
       reset?.()
+    } catch (error) {
+      pushToast(error.message, 'error')
+    }
+  }
+
+  const saveBackground = async (event) => {
+    event.preventDefault()
+    try {
+      await updateBackground.mutateAsync({ matchId: match.id, imageUrl: backgroundUrl.trim() })
+      pushToast(t('admin.live.backgroundSaved'))
     } catch (error) {
       pushToast(error.message, 'error')
     }
@@ -525,7 +580,7 @@ export default function AdminLive() {
               id="live-match"
               className="input sm:max-w-md"
               value={selectedId}
-              onChange={(event) => setSelectedId(event.target.value)}
+              onChange={(event) => { setSelectedId(event.target.value); setSearchParams(event.target.value ? { matchId: event.target.value } : {}, { replace: true }) }}
               disabled={!candidates.length}
             >
               {candidates.length ? (
@@ -574,6 +629,30 @@ export default function AdminLive() {
                 onUpdate={updateScore}
                 isPending={updateLive.isPending}
               />
+              <form className="card space-y-3 p-4" onSubmit={saveBackground}>
+                <div className="flex items-center gap-2">
+                  <ImagePlus size={16} className="text-accent" />
+                  <div>
+                    <h2 className="section-title">{t('admin.live.backgroundTitle')}</h2>
+                    <p className="text-[11px] text-muted">{t('admin.live.backgroundHint')}</p>
+                  </div>
+                </div>
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <input
+                    type="url"
+                    className="input min-w-0 flex-1"
+                    value={backgroundUrl}
+                    onChange={(event) => setBackgroundUrl(event.target.value)}
+                    placeholder="https://example.com/match-teams.jpg"
+                    aria-label={t('admin.live.backgroundTitle')}
+                  />
+                  <button type="submit" className="btn btn-accent" disabled={updateBackground.isPending}>
+                    <Save size={14} />
+                    {updateBackground.isPending ? t('admin.saving') : t('common.save')}
+                  </button>
+                </div>
+                {backgroundUrl ? <img src={backgroundUrl} alt={t('admin.live.backgroundPreview')} className="h-28 w-full rounded-lg border border-line object-cover" onError={(event) => { event.currentTarget.style.display = 'none' }} /> : null}
+              </form>
               <EventPanel
                 key={`events-${match.id}`}
                 match={{ ...match, events: eventsQuery.data || match.events || [] }}

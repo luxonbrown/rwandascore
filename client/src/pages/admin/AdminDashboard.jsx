@@ -44,7 +44,7 @@ export default function AdminDashboard() {
   useDocumentTitle(t('admin.dashboard'))
   const user = useAuthStore((state) => state.user)
   const pushToast = useUiStore((state) => state.pushToast)
-  const dashboardQuery = useAdminDashboard({ refetchInterval: 30000 })
+  const dashboardQuery = useAdminDashboard({ refetchInterval: 10000 })
   const resetDemo = useResetDemoData()
   const [resetOpen, setResetOpen] = useState(false)
   const data = dashboardQuery.data
@@ -144,6 +144,20 @@ export default function AdminDashboard() {
           </section>
         ) : null}
 
+        {data?.liveMatches?.some((match) => match.clock?.awaitingStoppage || match.clock?.awaitingFullTime) ? (
+          <section className="card overflow-hidden border border-accent/40">
+            <div className="flex items-center gap-2 border-b border-line px-4 py-3.5"><Bell size={16} className="text-accent"/><h2 className="section-title">Live match clock alerts</h2></div>
+            <ul className="divide-y divide-line">
+              {data.liveMatches.filter((match) => match.clock?.awaitingStoppage || match.clock?.awaitingFullTime).map((match) => (
+                <li key={match.id}><Link to={`/admin/live?matchId=${match.id}`} className="flex flex-wrap items-center justify-between gap-3 p-4 hover:bg-hover/50">
+                  <span><span className="block text-sm font-bold text-white">{match.homeTeam?.name} vs {match.awayTeam?.name}</span><span className="mt-1 block text-xs text-muted">{match.clock.period === 1 ? 'First half reached 45 minutes' : `Second half paused at ${match.minute} minutes`} · Add stoppage time or confirm the period</span></span>
+                  <span className="rounded-full bg-accent/10 px-3 py-1 text-xs font-bold text-accent">Open live control · {match.minute}&apos;</span>
+                </Link></li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
+
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)]">
           <div className="space-y-5">
             <section className="card overflow-hidden">
@@ -161,7 +175,7 @@ export default function AdminDashboard() {
                   {data.liveMatches.map((match) => (
                     <Link
                       key={match.id}
-                      to="/admin/live"
+                      to={`/admin/live?matchId=${match.id}`}
                       className="flex items-center gap-3 px-4 py-3.5 hover:bg-hover/50"
                     >
                       <div className="min-w-0 flex-1">

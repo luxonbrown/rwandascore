@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { ExternalLink, Pencil, Plus, Trash2 } from 'lucide-react'
+import { ExternalLink, EyeOff, Pencil, Plus, Send, Trash2 } from 'lucide-react'
 import AdminPageHeader from '../../components/admin/AdminPageHeader'
 import TableFrame from '../../components/admin/TableFrame'
 import FormModal from '../../components/admin/FormModal'
@@ -43,6 +43,7 @@ function defaultForm(author) {
     excerpt: '',
     body: '',
     featured: false,
+    status: 'published',
   }
 }
 
@@ -116,6 +117,13 @@ function NewsForm({ initial, onSubmit, onClose, isPending, error }) {
                 {t(`news.categories.${category.key}`)}
               </option>
             ))}
+          </select>
+        </div>
+        <div>
+          <label htmlFor="news-status" className="label">Publication status</label>
+          <select id="news-status" className="input" value={form.status || 'draft'} onChange={(event) => set('status', event.target.value)}>
+            <option value="published">Published on website</option>
+            <option value="draft">Save as draft</option>
           </select>
         </div>
         <div>
@@ -240,6 +248,7 @@ export default function AdminNews() {
       category: form.category,
       imageUrl: form.image?.trim() || null,
       featured: Boolean(form.featured),
+          status: form.status || 'draft',
     }
     try {
       if (id) {
@@ -266,6 +275,16 @@ export default function AdminNews() {
       await deleteItem.mutateAsync(pendingDelete.id)
       pushToast(t('admin.recordDeleted'))
       setPendingDelete(null)
+    } catch (error) {
+      pushToast(error.message, 'error')
+    }
+  }
+
+  const togglePublished = async (article) => {
+    try {
+      const published = article.status !== 'published'
+      await updateItem.mutateAsync({ id: article.id, status: published ? 'published' : 'draft' })
+      pushToast(published ? 'Article published on the website' : 'Article moved back to drafts')
     } catch (error) {
       pushToast(error.message, 'error')
     }
@@ -350,7 +369,10 @@ export default function AdminNews() {
                   </td>
                   <td className="px-4 py-3 text-xs text-muted">{article.author}</td>
                   <td className="px-4 py-3 text-xs text-muted">
-                    {formatDateTime(article.publishedAt)}
+                    <span className={cn('rounded-full px-2 py-0.5 text-[10px] font-bold uppercase', article.status === 'published' ? 'bg-positive/10 text-positive' : 'bg-surface2 text-muted')}>
+                      {article.status || 'draft'}
+                    </span>
+                    <span className="mt-1 block">{formatDateTime(article.publishedAt)}</span>
                   </td>
                   <td className="px-4 py-3">
                     <span
@@ -368,6 +390,15 @@ export default function AdminNews() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex justify-end gap-1">
+                      <button
+                        type="button"
+                        onClick={() => togglePublished(article)}
+                        aria-label={article.status === 'published' ? 'Move article to drafts' : 'Publish article'}
+                        title={article.status === 'published' ? 'Move to drafts' : 'Publish on website'}
+                        className={cn('rounded p-2', article.status === 'published' ? 'text-muted hover:bg-hover hover:text-white' : 'text-positive hover:bg-positive/10')}
+                      >
+                        {article.status === 'published' ? <EyeOff size={15} /> : <Send size={15} />}
+                      </button>
                       <Link
                         to={`/news/${article.slug}`}
                         target="_blank"

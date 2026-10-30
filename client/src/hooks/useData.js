@@ -177,6 +177,7 @@ export function useNews(filters = {}, options = {}) {
     queryKey: queryKeys.news(filters),
     queryFn: () => getNews(filters),
     placeholderData: keepPreviousData,
+    refetchInterval: 30000,
     ...options,
   })
 }
@@ -186,6 +187,7 @@ export function useArticle(slug, options = {}) {
     queryKey: queryKeys.article(slug),
     queryFn: () => getArticle(slug),
     enabled: Boolean(slug),
+    refetchInterval: 60000,
     ...options,
   })
 }
