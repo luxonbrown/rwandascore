@@ -279,7 +279,7 @@ export async function createMatch(data, actor, ipAddress = null) {
     });
 
     return match;
-  });
+  }, { maxWait: 10_000, timeout: 30_000 });
 
   const full = await emitMatchUpdate(created.id);
   return serializeMatch(full, { includeEvents: true });
@@ -355,7 +355,7 @@ export async function updateMatch(id, data, actor, ipAddress = null) {
     });
 
     return { matchId: id };
-  });
+  }, { maxWait: 10_000, timeout: 30_000 });
 
   const full = await emitMatchUpdate(result.matchId);
   return serializeMatch(full, { includeEvents: true });
