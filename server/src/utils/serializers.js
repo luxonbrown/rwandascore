@@ -222,6 +222,7 @@ export function serializeStanding(row, totalTeams = undefined) {
     gd: goalDifference,
     points: row.points,
     form,
+    isLive: Boolean(row.isLive),
     zone: standingZone(row.position, totalTeams),
     updatedAt: iso(row.updatedAt),
   };

@@ -91,8 +91,13 @@ const get = (path) => request(path)
 const admin = (path, options = {}) => request(`/admin${path}`, { ...options, auth: true })
 const manager = (path, options = {}) => request(`/manager${path}`, { ...options, auth: true })
 export const getManagedTeam = () => manager('/team')
+export const sendManagerMessage = (message) => manager('/messages', { method: 'POST', body: { message } })
+export const getManagerMessages = () => manager('/messages')
+export const getAdminManagerMessages = () => admin('/manager-messages')
+export const replyToManagerMessage = (id, message) => admin(`/manager-messages/${id}/reply`, { method: 'POST', body: { message } })
 export const updateManagedTeam = (body) => manager('/team', { method: 'PUT', body })
 export const getManagedPlayers = async () => unwrap(await manager('/players'))
+export const getManagedMatches = async () => unwrap(await manager('/matches'))
 export const createManagedPlayer = (body) => manager('/players', { method: 'POST', body })
 export const updateManagedPlayer = (id, body) => manager(`/players/${id}`, { method: 'PUT', body })
 export const deleteManagedPlayer = (id) => manager(`/players/${id}`, { method: 'DELETE' })
@@ -127,23 +132,24 @@ const teamPayload = (payload) => {
   return out
 }
 
-export async function getMatches(filters = {}) { if (useMock) return mock.getMatches(filters); return unwrap(await get(`/matches${qs({ ...filters, status: Array.isArray(filters.status) ? filters.status.map((s) => s.toLowerCase()).join(',') : filters.status?.toLowerCase() })}`)).map(matchShape) }
+const apiMatchStatus = (status) => ({ UPCOMING: 'scheduled', LIVE: 'live', HT: 'ht', FT: 'ft', POSTPONED: 'postponed' })[String(status || '').toUpperCase()] || String(status || '').toLowerCase()
+export async function getMatches(filters = {}) { if (useMock) return mock.getMatches(filters); return unwrap(await get(`/matches${qs({ ...filters, status: Array.isArray(filters.status) ? filters.status.map(apiMatchStatus).join(',') : filters.status ? apiMatchStatus(filters.status) : undefined })}`)).map(matchShape) }
 export async function getLiveMatches() { if (useMock) return mock.getLiveMatches(); return unwrap(await get('/matches/live')).map(matchShape) }
 export async function getMatch(id) { if (useMock) return mock.getMatch(id); return matchShape(await get(`/matches/${id}`)) }
 export async function getHeadToHead(a,b,limit=5) { const list = await getMatches({ teamId: a, limit: 100 }); return list.filter(m => [m.homeTeamId,m.awayTeamId].includes(b)).filter(m => m.status === 'FT').slice(0,limit) }
 export async function getCompetitions() { if (useMock) return mock.getCompetitions(); return unwrap(await get('/competitions')) }
 export async function getCompetition(id) { if (useMock) return mock.getCompetition(id); return get(`/competitions/${id}`) }
-export async function getCompetitionData(id) { if (useMock) return mock.getCompetitionData(id); const [competition, matches, standings, scorers] = await Promise.all([getCompetition(id), get(`/competitions/${id}/fixtures`), get(`/competitions/${id}/standings`), get(`/competitions/${id}/top-scorers`)]); return { ...competition, matches: unwrap(matches).map(matchShape), standings: unwrap(standings), topScorers: unwrap(scorers) } }
-export async function getStandings(id='rwanda-premier-league') { if (useMock) return mock.getStandings(id); return unwrap(await get(`/competitions/${id}/standings`)) }
+export async function getCompetitionData(id) { if (useMock) return mock.getCompetitionData(id); const data = await getCompetition(id); return { ...data, matches: (data.matches || []).map(matchShape), standings: data.standings || [], topScorers: data.topScorers || [] } }
+export async function getStandings(id='rwanda-premier-league') { if (useMock) return mock.getStandings(id); const data = await get(`/competitions/${id}/standings`); return Array.isArray(data) ? data : data?.standings || data?.items || [] }
 export async function getTopScorers(id='rwanda-premier-league',limit=10) { if (useMock) return mock.getTopScorers(id,limit); return unwrap(await get(`/competitions/${id}/top-scorers${qs({limit})}`)) }
 export async function getTeams(filters={}) { if (useMock) return mock.getTeams(filters); return unwrap(await get(`/teams${qs({ competitionId: filters.competitionId })}`)) }
 export async function getTeamDetail(id) { if (useMock) return mock.getTeamDetail(id); return get(`/teams/${id}`) }
-export async function getPlayers(filters={}) { if (useMock) return mock.getPlayers(filters); return unwrap(await get(`/players${qs(filters)}`)) }
-export async function getPlayer(id) { if (useMock) return mock.getPlayer(id); return get(`/players/${id}`) }
+export async function getPlayers(filters={}) { if (useMock) return mock.getPlayers(filters); return get(`/players${qs(filters)}`) }
+export async function getPlayer(id) { if (useMock) return mock.getPlayer(id); const data = await get(`/players/${id}`); return data?.player ? data : { ...data, player: data, team: data?.team ?? null, teammates: data?.teammates || [], scorerRank: data?.scorerRank ?? null } }
 export async function getNews(filters={}) { if (useMock) return mock.getNews(filters); return unwrap(await get(`/news${qs(filters)}`)) }
 export async function getArticle(slug) { if (useMock) return mock.getArticle(slug); return get(`/news/${slug}`) }
 export async function searchAll(query) { if (useMock) return mock.searchAll(query); return get(`/search${qs({q:query})}`) }
-export async function getFavouritesData(filters={}) { if (useMock) return mock.getFavouritesData(filters); const [teams, players] = await Promise.all([getTeams(), getPlayers()]); return { teams: teams.filter(x => filters.teamIds?.includes(x.id)), players: players.filter(x => filters.playerIds?.includes(x.id)) } }
+export async function getFavouritesData(filters={}) { if (useMock) return mock.getFavouritesData(filters); const [teams, playerPage] = await Promise.all([getTeams(), getPlayers({ pageSize: 100 })]); const players = playerPage.items || []; return { teams: teams.filter(x => filters.teamIds?.includes(x.id)), players: players.filter(x => filters.playerIds?.includes(x.id)) } }
 export async function login(email,password) { if (useMock) return mock.login(email,password); const data=await request('/auth/login',{method:'POST',body:{email:email.trim(),password}}); persistTokens({accessToken:data.accessToken,refreshToken:data.refreshToken}); return { user:data.user, token:data.accessToken } }
 export async function logout() {
   const refreshToken = tokens.refreshToken
@@ -159,7 +165,7 @@ export async function getCurrentUser() {
 }
 export async function getUserById(id) { if (useMock) return mock.getUserById(id); const user=await getCurrentUser(); return user?.id===id ? user : null }
 export async function getActivity(limit=12) { if (useMock) return mock.getActivity(limit); return unwrap(await admin(`/activity-logs${qs({pageSize:limit})}`)) }
-export async function getAdminDashboard() { if (useMock) return mock.getAdminDashboard(); return admin('/dashboard-stats',{auth:true}) }
+export async function getAdminDashboard() { if (useMock) return mock.getAdminDashboard(); const data = await admin('/dashboard-stats',{auth:true}); return { ...data, activity: data.activity || data.recentActivity || [] } }
 export async function getAdminMatchEvents(id) { if (useMock) return (await mock.getMatch(id))?.events || []; return unwrap(await admin(`/matches/${id}/events`)) }
 const routes={competitions:'/competitions',seasons:'/seasons',stadiums:'/stadiums',teams:'/teams',players:'/players',matches:'/matches',fixtures:'/matches',news:'/news',users:'/users'}
 export async function adminList(collection) {
@@ -188,7 +194,8 @@ export async function adminUpdateLiveMatch(matchId,updates,actor) { if(useMock)r
 export async function adminAddMatchEvent(matchId,event,actor) {
   if(useMock)return mock.adminAddMatchEvent(matchId,event,actor)
   const m=await getMatch(matchId)
-  const squad = await getPlayers({ teamId: event.teamId, pageSize: 100 })
+  const squadPage = await getPlayers({ teamId: event.teamId, pageSize: 100 })
+  const squad = squadPage.items || []
   const byName = (name) => squad.find((player) => player.name?.trim().toLowerCase() === name?.trim().toLowerCase())?.id || null
   return admin(`/matches/${matchId}/events`,{method:'POST',body:{...event,version:m.version,type:event.type?.toLowerCase(),teamId:event.teamId||event.team?.id,playerId:event.playerId || byName(event.playerName),relatedPlayerId:event.relatedPlayerId || byName(event.assistName),note:event.note ?? event.detail ?? null,x:event.x == null || event.x === '' ? undefined : Number(event.x),y:event.y == null || event.y === '' ? undefined : Number(event.y)}})
 }

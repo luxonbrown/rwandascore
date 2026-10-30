@@ -6,7 +6,7 @@ const seasonStartYear = now.getUTCMonth() >= 7 ? now.getUTCFullYear() : now.getU
 const seasonName = `${seasonStartYear}/${String(seasonStartYear + 1).slice(-2)}`;
 
 const competitions = [
-  { name: 'Rwanda Premier League', shortName: 'RPL', slug: 'rwanda-premier-league', type: 'league', primaryColor: '#176B45' },
+  { name: 'BK Premier League', shortName: 'BKPL', slug: 'rwanda-premier-league', type: 'league', primaryColor: '#176B45', description: 'Rwanda\'s top-flight football competition, featuring the country\'s leading clubs.' },
   { name: 'Rwanda Peace Cup', shortName: 'Peace Cup', slug: 'peace-cup', type: 'cup', primaryColor: '#D7A72D' },
   { name: 'Rwanda National Team', shortName: 'Amavubi', slug: 'amavubi', type: 'national', primaryColor: '#176B45' },
 ];
@@ -15,7 +15,7 @@ async function main() {
   for (const data of competitions) {
     const competition = await prisma.competition.upsert({
       where: { slug: data.slug },
-      update: {},
+      update: { name: data.name, shortName: data.shortName, primaryColor: data.primaryColor, description: data.description },
       create: data,
     });
     await prisma.season.upsert({

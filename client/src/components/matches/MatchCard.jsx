@@ -6,8 +6,9 @@ import { cn } from '../../utils/cn'
 import { useI18n } from '../../hooks/useI18n'
 import { formatDateShort, formatTime } from '../../utils/format'
 import { isLiveStatus } from '../../utils/media'
+import { useScoreFeedback } from '../../hooks/useScoreFeedback'
 
-function TeamLine({ team, score, winner }) {
+function TeamLine({ team, score, winner, scoreChanged }) {
   return (
     <div className="flex items-center justify-between gap-3">
       <div className="flex min-w-0 items-center gap-2.5">
@@ -25,6 +26,7 @@ function TeamLine({ team, score, winner }) {
         className={cn(
           'w-6 text-right text-lg font-extrabold tabular-nums',
           winner ? 'text-white' : 'text-muted',
+            scoreChanged && 'score-flash',
         )}
       >
         {score ?? '—'}
@@ -33,8 +35,9 @@ function TeamLine({ team, score, winner }) {
   )
 }
 
-export default function MatchCard({ match, className }) {
+export default function MatchCard({ match, className, style }) {
   const { t } = useI18n()
+  const scoreChanged = useScoreFeedback(match)
   const live = isLiveStatus(match.status)
   const upcoming = match.status === 'UPCOMING'
   const finished = match.status === 'FT'
@@ -47,10 +50,11 @@ export default function MatchCard({ match, className }) {
     <Link
       to={`/matches/${match.id}`}
       className={cn(
-        'card group block overflow-hidden transition-colors hover:border-white/15',
-        live && 'border-accent/30',
+        'card match-card-link group block overflow-hidden transition-colors hover:border-white/15',
+        live && 'live-match-card border-accent/30',
         className,
       )}
+      style={style}
     >
       <div className="flex items-center justify-between gap-3 border-b border-line/80 bg-black/10 px-4 py-2.5">
         <div className="flex min-w-0 items-center gap-2">
@@ -65,8 +69,8 @@ export default function MatchCard({ match, className }) {
         <StatusBadge status={match.status} minute={match.minute} showMinute />
       </div>
       <div className="space-y-2.5 px-4 py-3.5">
-        <TeamLine team={match.homeTeam} score={match.homeScore} winner={homeWinner || live} />
-        <TeamLine team={match.awayTeam} score={match.awayScore} winner={awayWinner || live} />
+        <TeamLine team={match.homeTeam} score={match.homeScore} winner={homeWinner || live} scoreChanged={scoreChanged} />
+        <TeamLine team={match.awayTeam} score={match.awayScore} winner={awayWinner || live} scoreChanged={scoreChanged} />
       </div>
       <div className="flex items-center justify-between gap-3 border-t border-line/80 px-4 py-2.5 text-[11px] text-muted">
         <span className="flex min-w-0 items-center gap-1.5">

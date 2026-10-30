@@ -44,7 +44,7 @@ export default function StandingsTable({
 
   return (
     <div className={cn('overflow-x-auto', className)}>
-      <table className="w-full min-w-[560px] border-collapse text-sm">
+      <table className={cn('w-full border-collapse text-sm', compact ? 'min-w-[300px]' : 'min-w-[560px]')}>
         <caption className="sr-only">{t('standings.leagueTable')}</caption>
         <thead>
           <tr className="border-b border-line text-[10px] uppercase tracking-wide text-muted">
@@ -103,8 +103,8 @@ export default function StandingsTable({
               >
                 <td
                   className={cn(
-                    'border-l-2 border-l-transparent py-2.5 pl-3 text-xs font-semibold tabular-nums text-muted',
-                    row.zone ? zoneStyles[row.zone] : '',
+                    'border-l-2 py-2.5 pl-3 text-xs font-semibold tabular-nums text-muted',
+                    compact ? 'border-l-info' : row.zone ? zoneStyles[row.zone] : 'border-l-transparent',
                   )}
                 >
                   {row.position}
@@ -116,6 +116,7 @@ export default function StandingsTable({
                   >
                     <TeamCrest team={team} size="sm" />
                     <span className="truncate">{team?.name || row.teamId}</span>
+                    {row.isLive ? <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-negative animate-pulse-dot" title={t('standings.liveProjection')} aria-label={t('standings.liveProjection')} /> : null}
                   </Link>
                 </td>
                 <td className="py-2.5 text-center text-xs tabular-nums text-muted">{row.played}</td>

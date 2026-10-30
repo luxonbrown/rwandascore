@@ -28,6 +28,10 @@ function sortPlayers(players, sort) {
     });
   } else if (sort === 'goals') {
     sorted.sort((a, b) => b.stats.goals - a.stats.goals || a.name.localeCompare(b.name));
+  } else if (sort === 'assists') {
+    sorted.sort((a, b) => b.stats.assists - a.stats.assists || a.name.localeCompare(b.name));
+  } else if (sort === 'appearances') {
+    sorted.sort((a, b) => b.stats.appearances - a.stats.appearances || a.name.localeCompare(b.name));
   } else {
     sorted.sort((a, b) => a.name.localeCompare(b.name));
   }

@@ -16,6 +16,7 @@ export async function getDashboardStats() {
     publishedNews,
     users,
     recentActivity,
+    managerMessages,
   ] = await Promise.all([
     prisma.team.count(),
     prisma.player.count(),
@@ -41,6 +42,12 @@ export async function getDashboardStats() {
       orderBy: { createdAt: 'desc' },
       take: 10,
     }),
+    prisma.activityLog.findMany({
+      where: { module: 'Team manager messages' },
+      include: { user: { select: { id: true, name: true, role: true } } },
+      orderBy: { createdAt: 'desc' },
+      take: 8,
+    }),
   ]);
 
   const league = await prisma.competition.findFirst({
@@ -64,5 +71,6 @@ export async function getDashboardStats() {
     recentResults: recentResults.map((match) => serializeMatch(match)),
     topScorers,
     recentActivity: recentActivity.map(serializeActivity),
+    managerMessages: managerMessages.map(serializeActivity),
   };
 }

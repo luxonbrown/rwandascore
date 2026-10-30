@@ -182,6 +182,45 @@ function computeStandings(db) {
     return { ...row, team, points, gd }
   })
 
+  const rowsByTeam = new Map(table.map((row) => [row.teamId, row]))
+  for (const match of db.matches.filter((item) => ['LIVE', 'HT'].includes(item.status)
+    && competitionOf(db, item.competitionId)?.type === 'league')) {
+    const home = rowsByTeam.get(match.homeTeamId)
+    const away = rowsByTeam.get(match.awayTeamId)
+    if (!home || !away) continue
+    const result = match.homeScore > match.awayScore ? 'home' : match.homeScore < match.awayScore ? 'away' : 'draw'
+    home.played += 1
+    away.played += 1
+    home.gf += match.homeScore
+    home.ga += match.awayScore
+    away.gf += match.awayScore
+    away.ga += match.homeScore
+    home.gd = home.gf - home.ga
+    away.gd = away.gf - away.ga
+    home.isLive = true
+    away.isLive = true
+    if (result === 'home') {
+      home.won += 1
+      away.lost += 1
+      home.points += 3
+      home.form = [...(home.form || []), 'W'].slice(-5)
+      away.form = [...(away.form || []), 'L'].slice(-5)
+    } else if (result === 'away') {
+      away.won += 1
+      home.lost += 1
+      away.points += 3
+      home.form = [...(home.form || []), 'L'].slice(-5)
+      away.form = [...(away.form || []), 'W'].slice(-5)
+    } else {
+      home.drawn += 1
+      away.drawn += 1
+      home.points += 1
+      away.points += 1
+      home.form = [...(home.form || []), 'D'].slice(-5)
+      away.form = [...(away.form || []), 'D'].slice(-5)
+    }
+  }
+
   table.sort((a, b) => {
     if (b.points !== a.points) return b.points - a.points
     if (b.gd !== a.gd) return b.gd - a.gd
@@ -199,6 +238,39 @@ function computeStandings(db) {
   })
 }
 
+function adjustMockStandings(db, match, direction) {
+  if (competitionOf(db, match.competitionId)?.type !== 'league') return
+  const home = db.standings.find((row) => row.teamId === match.homeTeamId)
+  const away = db.standings.find((row) => row.teamId === match.awayTeamId)
+  if (!home || !away) return
+
+  const homeResult = match.homeScore > match.awayScore ? 'W' : match.homeScore < match.awayScore ? 'L' : 'D'
+  const awayResult = homeResult === 'W' ? 'L' : homeResult === 'L' ? 'W' : 'D'
+  for (const [row, scored, conceded, result] of [
+    [home, match.homeScore, match.awayScore, homeResult],
+    [away, match.awayScore, match.homeScore, awayResult],
+  ]) {
+    row.played = Math.max(0, (row.played || 0) + direction)
+    row.gf = Math.max(0, (row.gf || 0) + scored * direction)
+    row.ga = Math.max(0, (row.ga || 0) + conceded * direction)
+    const resultKey = { W: 'won', D: 'drawn', L: 'lost' }[result]
+    row[resultKey] = Math.max(0, (row[resultKey] || 0) + direction)
+    const form = Array.isArray(row.form) ? row.form : []
+    row.form = direction > 0 ? [...form, result].slice(-5) : form.slice(0, -1)
+  }
+}
+
+function adjustPlayerGoal(db, event, direction) {
+  if (!['goal', 'penalty'].includes(event.type)) return
+  const name = event.playerName?.trim().toLocaleLowerCase()
+  const player = db.players.find((item) => item.id === event.playerId)
+    || db.players.find((item) => item.teamId === event.teamId && item.name?.trim().toLocaleLowerCase() === name)
+  if (!player) return
+  player.stats ||= {}
+  player.stats.goals = Math.max(0, (player.stats.goals || 0) + direction)
+  player.goals = player.stats.goals
+}
+
 function topScorersFor(db, competitionId = 'rwanda-premier-league', limit = 10) {
   const leagueTeamIds = new Set(db.standings.map((row) => row.teamId))
   let players = db.players
@@ -208,7 +280,7 @@ function topScorersFor(db, competitionId = 'rwanda-premier-league', limit = 10) 
     players = players.filter((player) => player.teamId && leagueTeamIds.has(player.teamId))
   }
 
-  return players
+  const scorers = players
     .filter((player) => (player.stats?.goals || 0) > 0)
     .sort((a, b) => {
       if (b.stats.goals !== a.stats.goals) return b.stats.goals - a.stats.goals
@@ -217,7 +289,6 @@ function topScorersFor(db, competitionId = 'rwanda-premier-league', limit = 10) 
       }
       return (a.name || '').localeCompare(b.name || '')
     })
-    .slice(0, limit)
     .map((player, index) => ({
       rank: index + 1,
       player,
@@ -226,6 +297,14 @@ function topScorersFor(db, competitionId = 'rwanda-premier-league', limit = 10) 
       assists: player.stats.assists || 0,
       appearances: player.stats.appearances || 0,
     }))
+
+  let rank = 0
+  let previousGoals = null
+  return scorers.slice(0, limit).map((scorer, index) => {
+    if (scorer.goals !== previousGoals) rank = index + 1
+    previousGoals = scorer.goals
+    return { ...scorer, rank }
+  })
 }
 
 function squadsForTeam(db, teamId) {
@@ -1167,6 +1246,9 @@ export async function adminUpdateLiveMatch(matchId, updates, actor) {
     const match = db.matches.find((item) => item.id === matchId)
     if (!match) throw new ApiError('Match not found', 404)
 
+    const priorStatus = match.status
+    const hadStandingContribution = match.standingApplied === true
+    if (hadStandingContribution) adjustMockStandings(db, match, -1)
     const previous = `${match.homeScore}-${match.awayScore}`
     if (updates.homeScore !== undefined) {
       const score = Number(updates.homeScore)
@@ -1188,6 +1270,12 @@ export async function adminUpdateLiveMatch(matchId, updates, actor) {
       if (!validStatuses.includes(updates.status)) throw new ApiError('Invalid status')
       match.status = updates.status
       if (updates.status === 'FT') match.minute = 90
+    }
+    if (match.status === 'FT' && (hadStandingContribution || priorStatus !== 'FT')) {
+      adjustMockStandings(db, match, 1)
+      match.standingApplied = true
+    } else {
+      match.standingApplied = false
     }
     match.updatedAt = new Date().toISOString()
 
@@ -1219,12 +1307,19 @@ export async function adminAddMatchEvent(matchId, event, actor) {
       throw new ApiError('A valid minute is required')
     }
 
+    const registeredPlayer = db.players.find((item) => item.id === event.playerId)
+      || db.players.find((item) => item.teamId === event.teamId
+        && item.name?.trim().toLocaleLowerCase() === event.playerName.trim().toLocaleLowerCase())
+    if (['goal', 'penalty'].includes(event.type || 'goal') && !registeredPlayer) {
+      throw new ApiError('Select a registered player so the goal can be added to the scorer table')
+    }
+
     const created = {
       id: makeId('ev'),
       minute: Number(event.minute),
       type: event.type || 'goal',
       teamId: event.teamId,
-      playerId: event.playerId || null,
+      playerId: registeredPlayer?.id || null,
       playerName: event.playerName.trim(),
       assistName: event.assistName || '',
       playerOut: event.playerOut || '',
@@ -1234,7 +1329,9 @@ export async function adminAddMatchEvent(matchId, event, actor) {
       throw new ApiError('Event team must be one of the two teams')
     }
 
+    if (match.standingApplied) adjustMockStandings(db, match, -1)
     match.events = [...(match.events || []), created].sort((a, b) => a.minute - b.minute)
+    adjustPlayerGoal(db, created, 1)
 
     if (['goal', 'penalty'].includes(created.type)) {
       if (created.teamId === match.homeTeamId) match.homeScore += 1
@@ -1243,6 +1340,7 @@ export async function adminAddMatchEvent(matchId, event, actor) {
       if (created.teamId === match.homeTeamId) match.awayScore += 1
       else match.homeScore += 1
     }
+    if (match.standingApplied) adjustMockStandings(db, match, 1)
 
     match.updatedAt = new Date().toISOString()
 
@@ -1271,7 +1369,9 @@ export async function adminDeleteMatchEvent(matchId, eventIndex, actor) {
       throw new ApiError('Event not found', 404)
     }
 
+    if (match.standingApplied) adjustMockStandings(db, match, -1)
     const [removed] = match.events.splice(index, 1)
+    adjustPlayerGoal(db, removed, -1)
     if (['goal', 'penalty'].includes(removed.type)) {
       if (removed.teamId === match.homeTeamId) match.homeScore = Math.max(0, match.homeScore - 1)
       else match.awayScore = Math.max(0, match.awayScore - 1)
@@ -1279,6 +1379,7 @@ export async function adminDeleteMatchEvent(matchId, eventIndex, actor) {
       if (removed.teamId === match.homeTeamId) match.awayScore = Math.max(0, match.awayScore - 1)
       else match.homeScore = Math.max(0, match.homeScore - 1)
     }
+    if (match.standingApplied) adjustMockStandings(db, match, 1)
 
     pushActivity(db, actor, {
       action: 'Deleted Match Event',

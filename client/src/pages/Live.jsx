@@ -91,9 +91,9 @@ export default function Live() {
         ) : liveQuery.isError ? (
           <ErrorState error={liveQuery.error} onRetry={liveQuery.refetch} />
         ) : filteredLive.length ? (
-          <div className="grid gap-4 lg:grid-cols-2">
-            {filteredLive.map((match) => (
-              <MatchCard key={match.id} match={match} />
+          <div className="live-match-grid grid gap-4 lg:grid-cols-2">
+            {filteredLive.map((match, index) => (
+              <MatchCard key={match.id} match={match} style={{ animationDelay: `${index * 90}ms` }} />
             ))}
           </div>
         ) : (

@@ -31,13 +31,17 @@ import AdminNews from './pages/admin/AdminNews'
 import AdminUploads from './pages/admin/AdminUploads'
 import AdminActivity from './pages/admin/AdminActivity'
 import AdminUsers from './pages/admin/AdminUsers'
+import AdminNotifications from './pages/admin/AdminNotifications'
 import EditorDashboard from './pages/admin/EditorDashboard'
 import ManagerDashboard from './pages/admin/ManagerDashboard'
+import ManagerPlayers from './pages/admin/ManagerPlayers'
+import AudioFeedback from './components/ui/AudioFeedback'
 import { useAuthStore } from './store/auth'
 
 function RoleDashboard() {
   const role = useAuthStore((state) => state.user?.role)
-  return role === 'EDITOR' ? <EditorDashboard /> : <AdminDashboard />
+  if (role === 'EDITOR') return <EditorDashboard />
+  return <AdminDashboard />
 }
 
 export default function App() {
@@ -49,6 +53,8 @@ export default function App() {
   }, [hydrateSession])
 
   return (
+    <>
+    <AudioFeedback />
     <Routes>
       <Route element={<PublicLayout />}>
         <Route index element={<Home />} />
@@ -82,12 +88,15 @@ export default function App() {
         <Route path="uploads" element={<AdminUploads />} />
         <Route path="activity" element={<AdminActivity />} />
         <Route path="users" element={<AdminUsers />} />
+        <Route path="notifications" element={<AdminNotifications />} />
         <Route path="*" element={<Navigate to="/admin" replace />} />
       </Route>
       <Route path="manager" element={<AdminLayout />}>
         <Route index element={<ManagerDashboard />} />
+        <Route path="players" element={<ManagerPlayers />} />
         <Route path="*" element={<Navigate to="/manager" replace />} />
       </Route>
     </Routes>
+    </>
   )
 }

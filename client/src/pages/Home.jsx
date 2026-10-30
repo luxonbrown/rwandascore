@@ -1,18 +1,22 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, CalendarDays, Clock3, Radio, Trophy } from 'lucide-react'
+import { ArrowRight, CalendarDays, ChevronLeft, ChevronRight, Clock3, Radio, Trophy } from 'lucide-react'
 import Container from '../components/ui/Container'
 import SectionHeading from '../components/ui/SectionHeading'
 import MatchRow from '../components/matches/MatchRow'
 import MatchCard from '../components/matches/MatchCard'
 import ArticleCard from '../components/news/ArticleCard'
-import StandingsTable, { StandingsLegend } from '../components/standings/StandingsTable'
+import StandingsTable from '../components/standings/StandingsTable'
 import TopScorersList from '../components/players/TopScorersList'
+import SoundWelcomeToast from '../components/ui/SoundWelcomeToast'
 import EmptyState from '../components/ui/EmptyState'
 import ErrorState from '../components/ui/ErrorState'
 import { MatchListSkeleton } from '../components/ui/Skeletons'
 import { useCompetitions, useLiveMatches, useMatches, useNews, useStandings, useTopScorers } from '../hooks/useData'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { useI18n } from '../hooks/useI18n'
+import { siteConfig } from '../config'
+import { findPremierLeague } from '../utils/competitions'
 import { todayKey } from '../utils/format'
 
 const competitionLabels = {
@@ -25,14 +29,20 @@ const accents = ['#FF6B00', '#38BDF8', '#22C55E']
 
 export default function Home() {
   const { t } = useI18n()
+  const [standingsPage, setStandingsPage] = useState(0)
   useDocumentTitle()
   const today = todayKey()
   const liveQuery = useLiveMatches()
   const matchesQuery = useMatches({ date: today, order: 'asc' })
-  const standingsQuery = useStandings('rwanda-premier-league')
-  const scorersQuery = useTopScorers('rwanda-premier-league', 5)
-  const newsQuery = useNews({ limit: 6 })
   const competitionsQuery = useCompetitions()
+  const premierLeague = findPremierLeague(competitionsQuery.data)
+  const premierLeagueFixturesQuery = useMatches(
+    { competitionId: premierLeague?.id, status: 'UPCOMING', order: 'asc', pageSize: 4 },
+    { enabled: Boolean(premierLeague) },
+  )
+  const standingsQuery = useStandings(premierLeague?.id || 'rwanda-premier-league', { enabled: Boolean(premierLeague) })
+  const scorersQuery = useTopScorers(premierLeague?.id || 'rwanda-premier-league', 5, { enabled: Boolean(premierLeague) })
+  const newsQuery = useNews({ limit: 6 })
 
   const liveMatches = liveQuery.data || []
   const todaysMatches = matchesQuery.data || []
@@ -41,11 +51,23 @@ export default function Home() {
   const secondaryNews = news.filter((article) => article.id !== featured?.id).slice(0, 3)
   const heroMatch = liveMatches[0] || todaysMatches.find((match) => match.status === 'UPCOMING')
   const nextUp = todaysMatches.filter((match) => match.status === 'UPCOMING').slice(0, 3)
+  const premierLeagueFixtures = (premierLeagueFixturesQuery.data || [])
+    .filter((match) => match.status === 'UPCOMING')
+    .slice(0, 4)
+  const standingsRows = standingsQuery.data || []
+  const standingsPageCount = Math.max(1, Math.ceil(standingsRows.length / 4))
+  const activeStandingsPage = Math.min(standingsPage, standingsPageCount - 1)
+  const visibleStandingsRows = standingsRows.slice(activeStandingsPage * 4, activeStandingsPage * 4 + 4)
+
+  useEffect(() => {
+    if (standingsPage >= standingsPageCount) setStandingsPage(standingsPageCount - 1)
+  }, [standingsPage, standingsPageCount])
 
   return (
     <>
+      <SoundWelcomeToast />
       <section className="relative overflow-hidden border-b border-line">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_0%,rgba(255,107,0,0.13),transparent_34%),radial-gradient(circle_at_85%_20%,rgba(56,189,248,0.07),transparent_30%)]" />
+        <div className="hero-aura pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_0%,rgba(255,107,0,0.13),transparent_34%),radial-gradient(circle_at_85%_20%,rgba(56,189,248,0.07),transparent_30%)]" />
         <Container className="relative grid gap-8 py-9 sm:py-12 lg:grid-cols-[1.35fr_0.85fr] lg:items-center">
           <div>
             <p className="mb-3 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em] text-accent">
@@ -88,7 +110,7 @@ export default function Home() {
                     ) : null}
                   </span>
                   <span className="text-[10px] font-semibold text-accent">
-                    {t('common.season')} 2025/26
+                    {t('common.season')} {heroMatch.season?.name || premierLeague?.season || siteConfig.season}
                   </span>
                 </div>
                 <MatchCard match={heroMatch} />
@@ -200,26 +222,80 @@ export default function Home() {
 
           <aside className="min-w-0 space-y-8">
             <section>
-              <SectionHeading
-                title={t('home.leagueTable')}
-                href="/tables"
-                linkLabel={t('home.viewTables')}
-              />
               <div className="card overflow-hidden">
-                {standingsQuery.isLoading ? (
+                <div className="flex items-center justify-between border-b border-line/80 px-4 py-3">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <h2 className="truncate text-sm font-extrabold tracking-tight text-white">{premierLeague?.name || t('home.leagueTable')}</h2>
+                    {standingsRows.some((row) => row.isLive) ? <span className="h-2 w-2 shrink-0 rounded-full bg-negative animate-pulse-dot" title={t('standings.liveProjection')} aria-label={t('standings.liveProjection')} /> : null}
+                  </div>
+                  <Link to="/tables" aria-label={t('home.viewTables')} className="grid h-8 w-8 place-items-center rounded-full text-muted transition-colors hover:bg-hover hover:text-white">
+                    <ChevronRight size={18} />
+                  </Link>
+                </div>
+                {competitionsQuery.isLoading || standingsQuery.isLoading ? (
                   <MatchListSkeleton count={5} />
+                ) : competitionsQuery.isError ? (
+                  <ErrorState error={competitionsQuery.error} onRetry={competitionsQuery.refetch} />
+                ) : !premierLeague ? (
+                  <EmptyState title={`${t('home.leagueTable')} ${t('tables.unavailable')}`} body={t('tables.notConfigured')} className="border-0 bg-transparent" />
                 ) : standingsQuery.isError ? (
                   <ErrorState error={standingsQuery.error} onRetry={standingsQuery.refetch} />
                 ) : (
                   <>
-                    <StandingsTable rows={standingsQuery.data || []} limit={6} compact showForm={false} />
-                    <div className="border-t border-line px-3 py-3">
-                      <StandingsLegend />
-                    </div>
+                    <StandingsTable key={activeStandingsPage} rows={visibleStandingsRows} compact showForm={false} className="home-standings-table standings-page-enter" />
+                    {standingsPageCount > 1 ? (
+                      <div className="flex items-center justify-between border-t border-line/80 px-3 py-2.5">
+                        <button
+                          type="button"
+                          onClick={() => setStandingsPage((page) => (page - 1 + standingsPageCount) % standingsPageCount)}
+                          aria-label={t('home.previousStandingsPage')}
+                          className="grid h-9 w-9 place-items-center rounded-full bg-surface2 text-muted transition-colors hover:bg-hover hover:text-white"
+                        ><ChevronLeft size={18} /></button>
+                        <div className="flex items-center gap-2" role="group" aria-label={t('home.standingsPages')}>
+                          {Array.from({ length: standingsPageCount }, (_, index) => (
+                            <button
+                              key={index}
+                              type="button"
+                              onClick={() => setStandingsPage(index)}
+                              aria-label={t('home.standingsPage', { page: index + 1 })}
+                              aria-current={activeStandingsPage === index ? 'page' : undefined}
+                              className={`standings-page-dot ${activeStandingsPage === index ? 'standings-page-dot-active' : ''}`}
+                            />
+                          ))}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setStandingsPage((page) => (page + 1) % standingsPageCount)}
+                          aria-label={t('home.nextStandingsPage')}
+                          className="grid h-9 w-9 place-items-center rounded-full bg-surface2 text-muted transition-colors hover:bg-hover hover:text-white"
+                        ><ChevronRight size={18} /></button>
+                      </div>
+                    ) : null}
                   </>
                 )}
               </div>
             </section>
+
+            {premierLeague ? (
+              <section>
+                <SectionHeading
+                  title={`${premierLeague.shortName || premierLeague.name} · ${t('home.nextUp')}`}
+                  href={`/competitions/${premierLeague.slug || premierLeague.id}`}
+                  linkLabel={t('common.viewAll')}
+                />
+                <div className="card divide-y divide-line overflow-hidden">
+                  {premierLeagueFixturesQuery.isLoading ? (
+                    <MatchListSkeleton count={4} />
+                  ) : premierLeagueFixturesQuery.isError ? (
+                    <ErrorState error={premierLeagueFixturesQuery.error} onRetry={premierLeagueFixturesQuery.refetch} />
+                  ) : premierLeagueFixtures.length ? (
+                    premierLeagueFixtures.map((match) => <MatchRow key={match.id} match={match} showDate />)
+                  ) : (
+                    <EmptyState title={t('common.noMatches')} className="border-0 bg-transparent" />
+                  )}
+                </div>
+              </section>
+            ) : null}
 
             <section>
               <SectionHeading

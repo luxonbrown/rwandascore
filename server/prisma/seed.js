@@ -26,12 +26,16 @@ async function main() {
     credentials.push({ role: 'EDITOR', email, password });
   }
   const competitions = [
-    { name: 'Rwanda Premier League', shortName: 'RPL', slug: 'rwanda-premier-league', type: 'league', primaryColor: '#176B45' },
+    { name: 'BK Premier League', shortName: 'BKPL', slug: 'rwanda-premier-league', type: 'league', primaryColor: '#176B45', description: 'Rwanda\'s top-flight football competition, featuring the country\'s leading clubs.' },
     { name: 'Rwanda Peace Cup', shortName: 'Peace Cup', slug: 'peace-cup', type: 'cup', primaryColor: '#D7A72D' },
     { name: 'Rwanda National Team', shortName: 'Amavubi', slug: 'amavubi', type: 'national', primaryColor: '#176B45' },
   ];
   for (const item of competitions) {
-    const competition = await prisma.competition.upsert({ where: { slug: item.slug }, update: {}, create: item });
+    const competition = await prisma.competition.upsert({
+      where: { slug: item.slug },
+      update: { name: item.name, shortName: item.shortName, primaryColor: item.primaryColor, description: item.description },
+      create: item,
+    });
     if (item.type !== 'national') await prisma.season.upsert({ where: { competitionId_name: { competitionId: competition.id, name: seasonName } }, update: {}, create: { competitionId: competition.id, name: seasonName, isCurrent: true, startDate: new Date(`${seasonName.slice(0,4)}-08-01T00:00:00Z`) } });
   }
   console.log('RwandaScore base records are ready.');

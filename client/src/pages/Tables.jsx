@@ -4,17 +4,21 @@ import Container from '../components/ui/Container'
 import PageHeader from '../components/ui/PageHeader'
 import StandingsTable, { StandingsLegend } from '../components/standings/StandingsTable'
 import TopScorersList from '../components/players/TopScorersList'
+import EmptyState from '../components/ui/EmptyState'
 import ErrorState from '../components/ui/ErrorState'
 import { MatchListSkeleton } from '../components/ui/Skeletons'
-import { useStandings, useTopScorers } from '../hooks/useData'
+import { useCompetitions, useStandings, useTopScorers } from '../hooks/useData'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { useI18n } from '../hooks/useI18n'
+import { findPremierLeague } from '../utils/competitions'
 
 export default function Tables() {
   const { t } = useI18n()
   useDocumentTitle(t('tables.title'))
-  const standingsQuery = useStandings('rwanda-premier-league')
-  const scorersQuery = useTopScorers('rwanda-premier-league', 10)
+  const competitionsQuery = useCompetitions()
+  const premierLeague = findPremierLeague(competitionsQuery.data)
+  const standingsQuery = useStandings(premierLeague?.id || 'rwanda-premier-league', { enabled: Boolean(premierLeague) })
+  const scorersQuery = useTopScorers(premierLeague?.id || 'rwanda-premier-league', 10, { enabled: Boolean(premierLeague) })
   const rows = standingsQuery.data || []
   const leader = rows[0]
   const bestAttack = [...rows].sort((a, b) => b.gf - a.gf)[0]
@@ -23,11 +27,11 @@ export default function Tables() {
   return (
     <>
       <PageHeader
-        eyebrow={`2025/26 · ${t('competitions.rpl')}`}
+        eyebrow={`${premierLeague?.season || '2026/27'} · ${premierLeague?.shortName || t('competitions.rpl')}`}
         title={t('tables.title')}
         subtitle={t('tables.subtitle')}
         actions={
-          <Link to="/competitions/rwanda-premier-league" className="btn btn-secondary">
+          <Link to={premierLeague ? `/competitions/${premierLeague.slug || premierLeague.id}` : '/competitions'} className="btn btn-secondary">
             <Shield size={15} />
             {t('competitions.viewCompetition')}
           </Link>
@@ -85,8 +89,12 @@ export default function Tables() {
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
           <div className="min-w-0">
             <div className="card overflow-hidden">
-              {standingsQuery.isLoading ? (
+              {competitionsQuery.isLoading || standingsQuery.isLoading ? (
                 <MatchListSkeleton count={8} />
+              ) : competitionsQuery.isError ? (
+                <ErrorState error={competitionsQuery.error} onRetry={competitionsQuery.refetch} />
+              ) : !premierLeague ? (
+                <EmptyState title={`${t('home.leagueTable')} ${t('tables.unavailable')}`} body={t('tables.notConfigured')} />
               ) : standingsQuery.isError ? (
                 <ErrorState error={standingsQuery.error} onRetry={standingsQuery.refetch} />
               ) : (
@@ -107,8 +115,10 @@ export default function Tables() {
               </Link>
             </div>
             <div className="card overflow-hidden">
-              {scorersQuery.isLoading ? (
+              {competitionsQuery.isLoading || scorersQuery.isLoading ? (
                 <MatchListSkeleton count={6} />
+              ) : !premierLeague ? (
+                <EmptyState title={t('tables.unavailable')} body={t('tables.notConfigured')} />
               ) : scorersQuery.isError ? (
                 <ErrorState error={scorersQuery.error} onRetry={scorersQuery.refetch} />
               ) : (

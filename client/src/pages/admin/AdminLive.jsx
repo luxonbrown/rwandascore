@@ -213,8 +213,6 @@ function EventPanel({ match, roster, onAdd, onDelete, addPending, deletePending 
 
   const set = (key, value) => setForm((current) => ({ ...current, [key]: value }))
   const playerNames = form.teamId === match.homeTeamId ? homePlayers : awayPlayers
-  const teamName =
-    form.teamId === match.homeTeamId ? match.homeTeam?.name : match.awayTeam?.name
   const events = [...(match.events || [])].sort((a, b) => a.minute - b.minute)
 
   return (
@@ -276,20 +274,18 @@ function EventPanel({ match, roster, onAdd, onDelete, addPending, deletePending 
           <label htmlFor="event-player" className="label">
             {t('admin.live.eventPlayer')} *
           </label>
-          <input
+          <select
             id="event-player"
             className="input"
             required
-            list={`players-${form.teamId}`}
             value={form.playerName}
             onChange={(event) => set('playerName', event.target.value)}
-            placeholder={teamName}
-          />
-          <datalist id={`players-${form.teamId}`}>
+          >
+            <option value="">{t('admin.live.choosePlayer')}</option>
             {playerNames.map((name) => (
               <option key={name} value={name} />
             ))}
-          </datalist>
+          </select>
         </div>
         <div>
           <label htmlFor="event-minute" className="label">

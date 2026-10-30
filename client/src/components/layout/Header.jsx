@@ -4,6 +4,7 @@ import Container from '../ui/Container'
 import { navLinks } from '../../config'
 import { useI18n } from '../../hooks/useI18n'
 import { useUiStore } from '../../store/ui'
+import SoundToggle from '../ui/SoundToggle'
 import { cn } from '../../utils/cn'
 
 export default function Header() {
@@ -37,7 +38,7 @@ export default function Header() {
                   ) : null}
                   {t(link.key)}
                   {isActive ? (
-                    <span className="absolute inset-x-2.5 -bottom-[11px] h-0.5 rounded-full bg-accent" />
+                    <span className="nav-indicator absolute inset-x-2.5 -bottom-[11px] h-0.5 rounded-full bg-accent" />
                   ) : null}
                 </>
               )}
@@ -46,6 +47,7 @@ export default function Header() {
         </nav>
 
         <div className="flex shrink-0 items-center gap-1">
+          <SoundToggle />
           <Link
             to="/search"
             aria-label={t('nav.search')}

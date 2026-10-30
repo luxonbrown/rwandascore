@@ -4,6 +4,7 @@ import Container from '../components/ui/Container'
 import TeamCrest from '../components/ui/TeamCrest'
 import FavouriteButton from '../components/ui/FavouriteButton'
 import PlayerCard from '../components/players/PlayerCard'
+import PlayerPitch from '../components/players/PlayerPitch'
 import ErrorState from '../components/ui/ErrorState'
 import { usePlayer } from '../hooks/useData'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
@@ -68,7 +69,8 @@ export default function PlayerDetail() {
               className="relative flex h-32 w-28 shrink-0 items-end justify-center overflow-hidden rounded-2xl pb-3 shadow-lift"
               style={{ backgroundColor: primary, color: secondary }}
             >
-              <span className="relative z-10 text-5xl font-black">{player.number ?? '—'}</span>
+              {player.photoUrl ? <img src={player.photoUrl} alt={player.name} className="absolute inset-0 h-full w-full object-cover" onError={(event) => { event.currentTarget.style.display = 'none' }} /> : null}
+              <span className="relative z-10 rounded-lg bg-black/55 px-2 text-3xl font-black">#{player.number ?? '—'}</span>
               <span className="absolute -right-4 -top-4 h-16 w-16 rounded-full bg-white/10" />
               <span className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10" />
             </div>
@@ -164,6 +166,7 @@ export default function PlayerDetail() {
           </div>
 
           <aside className="space-y-6">
+            <PlayerPitch featuredPlayer={player} team={team} title={t('players.pitchPosition')} compact />
             <section className="card p-4">
               <h2 className="section-title mb-3">{t('players.profile')}</h2>
               <dl className="space-y-2.5 text-xs">

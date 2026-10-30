@@ -1,17 +1,21 @@
 import { useState } from 'react'
-import { Search, SlidersHorizontal, UserRound } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { CircleDot, Grid2X2, Search, SlidersHorizontal, UserRound } from 'lucide-react'
 import Container from '../components/ui/Container'
 import PageHeader from '../components/ui/PageHeader'
 import SearchField from '../components/ui/SearchField'
 import Pagination from '../components/ui/Pagination'
 import PlayerCard from '../components/players/PlayerCard'
+import PlayerPitch from '../components/players/PlayerPitch'
+import TeamCrest from '../components/ui/TeamCrest'
 import EmptyState from '../components/ui/EmptyState'
 import ErrorState from '../components/ui/ErrorState'
 import { CardGridSkeleton } from '../components/ui/Skeletons'
-import { usePlayers, useTeams } from '../hooks/useData'
+import { useAllPlayers, usePlayers, useTeams } from '../hooks/useData'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { useI18n } from '../hooks/useI18n'
 import { useDebounce } from '../hooks/useDebounce'
+import { positionKey } from '../utils/media'
 
 const positions = [
   { value: 'ALL', label: 'players.allPositions' },
@@ -36,17 +40,21 @@ export default function Players() {
   const [position, setPosition] = useState('ALL')
   const [teamId, setTeamId] = useState('ALL')
   const [sort, setSort] = useState('goals')
+  const [view, setView] = useState('pitch')
   const [page, setPage] = useState(1)
   const debouncedSearch = useDebounce(search, 250)
-  const teamsQuery = useTeams({ competitionId: 'rwanda-premier-league' })
-  const playersQuery = usePlayers({
+  const teamsQuery = useTeams()
+  const allTeamsSelected = teamId === 'ALL'
+  const activeView = allTeamsSelected ? 'list' : view
+  const playerFilters = {
     search: debouncedSearch,
-    position,
+    ...(position !== 'ALL' ? { position } : {}),
     ...(teamId !== 'ALL' ? { teamId } : {}),
     sort,
-    page,
-    pageSize: 12,
-  })
+  }
+  const pagedPlayersQuery = usePlayers({ ...playerFilters, page, pageSize: 12 }, { enabled: activeView === 'cards' })
+  const allPlayersQuery = useAllPlayers(playerFilters, { enabled: activeView === 'pitch' || activeView === 'list' })
+  const playersQuery = activeView === 'cards' ? pagedPlayersQuery : allPlayersQuery
 
   const updateFilter = (setter) => (value) => {
     setter(value)
@@ -55,6 +63,13 @@ export default function Players() {
 
   const data = playersQuery.data
   const items = data?.items || []
+  const teams = teamsQuery.data || []
+  const selectedTeam = teams.find((team) => team.id === teamId)
+  const pitchPlayers = selectedTeam
+    ? items.filter((player) => (player.teamId || player.team?.id) === selectedTeam.id)
+    : []
+  const pitchSquads = pitchPlayers.length ? [{ team: selectedTeam, players: pitchPlayers }] : []
+  const displayedPitchPlayerCount = pitchSquads.reduce((total, squad) => total + squad.players.length, 0)
 
   return (
     <>
@@ -66,7 +81,14 @@ export default function Players() {
       />
 
       <Container className="py-7">
+        {teamsQuery.isError ? <div className="mb-4"><ErrorState error={teamsQuery.error} onRetry={teamsQuery.refetch} /></div> : null}
         <div className="card p-4">
+          <div className="mb-4 flex justify-end gap-2">
+            {allTeamsSelected ? <span className="inline-flex items-center gap-2 rounded-full border border-accent/30 bg-accent/10 px-4 text-xs font-semibold text-accent"><Grid2X2 size={15}/>{t('players.allTeamList')}</span> : <>
+              <button type="button" onClick={() => { setView('pitch'); setPage(1) }} aria-pressed={view === 'pitch'} className={`btn ${view === 'pitch' ? 'btn-accent' : 'btn-secondary'}`}><CircleDot size={15}/>{t('players.pitchView')}</button>
+              <button type="button" onClick={() => { setView('cards'); setPage(1) }} aria-pressed={view === 'cards'} className={`btn ${view === 'cards' ? 'btn-accent' : 'btn-secondary'}`}><Grid2X2 size={15}/>{t('players.cardsView')}</button>
+            </>}
+          </div>
           <div className="flex flex-wrap items-center gap-2">
             <span className="mr-1 hidden items-center gap-1.5 text-[10px] font-bold uppercase tracking-wide text-muted sm:flex">
               <SlidersHorizontal size={12} />
@@ -123,9 +145,9 @@ export default function Players() {
 
         <div className="mt-5 flex items-center justify-between">
           <p className="text-xs text-muted">
-            {data ? `${data.total} ${t('nav.players')}` : t('common.loading')}
+            {data ? `${activeView === 'pitch' ? displayedPitchPlayerCount : data.total} ${t('nav.players')}` : t('common.loading')}
           </p>
-          {data && data.totalPages > 1 ? (
+          {activeView === 'cards' && data && data.totalPages > 1 ? (
             <p className="text-[11px] text-muted">
               {t('common.page')} {data.page} {t('common.of')} {data.totalPages}
             </p>
@@ -133,10 +155,14 @@ export default function Players() {
         </div>
 
         <div className="mt-3">
-          {playersQuery.isLoading ? (
+          {playersQuery.isLoading || (activeView === 'pitch' && teamsQuery.isLoading) ? (
             <CardGridSkeleton count={8} />
           ) : playersQuery.isError ? (
             <ErrorState error={playersQuery.error} onRetry={playersQuery.refetch} />
+          ) : activeView === 'pitch' ? (
+            pitchSquads.length ? <div className="space-y-6">{pitchSquads.map((squad) => <PlayerPitch key={squad.team?.id || squad.title} players={squad.players} team={squad.team} title={squad.title || t('players.pitchTitle')} />)}</div> : <EmptyState icon={CircleDot} title={t('players.pitchSelectTeam')} body={t('players.noPlayersBody')} />
+          ) : activeView === 'list' ? (
+            items.length ? <div className="card divide-y divide-line overflow-hidden">{items.map((player) => <div key={player.id} className="flex items-center gap-3 p-3 sm:gap-4 sm:p-4"><div className="relative grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-full border border-line bg-surface2 text-sm font-black text-white">{player.photoUrl ? <img src={player.photoUrl} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" onError={(event) => { event.currentTarget.style.display = 'none' }}/> : null}<span className="relative z-10 rounded bg-black/55 px-1.5">{player.number ?? '—'}</span></div><div className="min-w-0 flex-1"><Link to={`/players/${player.id}`} className="block truncate text-sm font-bold text-white hover:text-accent">{player.name}</Link><div className="mt-1 flex min-w-0 items-center gap-1.5 text-[11px] text-muted">{player.team ? <TeamCrest team={player.team} size="xs"/> : null}<span className="truncate">{player.team?.name || (player.isNationalTeam ? t('players.nationalSquad') : t('players.unassignedPlayers'))}</span><span>·</span><span>{t(positionKey(player.position))}</span></div></div><Link to={`/players/${player.id}`} className="btn btn-secondary min-h-9 shrink-0 px-3 text-xs">{t('players.viewProfile')}</Link></div>)}</div> : <EmptyState icon={search ? Search : UserRound} title={t('players.noPlayers')} body={t('players.noPlayersBody')} />
           ) : items.length ? (
             <>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

@@ -16,14 +16,14 @@ import { listTeams } from '../services/team.service.js';
 import { listPlayers } from '../services/player.service.js';
 import { listNews, getNewsById, createNews, updateNews, deleteNews, setNewsPublished } from '../services/news.service.js';
 import { createMatch, listMatches, updateMatch, deleteMatch, addMatchEvent, deleteMatchEvent, updateMatchStatus } from '../services/match.service.js';
-import { serializeCompetition, serializeSeason, serializeStadium, serializeTeam, serializePlayer } from '../utils/serializers.js';
+import { serializeActivity, serializeCompetition, serializeSeason, serializeStadium, serializeTeam, serializePlayer } from '../utils/serializers.js';
 import {
   activityListQuery, competitionCreateSchema, competitionUpdateSchema, eventCreateSchema,
   idParam, liveActionSchema, matchCreateSchema, matchListQuery, matchStatusSchema, matchUpdateSchema, matchVersionSchema, newsCreateSchema,
   newsListQuery, newsPublishSchema, newsUpdateSchema, paginationQuery, playerCreateSchema, playerListQuery,
   playerUpdateSchema, resetPasswordSchema, seasonCreateSchema, seasonListQuery,
   seasonUpdateSchema, settingsUpdateSchema, stadiumCreateSchema, stadiumUpdateSchema,
-  teamCreateSchema, teamListQuery, teamUpdateSchema, userCreateSchema, userUpdateSchema,
+  managerMessageSchema, teamCreateSchema, teamListQuery, teamUpdateSchema, userCreateSchema, userUpdateSchema,
 } from '../validators/index.js';
 
 export const adminRouter = Router();
@@ -35,6 +35,42 @@ const send = (handler, status = 200) => asyncHandler(async (req, res) => res.sta
 const currentUser = (req) => req.user;
 
 adminRouter.get('/dashboard-stats', contentEditors, send(() => getDashboardStats()));
+adminRouter.get('/manager-messages', adminOnly, asyncHandler(async (req, res) => {
+  const messages = await prisma.activityLog.findMany({
+    where: { module: 'Team manager messages', action: 'message_to_admin' },
+    orderBy: { createdAt: 'desc' },
+    take: 100,
+    include: { user: { select: { id: true, name: true, role: true } } },
+  });
+  const replies = messages.length ? await prisma.activityLog.findMany({
+    where: { module: 'Team manager messages', action: 'admin_reply', recordId: { in: messages.map(({ id }) => id) } },
+    orderBy: { createdAt: 'asc' },
+    include: { user: { select: { id: true, name: true, role: true } } },
+  }) : [];
+  res.json(messages.map((message) => ({
+    ...serializeActivity(message),
+    body: message.description.replace(/^\[[^\]]+\]\s*/, ''),
+    replies: replies.filter((reply) => reply.recordId === message.id).map(serializeActivity),
+  })));
+}));
+adminRouter.post('/manager-messages/:id/reply', adminOnly, validate({ params: idParam, body: managerMessageSchema }), asyncHandler(async (req, res) => {
+  const original = await prisma.activityLog.findFirst({ where: { id: req.params.id, module: 'Team manager messages', action: 'message_to_admin' } });
+  if (!original) throw notFound('Team manager message not found');
+  if (!original.userId) throw badRequest('The manager account for this message is no longer available');
+  const reply = await prisma.$transaction(async (tx) => {
+    const created = await logActivity(tx, {
+      userId: req.user.id,
+      action: 'admin_reply',
+      module: 'Team manager messages',
+      recordType: 'manager_reply',
+      recordId: original.id,
+      description: req.body.message.trim(),
+      ipAddress: ip(req),
+    });
+    return tx.activityLog.findUnique({ where: { id: created.id }, include: { user: { select: { id: true, name: true, role: true } } } });
+  });
+  res.status(201).json(serializeActivity(reply));
+}));
 
 // User administration and operational settings are restricted to the single administrator role.
 adminRouter.get('/users', adminOnly, send(({ query }) => listUsers({ page: Number(query.page) || 1, pageSize: Math.min(Number(query.pageSize) || 20, 100), search: query.search || '', role: query.role, isActive: query.isActive === undefined ? undefined : query.isActive === 'true' })));

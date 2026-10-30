@@ -479,6 +479,9 @@ export async function addMatchEvent(matchId, data, actor, ipAddress = null) {
         throw badRequest('The player does not belong to the selected team');
       }
     }
+    if (['goal', 'penalty'].includes(data.type) && !player) {
+      throw badRequest('Select a registered player so the goal can be added to the scorer table');
+    }
 
     if (data.relatedPlayerId) {
       const related = await tx.player.findUnique({ where: { id: data.relatedPlayerId } });

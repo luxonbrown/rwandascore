@@ -1,7 +1,7 @@
 {
   "brand": {
     "tagline": "Umupira w'amaguru w'u Rwanda. Imikino yose. Ako kanya.",
-    "description": "Amanota ya live, imikino iteganyijwe, ibisubizo, imbonerahamwe n'amakuru y'ishyirahamwe ry'u Rwanda, Igikombe cy'Amahoro na Amavubi."
+    "description": "Amanota ya live, imikino iteganyijwe, ibisubizo, imbonerahamwe n'amakuru ya BK Premier League, Igikombe cy'Amahoro na Amavubi."
   },
   "nav": {
     "scores": "Imikino",
@@ -112,11 +112,11 @@
   "home": {
     "eyebrow": "Umupira w'amaguru w'u Rwanda, ako kanya",
     "title": "Umukino wose. Igitego cyose. Ahantu hamwe.",
-    "subtitle": "Amanota ya live, imbonerahamwe n'inkuru z'ishyirahamwe ry'u Rwanda, Igikombe cy'Amahoro na Amavubi.",
+    "subtitle": "Amanota ya live, imbonerahamwe n'inkuru za BK Premier League, Igikombe cy'Amahoro na Amavubi.",
     "liveNow": "Ako kanya",
     "todayMatches": "Imikino y'uyu munsi",
     "latestNews": "Amakuru mashya",
-    "leagueTable": "Ishyirahamwe ry'u Rwanda",
+    "leagueTable": "BK Premier League",
     "topScorers": "Abatsinze ibitego",
     "nextUp": "Ibikurikira",
     "followLive": "Kurikirana ako kanya",
@@ -131,9 +131,13 @@
     "liveCount": "{{count}} ako kanya",
     "liveCountEmpty": "Nta mukino uri ako kanya",
     "allCompetitions": "Amarushanwa yose",
-    "heroNote": "Amanota avugururwa buri masegonda 15.",
+    "heroNote": "Amanota avugururwa ako kanya; hagira ikibazo, avugururwa buri masegonda 15.",
     "readStories": "Soma inkuru",
-    "viewTables": "Reba imbonerahamwe yose"
+    "viewTables": "Reba imbonerahamwe yose",
+    "previousStandingsPage": "Jya ku rupapuro rw'imbere rw'imbonerahamwe",
+    "nextStandingsPage": "Jya ku rupapuro rukurikira rw'imbonerahamwe",
+    "standingsPages": "Amapaji y'imbonerahamwe y'irushanwa",
+    "standingsPage": "Urupapuro {{page}}"
   },
   "live": {
     "title": "Ikigo cy'ako kanya",
@@ -146,7 +150,7 @@
     "emptyBody": "Umukino ukurikira uzagaragara hano. Reba gahunda y'uyu munsi cyangwa imikino iteganyijwe.",
     "follow": "Kurikirana",
     "minute": "{{minute}}'",
-    "refreshNote": "Amanota avugururwa. Uburyo bwa WebSocket buzahindura iyi paji mu gihe kizaza.",
+    "refreshNote": "Amanota avugururwa ako kanya; hagira ikibazo, avugururwa buri masegonda 15.",
     "allCompetitions": "Amarushanwa yose",
     "liveOnly": "Ako kanya gusa",
     "allToday": "Uyu munsi wose",
@@ -157,6 +161,7 @@
     "subtitle": "Tegura umunsi wawe. Reba imikino ku itariki, irushanwa cyangwa ikipe.",
     "team": "Ikipe",
     "allTeams": "Amakipe yose",
+    "allTeamList": "Abakinnyi b'amakipe yose",
     "noMatches": "Nta mikino kuri iyi tariki",
     "noMatchesBody": "Gerageza indi tariki cyangwa usibe ihitamo ry'ikipe.",
     "selectedDate": "Itariki yahiswemo",
@@ -174,7 +179,7 @@
   },
   "competitions": {
     "title": "Amarushanwa",
-    "subtitle": "Ishyirahamwe ry'u Rwanda, Igikombe cy'Amahoro na Amavubi — ahantu hamwe.",
+    "subtitle": "BK Premier League, Igikombe cy'Amahoro na Amavubi — ahantu hamwe.",
     "overview": "Incamake",
     "table": "Imbonerahamwe",
     "fixtures": "Iteganyijwe",
@@ -200,7 +205,7 @@
     "leagueTable": "Imbonerahamwe y'ishyirahamwe",
     "scorers": "Abatsinze",
     "amavubi": "Amavubi",
-    "rpl": "Ishyirahamwe ry'u Rwanda",
+    "rpl": "BK Premier League",
     "peaceCup": "Igikombe cy'Amahoro",
     "peaceCupStage": "Umupira w'igitsinzi mu ijoro",
     "amavubiStage": "Inzira yerekeza muri AFCON n'Igikombe cy'Isi",
@@ -224,17 +229,20 @@
     "championsLeague": "CAF Champions League",
     "confederationCup": "CAF Confederation Cup",
     "relegation": "Gusubira mu cyiciro cya kabiri",
-    "updatedNote": "Imbonerahamwe ishingiye ku bisubizo byemejwe. P = yakinnye, GD = itandukaniro ry'ibitego.",
+    "updatedNote": "Imbonerahamwe ishingiye ku bisubizo byemejwe. Amanota y'imikino iri live ni ay'agateganyo. P = yakinnye, GD = itandukaniro ry'ibitego.",
+    "liveProjection": "Umwanya w'agateganyo mu gihe umukino ukiri live",
     "fullTable": "Imbonerahamwe yose",
     "topHalf": "Igice cy'hejuru",
     "positionShort": "No"
   },
   "tables": {
     "title": "Imbonerahamwe",
-    "subtitle": "Imiterere, amanota n'urugendo rw'amanota y'amakipe yose y'ishyirahamwe.",
+    "subtitle": "Imbonerahamwe ya BK Premier League, uko amakipe yitwaye n'urugamba rwo kwegukana igikombe.",
     "leader": "Ukuyobora",
     "bestAttack": "Igitero cyiza",
-    "bestDefence": "Ubudahangarwa"
+    "bestDefence": "Ubudahangarwa",
+    "unavailable": "ntaboneka",
+    "notConfigured": "Imikino n'imbonerahamwe bya BK Premier League bizagaragara hano amarushanwa n'igihembwe cyayo bimaze gushyirwaho."
   },
   "news": {
     "title": "Amakuru",
@@ -256,7 +264,7 @@
     "moreFrom": "Ibindi muri {{category}}",
     "categories": {
       "all": "Byose",
-      "rpl": "Ishyirahamwe ry'u Rwanda",
+      "rpl": "BK Premier League",
       "peace-cup": "Igikombe cy'Amahoro",
       "amavubi": "Amavubi",
       "grassroots": "Urubyiruko n'ibanze",
@@ -266,7 +274,7 @@
   },
   "teams": {
     "title": "Amakipe",
-    "subtitle": "Amakipe cumi n'atandatu y'ishyirahamwe ry'u Rwanda, kuva Kigali kugera mu ntara.",
+    "subtitle": "Amakipe ya BK Premier League kuva Kigali kugera mu ntara.",
     "searchPlaceholder": "Shakisha amakipe…",
     "squad": "Itsinda",
     "coach": "Umutoza",
@@ -326,13 +334,23 @@
     "noPlayers": "Nta mukinnyi wabonetse",
     "noPlayersBody": "Gerageza undi mwanya, ikipe cyangwa ijambo ry'ishakisha.",
     "allTeams": "Amakipe yose",
+    "allTeamList": "Abakinnyi b'amakipe yose",
     "ageValue": "Imyaka {{age}}",
     "heightValue": "{{height}} cm",
     "seasonStats": "Muri iki gihembwe",
     "viewProfile": "Reba umwirondoro",
     "goalsShort": "Ibitego {{count}}",
     "appsShort": "Imikino {{count}}",
-    "position": "Umwanya"
+    "position": "Umwanya",
+    "pitchView": "Reba ikibuga",
+    "cardsView": "Amakarita",
+    "pitchTitle": "Imyanya y'abakinnyi mu kibuga",
+    "pitchPosition": "Umwanya ku kibuga",
+    "pitchPositionHint": "Agace k'ikibuga gashingiye ku mwanya wanditse ku mukinnyi",
+    "pitchSquadHint": "Abakinnyi bashyizwe mu myanya yabo banditse",
+    "pitchSelectTeam": "Hitamo ikipe irimo abakinnyi urebe ikibuga",
+    "nationalSquad": "Ikipe y'igihugu",
+    "unassignedPlayers": "Abakinnyi badafite ikipe"
   },
   "favourites": {
     "title": "Ibyakunze",
@@ -372,8 +390,19 @@
     "suggestionPeaceCup": "Igikombe cy'Amahoro",
     "suggestionScorers": "Abatsinze ibitego"
   },
+  "soundPrompt": {
+    "title": "Zana ibyishimo by'umunsi w'umukino",
+    "body": "Fungura amajwi ya stade n'ay'amanota. Ushobora kuyazimya hano cyangwa igihe cyose ukoresheje akamenyetso k'ijwi kari hejuru.",
+    "enabledTitle": "Amajwi y'umukino arakora",
+    "enabledBody": "Kanda hano uyazimye, cyangwa ukoreshe akamenyetso k'ijwi kari hejuru igihe ubishakiye.",
+    "enable": "Fungura amajwi",
+    "turnOff": "Zimya amajwi",
+    "later": "Nyuma"
+  },
   "settings": {
     "title": "Igenamiterere",
+    "soundOn": "Fungura amajwi y'umukino",
+    "soundOff": "Zimya amajwi y'umukino",
     "language": "Ururimi",
     "languageBody": "Hitamo ururimi rukoreshwa kuri RwandaScore.",
     "favouritesBody": "Kurikira amakipe n'abakinnyi kugira ngo ubabone mbere.",
@@ -510,6 +539,7 @@
       "copyFailed": "Ntibyakunze gukopa URL.",
       "storageFull": "Ububiko bwa browser bwuzuye. Kuraho ifoto hanyuma ugerageze."
     },
+    "notifications": { "title": "Ubutumwa" },
     "activity": {
       "title": "Ibyakozwe",
       "subtitle": "Urutonde rw'impinduka zose mu cyumba cy'amakuru.",
@@ -695,6 +725,7 @@
       "addEvent": "Ongeraho igikorwa",
       "eventType": "Ubwoko bw'igikorwa",
       "eventPlayer": "Izina ry'umukinnyi",
+      "choosePlayer": "Hitamo umukinnyi uri muri iyi kipe",
       "eventTeam": "Ikipe",
       "eventAssist": "Uwafashije (bidategetswe)",
       "eventDetail": "Ibisobanuro (bidategetswe)",

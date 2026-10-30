@@ -2,15 +2,15 @@
   {
     "id": "rwanda-premier-league",
     "slug": "rwanda-premier-league",
-    "name": "Rwanda Premier League",
-    "shortName": "Premier League",
+    "name": "BK Premier League",
+    "shortName": "BKPL",
     "country": "Rwanda",
     "type": "league",
     "season": "2025/26",
-    "logoText": "RPL",
+    "logoText": "BKPL",
     "color": "#FF6B00",
     "secondaryColor": "#121212",
-    "description": "The top tier of Rwandan football, contested by 16 clubs across the country.",
+    "description": "Rwanda's top-flight football competition, featuring the country's leading clubs.",
     "teamCount": 16
   },
   {

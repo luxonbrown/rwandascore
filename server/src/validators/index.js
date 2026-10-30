@@ -7,6 +7,9 @@ const isoDate = z
   .string()
   .refine((value) => !Number.isNaN(Date.parse(value)), 'Invalid date');
 const nullableDate = isoDate.nullable().optional();
+export const managerMessageSchema = z.object({
+  message: z.string().trim().min(1).max(2000),
+});
 const nullableInteger = (min, max = Number.MAX_SAFE_INTEGER) => z.preprocess(
   (value) => value === '' ? null : value,
   z.coerce.number().int().min(min).max(max).nullable().optional(),
@@ -187,7 +190,7 @@ export const teamUpdateSchema = z.preprocess(normalizeTeamPayload, teamCreateBas
 export const playerCreateSchema = z.object({
   name: z.string().min(2).max(120),
   teamId: nullableId,
-  position: position.optional(),
+  position: z.preprocess((value) => value === 'ALL' ? undefined : value, position.optional()),
   number: nullableInteger(0, 99),
   nationality: z.string().max(80).optional(),
   age: nullableInteger(14, 100),
@@ -215,7 +218,7 @@ export const playerListQuery = z.object({
   nationalTeam: booleanString.optional(),
   search: z.string().max(120).optional(),
   position: position.optional(),
-  sort: z.enum(['name', 'age', 'goals']).default('name'),
+  sort: z.enum(['name', 'age', 'goals', 'assists', 'appearances']).default('name'),
 });
 
 export const competitionCreateSchema = z.object({

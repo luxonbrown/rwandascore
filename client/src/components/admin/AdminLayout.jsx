@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, Navigate, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import {
   CalendarDays,
+  Bell,
   ExternalLink,
   History,
   LayoutDashboard,
@@ -23,9 +24,36 @@ import { useI18n } from '../../hooks/useI18n'
 import { useAuthStore } from '../../store/auth'
 import { cn } from '../../utils/cn'
 import { initialsOf } from '../../utils/media'
+import { changePassword } from '../../services/api'
+import SoundToggle from '../ui/SoundToggle'
+
+function PasswordChangeGate({ onComplete }) {
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [error, setError] = useState('')
+  const [saving, setSaving] = useState(false)
+  const submit = async (event) => {
+    event.preventDefault()
+    setError('')
+    if (newPassword.length < 8) return setError('Use at least 8 characters for your new password.')
+    if (newPassword !== confirmPassword) return setError('The new passwords do not match.')
+    setSaving(true)
+    try {
+      await changePassword(currentPassword, newPassword)
+      await onComplete()
+    } catch (cause) {
+      setError(cause.message || 'Could not change password.')
+    } finally {
+      setSaving(false)
+    }
+  }
+  return <main className="flex min-h-screen items-center justify-center bg-ink p-4"><form className="card w-full max-w-md space-y-4 p-6" onSubmit={submit}><p className="text-xs font-bold uppercase tracking-wider text-accent">Account security</p><h1 className="text-2xl font-black text-white">Change your temporary password</h1><p className="text-sm text-muted">Choose a new password to continue to your workspace.</p>{error ? <p role="alert" className="rounded-lg border border-negative/30 bg-negative/10 p-3 text-sm text-negative">{error}</p> : null}<label className="block"><span className="label">Temporary password</span><input className="input" type="password" autoComplete="current-password" required value={currentPassword} onChange={(event) => setCurrentPassword(event.target.value)}/></label><label className="block"><span className="label">New password</span><input className="input" type="password" autoComplete="new-password" minLength={8} required value={newPassword} onChange={(event) => setNewPassword(event.target.value)}/></label><label className="block"><span className="label">Confirm new password</span><input className="input" type="password" autoComplete="new-password" minLength={8} required value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)}/></label><button className="btn btn-accent w-full justify-center" disabled={saving}>{saving ? 'Updating…' : 'Change password and continue'}</button></form></main>
+}
 
 const icons = {
   LayoutDashboard,
+  Bell,
   Trophy,
   Shield,
   Users,
@@ -79,6 +107,7 @@ function SidebarContent({ user, onNavigate, onLogout }) {
         })}
       </nav>
       <div className="border-t border-line p-3">
+        <SoundToggle showLabel />
         <Link
           to="/"
           onClick={onNavigate}
@@ -117,6 +146,7 @@ export default function AdminLayout() {
   const user = useAuthStore((state) => state.user)
   const isSessionChecked = useAuthStore((state) => state.isSessionChecked)
   const logout = useAuthStore((state) => state.logout)
+  const refreshUser = useAuthStore((state) => state.refreshUser)
   const location = useLocation()
   const navigate = useNavigate()
   const [menuOpen, setMenuOpen] = useState(false)
@@ -149,7 +179,9 @@ export default function AdminLayout() {
   const isManagerPath = location.pathname.startsWith('/manager')
   if (user.role === 'TEAM_MANAGER' && !isManagerPath) return <Navigate to="/manager" replace />
   if (user.role !== 'TEAM_MANAGER' && isManagerPath) return <Navigate to="/admin" replace />
-  if (user.role === 'EDITOR' && ['/admin/users', '/admin/settings', '/admin/profile'].some((path) => location.pathname === path || location.pathname.startsWith(`${path}/`))) return <Navigate to="/admin" replace />
+  if (user.role === 'EDITOR' && ['/admin/users', '/admin/notifications', '/admin/settings', '/admin/profile'].some((path) => location.pathname === path || location.pathname.startsWith(`${path}/`))) return <Navigate to="/admin" replace />
+
+  if (user.mustChangePassword) return <PasswordChangeGate onComplete={refreshUser} />
 
   const handleLogout = () => {
     logout()

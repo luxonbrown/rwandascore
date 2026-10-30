@@ -91,6 +91,7 @@ export function useCompetitionData(id, options = {}) {
     queryKey: queryKeys.competitionData(id),
     queryFn: () => getCompetitionData(id),
     enabled: Boolean(id),
+    refetchInterval: siteConfig.livePollingMs,
     ...options,
   })
 }
@@ -99,6 +100,7 @@ export function useStandings(competitionId = 'rwanda-premier-league', options = 
   return useQuery({
     queryKey: queryKeys.standings(competitionId),
     queryFn: () => getStandings(competitionId),
+    refetchInterval: siteConfig.livePollingMs,
     ...options,
   })
 }
@@ -107,6 +109,7 @@ export function useTopScorers(competitionId = 'rwanda-premier-league', limit = 1
   return useQuery({
     queryKey: queryKeys.topScorers(competitionId, limit),
     queryFn: () => getTopScorers(competitionId, limit),
+    refetchInterval: siteConfig.livePollingMs,
     ...options,
   })
 }
@@ -134,6 +137,28 @@ export function usePlayers(filters = {}, options = {}) {
     queryKey: queryKeys.players(filters),
     queryFn: () => getPlayers(filters),
     placeholderData: keepPreviousData,
+    ...options,
+  })
+}
+
+export function useAllPlayers(filters = {}, options = {}) {
+  return useQuery({
+    queryKey: ['players', 'all', filters],
+    queryFn: async () => {
+      const firstPage = await getPlayers({ ...filters, page: 1, pageSize: 100 })
+      if (firstPage.totalPages <= 1) return firstPage
+      const otherPages = await Promise.all(Array.from(
+        { length: firstPage.totalPages - 1 },
+        (_, index) => getPlayers({ ...filters, page: index + 2, pageSize: 100 }),
+      ))
+      return {
+        ...firstPage,
+        items: [firstPage, ...otherPages].flatMap((page) => page.items || []),
+        page: 1,
+        pageSize: firstPage.total,
+        totalPages: 1,
+      }
+    },
     ...options,
   })
 }

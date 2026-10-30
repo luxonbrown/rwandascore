@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import {
   Activity,
   ArrowRight,
+  Bell,
   CalendarDays,
   Newspaper,
   Radio,
@@ -43,7 +44,7 @@ export default function AdminDashboard() {
   useDocumentTitle(t('admin.dashboard'))
   const user = useAuthStore((state) => state.user)
   const pushToast = useUiStore((state) => state.pushToast)
-  const dashboardQuery = useAdminDashboard()
+  const dashboardQuery = useAdminDashboard({ refetchInterval: 30000 })
   const resetDemo = useResetDemoData()
   const [resetOpen, setResetOpen] = useState(false)
   const data = dashboardQuery.data
@@ -124,6 +125,24 @@ export default function AdminDashboard() {
             })}
           </div>
         )}
+
+        {data?.managerMessages?.length ? (
+          <section className="card overflow-hidden border border-accent/30">
+              <div className="flex items-center justify-between border-b border-line px-4 py-3.5">
+              <div className="flex items-center gap-2"><Bell size={16} className="text-accent" /><h2 className="section-title">Team manager notifications</h2></div>
+              <Link to="/admin/notifications" className="rounded-full bg-accent/10 px-2 py-1 text-[10px] font-bold text-accent">{data.managerMessages.length} recent · Open inbox</Link>
+            </div>
+            <ul className="divide-y divide-line">
+              {data.managerMessages.map((item) => (
+                <li key={item.id} className="px-4 py-3">
+                  <div className="flex items-start justify-between gap-3"><p className="text-xs font-semibold text-white">{item.user}</p><time className="shrink-0 text-[10px] text-muted">{formatTimeAgo(item.createdAt, t)}</time></div>
+                  <p className="mt-1 whitespace-pre-wrap text-sm text-muted">{item.description.replace(/^\[[^\]]+\]\s*/, '')}</p>
+                  {item.recordId ? <p className="mt-1 text-[10px] text-muted">Club: {item.description.match(/^\[([^\]]+)\]/)?.[1] || 'Assigned club'}</p> : null}
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
 
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)]">
           <div className="space-y-5">

@@ -6,6 +6,7 @@ import { cn } from '../../utils/cn'
 import { useI18n } from '../../hooks/useI18n'
 import { formatDateShort, formatTime } from '../../utils/format'
 import { isLiveStatus } from '../../utils/media'
+import { useScoreFeedback } from '../../hooks/useScoreFeedback'
 
 function TeamSide({ team, align = 'right' }) {
   return (
@@ -26,6 +27,7 @@ function TeamSide({ team, align = 'right' }) {
 
 export default function MatchRow({ match, showDate = false, showVenue = false, className }) {
   const { t } = useI18n()
+  const scoreChanged = useScoreFeedback(match)
   const live = isLiveStatus(match.status)
   const upcoming = match.status === 'UPCOMING'
   const score = `${match.homeScore ?? 0} - ${match.awayScore ?? 0}`
@@ -47,6 +49,7 @@ export default function MatchRow({ match, showDate = false, showVenue = false, c
           className={cn(
             'text-sm font-extrabold tabular-nums sm:text-base',
             live ? 'text-accent' : upcoming ? 'text-white' : 'text-white',
+            scoreChanged && 'score-flash',
           )}
         >
           {centerLabel}

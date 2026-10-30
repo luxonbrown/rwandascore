@@ -84,7 +84,6 @@ export async function getTopScorers(competitionId, seasonId, limit = 20) {
     },
     _count: { _all: true },
     orderBy: { _count: { playerId: 'desc' } },
-    take: limit,
   });
 
   const playerIds = grouped.map((row) => row.playerId).filter(Boolean);
@@ -97,7 +96,7 @@ export async function getTopScorers(competitionId, seasonId, limit = 20) {
 
   const playerMap = new Map(players.map((player) => [player.id, player]));
 
-  return grouped
+  const rankedPlayers = grouped
     .map((row, index) => {
       const player = playerMap.get(row.playerId);
       if (!player) return null;
@@ -112,8 +111,73 @@ export async function getTopScorers(competitionId, seasonId, limit = 20) {
       });
     })
     .filter(Boolean)
-    .sort((a, b) => b.goals - a.goals || a.player.name.localeCompare(b.player.name))
-    .map((entry, index) => ({ ...entry, rank: index + 1 }));
+    .sort((a, b) => b.goals - a.goals || a.player.name.localeCompare(b.player.name));
+
+  let rank = 0;
+  let previousGoals = null;
+  return rankedPlayers.slice(0, limit).map((entry, index) => {
+    if (entry.goals !== previousGoals) rank = index + 1;
+    previousGoals = entry.goals;
+    return { ...entry, rank };
+  });
+}
+
+async function getStandingsWithLiveProjection(competition, seasonId) {
+  const { season, rows } = await getStandingsRows(competition.id, seasonId);
+  if (!season || competition.type !== 'league') return { season, rows };
+
+  const liveMatches = await prisma.match.findMany({
+    where: { competitionId: competition.id, seasonId: season.id, status: { in: ['live', 'ht'] } },
+    select: { homeTeamId: true, awayTeamId: true, homeScore: true, awayScore: true },
+  });
+  if (!liveMatches.length) return { season, rows };
+
+  const projected = rows.map((row) => ({ ...row, form: row.form || '' }));
+  const rowByTeam = new Map(projected.map((row) => [row.teamId, row]));
+  for (const match of liveMatches) {
+    const home = rowByTeam.get(match.homeTeamId);
+    const away = rowByTeam.get(match.awayTeamId);
+    if (!home || !away) continue;
+
+    const result = match.homeScore > match.awayScore ? 'home' : match.homeScore < match.awayScore ? 'away' : 'draw';
+    home.played += 1;
+    away.played += 1;
+    home.goalsFor += match.homeScore;
+    home.goalsAgainst += match.awayScore;
+    away.goalsFor += match.awayScore;
+    away.goalsAgainst += match.homeScore;
+    home.isLive = true;
+    away.isLive = true;
+
+    if (result === 'home') {
+      home.won += 1;
+      away.lost += 1;
+      home.points += 3;
+      home.form = `${home.form}W`.slice(-5);
+      away.form = `${away.form}L`.slice(-5);
+    } else if (result === 'away') {
+      away.won += 1;
+      home.lost += 1;
+      away.points += 3;
+      home.form = `${home.form}L`.slice(-5);
+      away.form = `${away.form}W`.slice(-5);
+    } else {
+      home.drawn += 1;
+      away.drawn += 1;
+      home.points += 1;
+      away.points += 1;
+      home.form = `${home.form}D`.slice(-5);
+      away.form = `${away.form}D`.slice(-5);
+    }
+  }
+
+  projected.sort((a, b) =>
+    b.points - a.points
+    || (b.goalsFor - b.goalsAgainst) - (a.goalsFor - a.goalsAgainst)
+    || b.goalsFor - a.goalsFor
+    || a.team.name.localeCompare(b.team.name));
+  projected.forEach((row, index) => { row.position = index + 1; });
+  return { season, rows: projected };
 }
 
 export async function getBracket(competitionId, seasonId) {
@@ -210,11 +274,7 @@ export async function getCompetitionOverview(identifier) {
       orderBy: { kickoffAt: 'asc' },
     }),
     season
-      ? prisma.standing.findMany({
-          where: { seasonId: season.id },
-          include: { team: { include: { stadium: true } } },
-          orderBy: { position: 'asc' },
-        })
+      ? getStandingsWithLiveProjection(competition, season.id).then(({ rows }) => rows)
       : [],
     getTopScorers(competition.id, season?.id),
     competition.type === 'cup' ? getBracket(competition.id, season?.id) : [],
@@ -238,7 +298,7 @@ export async function getCompetitionStandings(identifier, seasonId = undefined) 
   const competition = await findCompetition(identifier);
   if (!competition) throw notFound('Competition not found');
 
-  const { season, rows } = await getStandingsRows(competition.id, seasonId);
+  const { season, rows } = await getStandingsWithLiveProjection(competition, seasonId);
 
   return {
     competition: serializeCompetition(competition),

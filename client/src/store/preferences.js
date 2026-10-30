@@ -10,11 +10,14 @@ export const usePreferencesStore = create(
   persist(
     (set, get) => ({
       language: DEFAULT_LANGUAGE,
+      soundEnabled: false,
       favouriteTeams: [],
       favouritePlayers: [],
       setLanguage: (language) => {
         if (isLanguage(language)) set({ language })
       },
+      setSoundEnabled: (soundEnabled) => set({ soundEnabled }),
+      toggleSound: () => set((state) => ({ soundEnabled: !state.soundEnabled })),
       toggleFavouriteTeam: (teamId) =>
         set((state) => ({ favouriteTeams: toggleInList(state.favouriteTeams, teamId) })),
       toggleFavouritePlayer: (playerId) =>
@@ -25,8 +28,9 @@ export const usePreferencesStore = create(
     }),
     {
       name: 'rwandascore_preferences_v1',
-      partialize: ({ language, favouriteTeams, favouritePlayers }) => ({
+      partialize: ({ language, soundEnabled, favouriteTeams, favouritePlayers }) => ({
         language,
+        soundEnabled,
         favouriteTeams,
         favouritePlayers,
       }),

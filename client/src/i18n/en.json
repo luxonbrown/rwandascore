@@ -1,7 +1,7 @@
 {
   "brand": {
     "tagline": "Rwanda football. Every match. Live.",
-    "description": "Live scores, fixtures, results, tables and stories from the Rwanda Premier League, Peace Cup and Amavubi."
+    "description": "Live scores, fixtures, results, tables and stories from the BK Premier League, Peace Cup and Amavubi."
   },
   "nav": {
     "scores": "Scores",
@@ -112,11 +112,11 @@
   "home": {
     "eyebrow": "Rwandan football, live",
     "title": "Every match. Every goal. One place.",
-    "subtitle": "Live scores, tables and stories from the Rwanda Premier League, Peace Cup and Amavubi.",
+    "subtitle": "Live scores, tables and stories from the BK Premier League, Peace Cup and Amavubi.",
     "liveNow": "Live now",
     "todayMatches": "Today's matches",
     "latestNews": "Latest news",
-    "leagueTable": "Rwanda Premier League",
+    "leagueTable": "BK Premier League",
     "topScorers": "Top scorers",
     "nextUp": "Next up",
     "followLive": "Follow live",
@@ -131,9 +131,13 @@
     "liveCount": "{{count}} live",
     "liveCountEmpty": "No live matches",
     "allCompetitions": "All competitions",
-    "heroNote": "Scores refresh automatically every 15 seconds.",
+    "heroNote": "Live scores update instantly, with a 15-second refresh fallback.",
     "readStories": "Read the stories",
-    "viewTables": "View full table"
+    "viewTables": "View full table",
+    "previousStandingsPage": "Previous standings page",
+    "nextStandingsPage": "Next standings page",
+    "standingsPages": "League table pages",
+    "standingsPage": "Page {{page}}"
   },
   "live": {
     "title": "Live centre",
@@ -146,7 +150,7 @@
     "emptyBody": "The next kick-off will appear here automatically. Browse today's schedule or check upcoming fixtures.",
     "follow": "Follow",
     "minute": "{{minute}}'",
-    "refreshNote": "Scores update automatically. A future WebSocket channel can replace polling without changing this page.",
+    "refreshNote": "Live scores update instantly when connected, with a 15-second refresh fallback.",
     "allCompetitions": "All competitions",
     "liveOnly": "Live only",
     "allToday": "All today",
@@ -157,6 +161,7 @@
     "subtitle": "Plan your matchday. Browse fixtures by date, competition or team.",
     "team": "Team",
     "allTeams": "All teams",
+    "allTeamList": "All team players",
     "noMatches": "No matches on this date",
     "noMatchesBody": "Try another day or clear the team filter.",
     "selectedDate": "Selected date",
@@ -174,7 +179,7 @@
   },
   "competitions": {
     "title": "Competitions",
-    "subtitle": "The Rwanda Premier League, Peace Cup and Amavubi — all in one place.",
+    "subtitle": "The BK Premier League, Peace Cup and Amavubi — all in one place.",
     "overview": "Overview",
     "table": "Table",
     "fixtures": "Fixtures",
@@ -200,7 +205,7 @@
     "leagueTable": "League table",
     "scorers": "Scorers",
     "amavubi": "Amavubi",
-    "rpl": "Rwanda Premier League",
+    "rpl": "BK Premier League",
     "peaceCup": "Peace Cup",
     "peaceCupStage": "Knockout football under the lights",
     "amavubiStage": "The road to AFCON and the World Cup",
@@ -224,17 +229,20 @@
     "championsLeague": "CAF Champions League",
     "confederationCup": "CAF Confederation Cup",
     "relegation": "Relegation",
-    "updatedNote": "Table is based on verified results. P = played, GD = goal difference.",
+    "updatedNote": "Table is based on verified results. Live match points are provisional. P = played, GD = goal difference.",
+    "liveProjection": "Provisional live table position",
     "fullTable": "Full table",
     "topHalf": "Top half",
     "positionShort": "Pos"
   },
   "tables": {
     "title": "League tables",
-    "subtitle": "Standings, form and the race for every Rwanda Premier League destination.",
+    "subtitle": "BK Premier League standings, team form and the race for the title.",
     "leader": "League leader",
     "bestAttack": "Best attack",
-    "bestDefence": "Best defence"
+    "bestDefence": "Best defence",
+    "unavailable": "standings unavailable",
+    "notConfigured": "BK Premier League fixtures and standings will appear here once the competition and current season are configured."
   },
   "news": {
     "title": "News",
@@ -256,7 +264,7 @@
     "moreFrom": "More from {{category}}",
     "categories": {
       "all": "All",
-      "rpl": "Rwanda Premier League",
+      "rpl": "BK Premier League",
       "peace-cup": "Peace Cup",
       "amavubi": "Amavubi",
       "grassroots": "Grassroots",
@@ -266,7 +274,7 @@
   },
   "teams": {
     "title": "Teams",
-    "subtitle": "All sixteen Rwanda Premier League clubs, from Kigali to the provinces.",
+    "subtitle": "All BK Premier League clubs, from Kigali to the provinces.",
     "searchPlaceholder": "Search teams…",
     "squad": "Squad",
     "coach": "Coach",
@@ -326,13 +334,23 @@
     "noPlayers": "No players found",
     "noPlayersBody": "Try another position, team or search term.",
     "allTeams": "All teams",
+    "allTeamList": "All team players",
     "ageValue": "{{age}} years",
     "heightValue": "{{height}} cm",
     "seasonStats": "This season",
     "viewProfile": "View profile",
     "goalsShort": "{{count}} goals",
     "appsShort": "{{count}} apps",
-    "position": "Position"
+    "position": "Position",
+    "pitchView": "Pitch view",
+    "cardsView": "Cards",
+    "pitchTitle": "Squad positions",
+    "pitchPosition": "Position on the pitch",
+    "pitchPositionHint": "Approximate zone from the player’s registered position",
+    "pitchSquadHint": "Players grouped by their registered positions",
+    "pitchSelectTeam": "Choose a team with players to view the pitch",
+    "nationalSquad": "National team squad",
+    "unassignedPlayers": "Players without a team"
   },
   "favourites": {
     "title": "Favourites",
@@ -372,8 +390,19 @@
     "suggestionPeaceCup": "Peace Cup",
     "suggestionScorers": "Top scorers"
   },
+  "soundPrompt": {
+    "title": "Bring the matchday atmosphere to life",
+    "body": "Turn on the stadium soundtrack and score sounds. You can mute it here or anytime with the speaker button above.",
+    "enabledTitle": "Matchday sound is on",
+    "enabledBody": "Tap here to mute it, or use the speaker button in the header whenever you like.",
+    "enable": "Turn sound on",
+    "turnOff": "Turn sound off",
+    "later": "Maybe later"
+  },
   "settings": {
     "title": "Settings",
+    "soundOn": "Turn matchday sound on",
+    "soundOff": "Turn matchday sound off",
     "language": "Language",
     "languageBody": "Choose the language used across RwandaScore.",
     "favouritesBody": "Follow teams and players to see them first.",
@@ -510,6 +539,7 @@
       "copyFailed": "Could not copy the URL.",
       "storageFull": "Browser storage is full. Remove an image and try again."
     },
+    "notifications": { "title": "Notifications" },
     "activity": {
       "title": "Activity Log",
       "subtitle": "An audit trail of every change in the newsroom.",
@@ -695,6 +725,7 @@
       "addEvent": "Add event",
       "eventType": "Event type",
       "eventPlayer": "Player name",
+      "choosePlayer": "Choose a registered player",
       "eventTeam": "Team",
       "eventAssist": "Assist (optional)",
       "eventDetail": "Detail (optional)",

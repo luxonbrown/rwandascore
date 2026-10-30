@@ -7,15 +7,15 @@ export const siteConfig = {
   shortName: 'RS',
   tagline: 'Rwanda football. Every match. Live.',
   description:
-    'Live scores, fixtures, results, tables and stories from the Rwanda Premier League, Peace Cup and Amavubi.',
+    'Live scores, fixtures, results, tables and stories from the BK Premier League, Peace Cup and Amavubi.',
   url: 'https://rwandascore.rw',
   email: 'hello@rwandascore.rw',
   phone: '+250 788 000 000',
   address: 'KG 11 Ave, Kigali, Rwanda',
   season: '2026/27',
   livePollingMs: 15000,
-  // When a real-time backend is available, set this and replace the polling
-  // query in `src/hooks/useData.js` with a WebSocket subscription.
+  // WebSocket updates keep live scores, standings and scorer lists in sync;
+  // REST polling remains the fallback when the socket is unavailable.
   enableWebSocket: true,
   websocketUrl: import.meta.env.VITE_WS_URL || 'ws://localhost:4000/ws/live',
   socials: {
@@ -50,6 +50,7 @@ export const mobileMoreLinks = [
 
 export const adminNavLinks = [
   { to: '/admin', key: 'admin.dashboard', icon: 'LayoutDashboard', end: true },
+  { to: '/admin/notifications', key: 'admin.notifications.title', icon: 'Bell' },
   { to: '/admin/competitions', key: 'admin.competitions.title', icon: 'Trophy' },
   { to: '/admin/teams', key: 'admin.teams.title', icon: 'Shield' },
   { to: '/admin/players', key: 'admin.players.title', icon: 'Users' },
@@ -61,8 +62,9 @@ export const adminNavLinks = [
   { to: '/admin/users', key: 'admin.users.title', icon: 'UserCog' },
 ]
 
-export const editorNavLinks = adminNavLinks.filter((link) => link.to !== '/admin/users')
+export const editorNavLinks = adminNavLinks.filter((link) => !['/admin/users', '/admin/notifications'].includes(link.to))
 
 export const managerNavLinks = [
   { to: '/manager', key: 'admin.dashboard', icon: 'LayoutDashboard', end: true },
+  { to: '/manager/players', key: 'admin.players.title', icon: 'Users' },
 ]
