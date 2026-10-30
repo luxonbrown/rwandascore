@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import {
   ArrowLeft,
@@ -46,12 +46,34 @@ function CardIcon({ className = '' }) {
   return <span aria-hidden="true" className={`inline-block h-4 w-2.5 rounded-[2px] bg-current shadow-sm ${className}`} />
 }
 
-function FootballIcon({ size = 14, className = '' }) {
+function FootballIcon({ size = 16, className = '' }) {
+  const id = useId().replaceAll(':', '')
   return (
     <svg aria-hidden="true" width={size} height={size} viewBox="0 0 24 24" className={className}>
-      <circle cx="12" cy="12" r="10" fill="#fff" stroke="#111827" strokeWidth="1.4" />
-      <path d="m12 6.8 3.9 2.85-1.5 4.55h-4.8L8.1 9.65 12 6.8Z" fill="#111827" />
-      <path d="m12 6.8-.1-4.75M15.9 9.65l4.4-1.55M14.4 14.2l2.2 4.5M9.6 14.2l-2.2 4.5M8.1 9.65 3.7 8.1" fill="none" stroke="#111827" strokeWidth="1.45" />
+      <defs>
+        <radialGradient id={`${id}-ball-white`} cx="34%" cy="25%" r="78%">
+          <stop offset="0" stopColor="#fff" />
+          <stop offset="0.62" stopColor="#f1f1ed" />
+          <stop offset="1" stopColor="#aeb3b6" />
+        </radialGradient>
+        <linearGradient id={`${id}-ball-black`} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#323436" />
+          <stop offset="0.45" stopColor="#050607" />
+          <stop offset="1" stopColor="#191b1c" />
+        </linearGradient>
+        <clipPath id={`${id}-ball-edge`}><circle cx="12" cy="12" r="10" /></clipPath>
+      </defs>
+      <circle cx="12" cy="12" r="10" fill={`url(#${id}-ball-white)`} stroke="#222629" strokeWidth="1.25" />
+      <g clipPath={`url(#${id}-ball-edge)`} stroke="#d6d5d0" strokeWidth="0.65" strokeLinejoin="round">
+        <path d="m12 7.35 3.75 2.72-1.43 4.42h-4.64l-1.43-4.42L12 7.35Z" fill={`url(#${id}-ball-black)`} />
+        <path d="m10.3 7.35-1.5-3.9 3.2-2.2 3.1 2.2-1.35 3.9L12 7.35Z" fill={`url(#${id}-ball-black)`} />
+        <path d="m15.75 10.07 3.95-.8 2 3.15-1.65 3.2-3.7-2.13 1.43-3.42Z" fill={`url(#${id}-ball-black)`} />
+        <path d="m14.32 14.49 2.65 3.03-.85 3.8-3.65 1.05-1.35-3.9 2.57-3.98Z" fill={`url(#${id}-ball-black)`} />
+        <path d="m9.68 14.49-2.6 3.03.8 3.8 3.65 1.05 1.35-3.9-2.57-3.98Z" fill={`url(#${id}-ball-black)`} />
+        <path d="m8.25 10.07-3.95-.8-2 3.15 1.65 3.2 3.7-2.13-1.43-3.42Z" fill={`url(#${id}-ball-black)`} />
+        <path d="m12 7.35-.2-5.9M15.75 10.07l5.95-.8M14.32 14.49l2.65 6.83M9.68 14.49l-2.6 6.83M8.25 10.07 2.3 9.27" fill="none" />
+      </g>
+      <ellipse cx="8" cy="5.1" rx="3.2" ry="1.2" fill="#fff" opacity="0.42" transform="rotate(-28 8 5.1)" />
     </svg>
   )
 }
