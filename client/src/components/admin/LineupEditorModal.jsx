@@ -51,7 +51,7 @@ function rowGroups(formation, t) {
   }))
 }
 
-function TeamLineupEditor({ team, players, value, onChange, t }) {
+export function TeamLineupEditor({ team, players, value, onChange, t }) {
   const groups = rowGroups(value.formation, t)
   const selectedStarters = useMemo(() => new Set(value.starters.filter(Boolean)), [value.starters])
   const playerLabel = (player) => `${player.number ? `#${player.number} · ` : ''}${player.name}`

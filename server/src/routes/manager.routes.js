@@ -5,10 +5,10 @@ import { validate } from '../middleware/validate.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { notFound } from '../utils/errors.js';
 import { listPlayers } from '../services/player.service.js';
-import { listMatches } from '../services/match.service.js';
+import { listMatches, updateManagerMatchLineup } from '../services/match.service.js';
 import { createPlayer, updatePlayer, deletePlayer } from '../services/admin.service.js';
 import { logActivity } from '../services/activity.service.js';
-import { managerMessageSchema, playerCreateSchema, playerUpdateSchema, teamUpdateSchema } from '../validators/index.js';
+import { managerMatchLineupUpdateSchema, managerMessageSchema, playerCreateSchema, playerUpdateSchema, teamUpdateSchema } from '../validators/index.js';
 import { serializeActivity, serializeTeam } from '../utils/serializers.js';
 
 export const managerRouter = Router();
@@ -78,6 +78,10 @@ managerRouter.get('/matches', asyncHandler(async (req, res) => {
   const team = await prisma.team.findFirst({ where: { managerUserId: req.user.id }, select: { id: true } });
   if (!team) return res.json({ items: [], total: 0, page: 1, pageSize: 100, totalPages: 0 });
   return res.json(await listMatches({ page: 1, pageSize: 100, sort: 'kickoffAt', order: 'desc', teamId: team.id }));
+}));
+managerRouter.put('/matches/:id/lineup', validate({ body: managerMatchLineupUpdateSchema }), asyncHandler(async (req, res) => {
+  const team = await assignedTeam(req.user.id);
+  res.json(await updateManagerMatchLineup(req.params.id, req.body, team.id, req.user, req.ip));
 }));
 managerRouter.post('/players', validate({ body: playerCreateSchema }), asyncHandler(async (req, res) => {
   const team = await assignedTeam(req.user.id);

@@ -98,6 +98,7 @@ export const replyToManagerMessage = (id, message) => admin(`/manager-messages/$
 export const updateManagedTeam = (body) => manager('/team', { method: 'PUT', body })
 export const getManagedPlayers = async () => unwrap(await manager('/players'))
 export const getManagedMatches = async () => unwrap(await manager('/matches'))
+export const updateManagedMatchLineup = (matchId, version, lineup) => manager(`/matches/${matchId}/lineup`, { method: 'PUT', body: { version, lineup } })
 export const createManagedPlayer = (body) => manager('/players', { method: 'POST', body })
 export const updateManagedPlayer = (id, body) => manager(`/players/${id}`, { method: 'PUT', body })
 export const deleteManagedPlayer = (id) => manager(`/players/${id}`, { method: 'DELETE' })

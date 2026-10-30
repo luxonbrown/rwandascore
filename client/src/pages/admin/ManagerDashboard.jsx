@@ -1,12 +1,16 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ArrowRight, CalendarDays, MessageSquare, Pencil, Send, Shield, Users } from 'lucide-react'
+import { ArrowRight, CalendarDays, MessageSquare, Pencil, Send, Shield, Users, UsersRound } from 'lucide-react'
 import AdminPageHeader from '../../components/admin/AdminPageHeader'
+import ManagerLineupModal from '../../components/admin/ManagerLineupModal'
+import { useUpdateManagedMatchLineup } from '../../hooks/useManager'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle'
+import { useI18n } from '../../hooks/useI18n'
 import { getManagedMatches, getManagedPlayers, getManagedTeam, getManagerMessages, sendManagerMessage, updateManagedTeam } from '../../services/api'
 
 export default function ManagerDashboard() {
+  const { t } = useI18n()
   useDocumentTitle('Team manager workspace')
   const client = useQueryClient()
   const teamQuery = useQuery({ queryKey: ['manager', 'team'], queryFn: getManagedTeam })
@@ -16,6 +20,8 @@ export default function ManagerDashboard() {
   const [teamForm, setTeamForm] = useState(null)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
+  const [lineupMatch, setLineupMatch] = useState(null)
+  const saveLineup = useUpdateManagedMatchLineup()
   const saveTeam = useMutation({ mutationFn: updateManagedTeam, onSuccess: () => { setTeamForm(null); setError(''); client.invalidateQueries({ queryKey: ['manager'] }) }, onError: (cause) => setError(cause.message) })
   const sendMessage = useMutation({ mutationFn: sendManagerMessage, onSuccess: () => { setMessage(''); setError('') }, onError: (cause) => setError(cause.message) })
   const team = teamQuery.data
@@ -42,7 +48,7 @@ export default function ManagerDashboard() {
 
       <section className="card overflow-hidden">
         <div className="flex items-center gap-2 border-b border-line p-5"><CalendarDays size={17} className="text-accent"/><div><h2 className="font-bold text-white">Team fixtures and results</h2><p className="mt-1 text-xs text-muted">Read-only match information for {team?.name || 'your assigned club'}.</p></div></div>
-        {matchesQuery.isLoading ? <p className="p-5 text-sm text-muted">Loading team matches…</p> : matches.length ? <div className="divide-y divide-line">{matches.map((match) => <div key={match.id} className="flex flex-wrap items-center justify-between gap-3 p-4"><div><p className="font-semibold text-white">{match.homeTeam?.name} <span className="text-muted">vs</span> {match.awayTeam?.name}</p><p className="mt-1 text-xs text-muted">{match.competition?.shortName || match.competition?.name || 'Competition'} · {match.date ? new Date(match.date).toLocaleString() : 'Date pending'}</p></div><div className="text-right"><p className="font-bold tabular-nums text-white">{match.homeScore}–{match.awayScore}</p><p className="mt-1 text-[10px] font-bold uppercase tracking-wide text-accent">{match.status}</p></div></div>)}</div> : <p className="p-5 text-sm text-muted">No fixtures or results are registered for your club.</p>}
+        {matchesQuery.isLoading ? <p className="p-5 text-sm text-muted">Loading team matches…</p> : matches.length ? <div className="divide-y divide-line">{matches.map((match) => { const upcoming = match.status === 'UPCOMING'; return <div key={match.id} className="flex flex-wrap items-center justify-between gap-3 p-4"><div><p className="font-semibold text-white">{match.homeTeam?.name} <span className="text-muted">vs</span> {match.awayTeam?.name}</p><p className="mt-1 text-xs text-muted">{match.competition?.shortName || match.competition?.name || 'Competition'} · {match.date ? new Date(match.date).toLocaleString() : 'Date pending'}</p></div><div className="flex items-center gap-3"><div className="text-right"><p className="font-bold tabular-nums text-white">{match.homeScore}–{match.awayScore}</p><p className="mt-1 text-[10px] font-bold uppercase tracking-wide text-accent">{match.status}</p></div>{upcoming ? <button type="button" className="btn btn-secondary" onClick={() => setLineupMatch(match)}><UsersRound size={15}/>{t('admin.fixtures.manageLineups')}</button> : null}</div></div> })}</div> : <p className="p-5 text-sm text-muted">No fixtures or results are registered for your club.</p>}
       </section>
 
       <section className="card p-5 sm:p-6">
@@ -54,5 +60,6 @@ export default function ManagerDashboard() {
     </div>
 
     {teamForm ? <div className="fixed inset-0 z-[80] flex items-center justify-center overflow-y-auto bg-black/70 p-4" role="presentation"><form className="card my-auto w-full max-w-2xl space-y-4 p-5" onSubmit={(event) => { event.preventDefault(); saveTeam.mutate({ ...teamForm, founded: teamForm.founded === '' ? null : Number(teamForm.founded), logoUrl: teamForm.logoUrl.trim() || null }) }}><div><h2 className="text-lg font-bold text-white">Club registration</h2><p className="mt-1 text-xs text-muted">Update the public registration details for your assigned club.</p></div><div className="grid gap-3 sm:grid-cols-2">{[['name','Club name'],['shortName','Short name'],['initials','Initials'],['city','City'],['nickname','Nickname'],['coach','Head coach'],['founded','Founded year'],['logoUrl','Logo URL']].map(([key,label]) => <label key={key} className="block"><span className="label">{label}</span><input className="input" type={key === 'founded' ? 'number' : 'text'} min={key === 'founded' ? 1900 : undefined} max={key === 'founded' ? 2100 : undefined} value={teamForm[key]} onChange={(event) => setTeamForm({ ...teamForm, [key]: event.target.value })}/></label>)}</div><label className="block"><span className="label">Description</span><textarea className="input min-h-20" value={teamForm.description} onChange={(event) => setTeamForm({ ...teamForm, description: event.target.value })}/></label><div className="grid gap-3 sm:grid-cols-2">{[['primaryColor','Primary color'],['secondaryColor','Secondary color']].map(([key,label]) => <label key={key} className="block"><span className="label">{label}</span><input className="input h-11" type="color" value={teamForm[key]} onChange={(event) => setTeamForm({ ...teamForm, [key]: event.target.value })}/></label>)}</div><div className="flex justify-end gap-2"><button type="button" className="btn btn-secondary" onClick={() => setTeamForm(null)}>Cancel</button><button className="btn btn-accent" disabled={saveTeam.isPending}>{saveTeam.isPending ? 'Saving…' : 'Save club'}</button></div></form></div> : null}
+    {lineupMatch && team ? <ManagerLineupModal match={lineupMatch} team={team} players={players} isPending={saveLineup.isPending} onClose={() => setLineupMatch(null)} onSave={(lineup) => saveLineup.mutate({ matchId: lineupMatch.id, version: lineupMatch.version, lineup }, { onSuccess: () => { setLineupMatch(null); setError('') }, onError: (cause) => setError(cause.message) })} /> : null}
   </>
 }

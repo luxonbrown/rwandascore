@@ -107,6 +107,11 @@ export const matchLineupsUpdateSchema = z.object({
   }),
 });
 
+export const managerMatchLineupUpdateSchema = z.object({
+  version: z.coerce.number().int().min(1),
+  lineup: lineupSideSchema,
+});
+
 export const matchVersionSchema = z.object({ version: z.coerce.number().int().min(1) });
 export const liveActionSchema = z.object({
   version: z.coerce.number().int().min(1),

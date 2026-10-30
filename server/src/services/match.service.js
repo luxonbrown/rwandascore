@@ -455,6 +455,50 @@ export async function updateMatchLineups(id, { version, lineups }, actor, ipAddr
   return serializeMatch(full, { includeEvents: true });
 }
 
+export async function updateManagerMatchLineup(id, { version, lineup }, teamId, actor, ipAddress = null) {
+  const result = await prisma.$transaction(async (tx) => {
+    const match = await tx.match.findUnique({ where: { id }, include: matchInclude });
+    if (!match) throw notFound('Match not found');
+    if (Number(version) !== match.version) {
+      throw conflict('This match was changed by someone else. Reload it and try again.', 'MATCH_VERSION_CONFLICT', {
+        current: serializeMatch(match, { includeEvents: true }),
+      });
+    }
+    if (match.status !== 'scheduled') throw badRequest('Lineups can only be set for an upcoming match');
+    const side = match.homeTeamId === teamId ? 'home' : match.awayTeamId === teamId ? 'away' : null;
+    if (!side) throw badRequest('You can only set the lineup for your assigned team');
+
+    const playerIds = [...lineup.starters, ...lineup.bench];
+    const players = await tx.player.findMany({ where: { id: { in: [...new Set(playerIds)] } } });
+    const playerMap = new Map(players.map((player) => [player.id, player]));
+    if (playerMap.size !== new Set(playerIds).size) throw badRequest('One or more selected players no longer exist');
+    if (playerIds.some((playerId) => playerMap.get(playerId)?.teamId !== teamId)) {
+      throw badRequest('Every lineup player must belong to your assigned team');
+    }
+
+    const currentLineups = match.lineups && typeof match.lineups === 'object' ? match.lineups : {};
+    const storedLineups = { ...currentLineups, [side]: formatLineupSide(lineup, playerMap) };
+    const changed = await tx.match.updateMany({
+      where: { id, version: match.version },
+      data: { lineups: storedLineups, version: match.version + 1 },
+    });
+    if (!changed.count) throw conflict('This match was changed by someone else. Reload it and try again.', 'MATCH_VERSION_CONFLICT');
+    await logActivity(tx, {
+      userId: actor?.id,
+      action: 'update_lineup',
+      module: 'Matches',
+      recordType: 'match',
+      recordId: id,
+      description: `Updated ${side} lineup for ${match.homeTeam.name} vs ${match.awayTeam.name}`,
+      ipAddress,
+    });
+    return { matchId: id };
+  }, { maxWait: 10_000, timeout: 15_000 });
+
+  const full = await emitMatchUpdate(result.matchId);
+  return serializeMatch(full, { includeEvents: true });
+}
+
 export async function updateMatchStatus(id, { status, minute, version }, actor, ipAddress = null) {
   const result = await prisma.$transaction(async (tx) => {
     const current = await tx.match.findUnique({ where: { id }, include: matchInclude });
