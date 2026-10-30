@@ -1296,6 +1296,69 @@ export async function adminUpdateLiveMatch(matchId, updates, actor) {
   })
 }
 
+export async function adminUpdateMatchLineups(matchId, lineups, actor) {
+  await wait(100, 220)
+
+  return mutateDb('fixtures', (db) => {
+    const match = db.matches.find((item) => item.id === matchId)
+    if (!match) throw new ApiError('Match not found', 404)
+    if (match.status !== 'UPCOMING') throw new ApiError('Lineups can only be set for an upcoming match')
+
+    const formatSide = (side, teamId) => {
+      const ids = [...side.starters, ...side.bench]
+      if (!side.starters.length || new Set(ids).size !== ids.length) {
+        throw new ApiError('Choose unique starters and bench players for both teams')
+      }
+      const players = ids.map((id) => db.players.find((player) => player.id === id))
+      if (players.some((player) => !player || player.teamId !== teamId)) {
+        throw new ApiError('Every lineup player must belong to the selected team')
+      }
+      const byId = new Map(players.map((player) => [player.id, player]))
+      let offset = 0
+      const rowSizes = [1, ...side.formation.split('-').map(Number)]
+      const rows = rowSizes.map((size, index) => {
+        const playerIds = side.starters.slice(offset, offset + size)
+        offset += size
+        return {
+          label: index === 0 ? 'GK' : `line-${index}`,
+          players: playerIds.map((id) => ({
+            playerId: id,
+            name: byId.get(id).name,
+            number: byId.get(id).number ?? '',
+            position: byId.get(id).position,
+            rating: null,
+          })),
+        }
+      }).filter((row) => row.players.length)
+      return {
+        formation: side.formation,
+        rows,
+        bench: side.bench.map((id) => ({
+          playerId: id,
+          name: byId.get(id).name,
+          number: byId.get(id).number ?? '',
+          position: byId.get(id).position,
+          rating: null,
+        })),
+      }
+    }
+
+    match.lineups = {
+      home: formatSide(lineups.home, match.homeTeamId),
+      away: formatSide(lineups.away, match.awayTeamId),
+    }
+    match.version = Number(match.version || 0) + 1
+    match.updatedAt = new Date().toISOString()
+    pushActivity(db, actor, {
+      action: 'Updated Match Lineups',
+      module: competitionOf(db, match.competitionId)?.name || 'Match Centre',
+      record: `${teamOf(db, match.homeTeamId)?.name || 'Home'} vs ${teamOf(db, match.awayTeamId)?.name || 'Away'}`,
+      description: 'Set starting players and bench for an upcoming fixture',
+    })
+    return decorateMatch(db, match)
+  })
+}
+
 export async function adminAddMatchEvent(matchId, event, actor) {
   await wait(100, 220)
 

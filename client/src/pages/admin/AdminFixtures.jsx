@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { Pencil, Plus, Radio, Trash2 } from 'lucide-react'
+import { Pencil, Plus, Radio, Trash2, UsersRound } from 'lucide-react'
 import AdminPageHeader from '../../components/admin/AdminPageHeader'
+import LineupEditorModal from '../../components/admin/LineupEditorModal'
 import TableFrame from '../../components/admin/TableFrame'
 import FormModal from '../../components/admin/FormModal'
 import ConfirmDeleteModal from '../../components/admin/ConfirmDeleteModal'
@@ -12,6 +13,7 @@ import {
   useAdminCollection,
   useCreateAdminItem,
   useDeleteAdminItem,
+  useUpdateMatchLineups,
   useUpdateAdminItem,
 } from '../../hooks/useAdmin'
 import { useI18n } from '../../hooks/useI18n'
@@ -255,13 +257,16 @@ export default function AdminFixtures() {
   const teamsQuery = useAdminCollection('teams')
   const competitionsQuery = useAdminCollection('competitions')
   const seasonsQuery = useAdminCollection('seasons')
+  const playersQuery = useAdminCollection('players')
   const createItem = useCreateAdminItem('fixtures')
   const updateItem = useUpdateAdminItem('fixtures')
+  const updateLineups = useUpdateMatchLineups()
   const deleteItem = useDeleteAdminItem('fixtures')
   const [editor, setEditor] = useState(() =>
     searchParams.get('new') === '1' ? defaultForm() : null,
   )
   const [pendingDelete, setPendingDelete] = useState(null)
+  const [lineupMatch, setLineupMatch] = useState(null)
   const [formError, setFormError] = useState('')
   const [search, setSearch] = useState('')
   const [competitionFilter, setCompetitionFilter] = useState('')
@@ -314,6 +319,17 @@ export default function AdminFixtures() {
       await deleteItem.mutateAsync(pendingDelete.id)
       pushToast(t('admin.recordDeleted'))
       setPendingDelete(null)
+    } catch (error) {
+      pushToast(error.message, 'error')
+    }
+  }
+
+  const saveLineups = async (lineups) => {
+    if (!lineupMatch) return
+    try {
+      await updateLineups.mutateAsync({ matchId: lineupMatch.id, lineups })
+      pushToast(t('admin.fixtures.lineupsSaved'))
+      setLineupMatch(null)
     } catch (error) {
       pushToast(error.message, 'error')
     }
@@ -434,6 +450,17 @@ export default function AdminFixtures() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex justify-end gap-1">
+                      {match.status === 'UPCOMING' ? (
+                        <button
+                          type="button"
+                          onClick={() => setLineupMatch(match)}
+                          aria-label={t('admin.fixtures.manageLineups')}
+                          title={t('admin.fixtures.manageLineups')}
+                          className="rounded p-2 text-accent hover:bg-accent/10"
+                        >
+                          <UsersRound size={15} />
+                        </button>
+                      ) : null}
                       {isLiveStatus(match.status) ? (
                         <Link
                           to="/admin/live"
@@ -482,6 +509,16 @@ export default function AdminFixtures() {
           onClose={closeEditor}
           isPending={createItem.isPending || updateItem.isPending}
           error={formError}
+        />
+      ) : null}
+
+      {lineupMatch ? (
+        <LineupEditorModal
+          match={lineupMatch}
+          players={playersQuery.data || []}
+          isPending={updateLineups.isPending}
+          onClose={() => setLineupMatch(null)}
+          onSave={saveLineups}
         />
       ) : null}
 

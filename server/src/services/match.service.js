@@ -354,6 +354,97 @@ export async function updateMatch(id, data, actor, ipAddress = null) {
   return serializeMatch(full, { includeEvents: true });
 }
 
+function formatLineupSide(lineup, playerMap) {
+  const rowSizes = [1, ...lineup.formation.split('-').map(Number)];
+  let index = 0;
+  const rows = rowSizes.map((size, rowIndex) => {
+    const playerIds = lineup.starters.slice(index, index + size);
+    index += size;
+    return {
+      label: rowIndex === 0 ? 'GK' : `line-${rowIndex}`,
+      players: playerIds.map((playerId) => {
+        const player = playerMap.get(playerId);
+        return {
+          playerId: player.id,
+          name: player.name,
+          number: player.number ?? '',
+          position: player.position,
+          rating: null,
+        };
+      }),
+    };
+  }).filter((row) => row.players.length);
+
+  return {
+    formation: lineup.formation,
+    rows,
+    bench: lineup.bench.map((playerId) => {
+      const player = playerMap.get(playerId);
+      return {
+        playerId: player.id,
+        name: player.name,
+        number: player.number ?? '',
+        position: player.position,
+        rating: null,
+      };
+    }),
+  };
+}
+
+export async function updateMatchLineups(id, { version, lineups }, actor, ipAddress = null) {
+  const result = await prisma.$transaction(async (tx) => {
+    const match = await tx.match.findUnique({ where: { id }, include: matchInclude });
+    if (!match) throw notFound('Match not found');
+    if (Number(version) !== match.version) {
+      throw conflict('This match was changed by someone else. Reload it and try again.', 'MATCH_VERSION_CONFLICT', {
+        current: serializeMatch(match, { includeEvents: true }),
+      });
+    }
+    if (match.status !== 'scheduled') {
+      throw badRequest('Lineups can only be set for an upcoming match');
+    }
+
+    const playerIds = [...lineups.home.starters, ...lineups.home.bench, ...lineups.away.starters, ...lineups.away.bench];
+    const players = await tx.player.findMany({ where: { id: { in: [...new Set(playerIds)] } } });
+    const playerMap = new Map(players.map((player) => [player.id, player]));
+    if (playerMap.size !== new Set(playerIds).size) {
+      throw badRequest('One or more selected players no longer exist');
+    }
+    for (const [side, teamId] of [['home', match.homeTeamId], ['away', match.awayTeamId]]) {
+      const ids = [...lineups[side].starters, ...lineups[side].bench];
+      if (ids.some((playerId) => playerMap.get(playerId)?.teamId !== teamId)) {
+        throw badRequest(`Every ${side} lineup player must belong to that team`);
+      }
+    }
+
+    const storedLineups = {
+      home: formatLineupSide(lineups.home, playerMap),
+      away: formatLineupSide(lineups.away, playerMap),
+    };
+    const changed = await tx.match.updateMany({
+      where: { id, version: match.version },
+      data: { lineups: storedLineups, version: match.version + 1 },
+    });
+    if (!changed.count) {
+      throw conflict('This match was changed by someone else. Reload it and try again.', 'MATCH_VERSION_CONFLICT');
+    }
+
+    await logActivity(tx, {
+      userId: actor?.id,
+      action: 'update_lineups',
+      module: 'Matches',
+      recordType: 'match',
+      recordId: id,
+      description: `Updated lineups for ${match.homeTeam.name} vs ${match.awayTeam.name}`,
+      ipAddress,
+    });
+    return { matchId: id };
+  }, { maxWait: 10_000, timeout: 15_000 });
+
+  const full = await emitMatchUpdate(result.matchId);
+  return serializeMatch(full, { includeEvents: true });
+}
+
 export async function updateMatchStatus(id, { status, minute, version }, actor, ipAddress = null) {
   const result = await prisma.$transaction(async (tx) => {
     const current = await tx.match.findUnique({ where: { id }, include: matchInclude });

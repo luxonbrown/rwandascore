@@ -85,6 +85,25 @@ export const matchStatusSchema = z.object({
   minute: z.coerce.number().int().min(0).max(130).optional(),
 });
 
+const lineupSideSchema = z.object({
+  formation: z.enum(['4-3-3', '4-4-2', '4-2-3-1', '3-5-2', '5-3-2']),
+  starters: z.array(id).min(1).max(11),
+  bench: z.array(id).max(12),
+}).superRefine((lineup, ctx) => {
+  const ids = [...lineup.starters, ...lineup.bench];
+  if (new Set(ids).size !== ids.length) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'A player can only appear once in a lineup' });
+  }
+});
+
+export const matchLineupsUpdateSchema = z.object({
+  version: z.coerce.number().int().min(1),
+  lineups: z.object({
+    home: lineupSideSchema,
+    away: lineupSideSchema,
+  }),
+});
+
 export const matchVersionSchema = z.object({ version: z.coerce.number().int().min(1) });
 export const liveActionSchema = z.object({
   version: z.coerce.number().int().min(1),

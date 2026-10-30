@@ -15,10 +15,10 @@ import { listCompetitions, getCompetition } from '../services/competition.servic
 import { listTeams } from '../services/team.service.js';
 import { listPlayers } from '../services/player.service.js';
 import { listNews, getNewsById, createNews, updateNews, deleteNews, setNewsPublished } from '../services/news.service.js';
-import { createMatch, listMatches, updateMatch, deleteMatch, addMatchEvent, deleteMatchEvent, updateMatchStatus } from '../services/match.service.js';
+import { createMatch, listMatches, updateMatch, updateMatchLineups, deleteMatch, addMatchEvent, deleteMatchEvent, updateMatchStatus } from '../services/match.service.js';
 import { serializeActivity, serializeCompetition, serializeSeason, serializeStadium, serializeTeam, serializePlayer } from '../utils/serializers.js';
 import {
-  activityListQuery, competitionCreateSchema, competitionUpdateSchema, eventCreateSchema,
+  activityListQuery, competitionCreateSchema, competitionUpdateSchema, eventCreateSchema, matchLineupsUpdateSchema,
   idParam, liveActionSchema, matchCreateSchema, matchListQuery, matchStatusSchema, matchUpdateSchema, matchVersionSchema, newsCreateSchema,
   newsListQuery, newsPublishSchema, newsUpdateSchema, paginationQuery, playerCreateSchema, playerListQuery,
   playerUpdateSchema, resetPasswordSchema, seasonCreateSchema, seasonListQuery,
@@ -144,6 +144,7 @@ adminRouter.delete('/players/:id', contentEditors, validate({ params: idParam })
 adminRouter.get('/matches', contentEditors, validate({ query: matchListQuery }), send(({ query }) => listMatches(query)));
 adminRouter.post('/matches', contentEditors, validate({ body: matchCreateSchema }), send(({ body, user }) => createMatch(body, user, ip(user)), 201));
 adminRouter.put('/matches/:id', contentEditors, validate({ params: idParam, body: matchUpdateSchema }), send(({ params, body, user }) => updateMatch(params.id, body, user, ip(user))));
+adminRouter.put('/matches/:id/lineups', contentEditors, validate({ params: idParam, body: matchLineupsUpdateSchema }), send(({ params, body, user }) => updateMatchLineups(params.id, body, user, ip(user))));
 adminRouter.delete('/matches/:id', contentEditors, validate({ params: idParam, body: matchVersionSchema }), send(({ params, body, user }) => deleteMatch(params.id, body.version, user, ip(user))));
 adminRouter.get('/matches/:id/events', contentEditors, validate({ params: idParam }), send(async ({ params }) => (await import('../services/match.service.js')).getMatch(params.id).then((match) => match.events || [])));
 adminRouter.post('/matches/:id/events', contentEditors, validate({ params: idParam, body: eventCreateSchema }), send(({ params, body, user }) => addMatchEvent(params.id, body, user, ip(user)), 201));

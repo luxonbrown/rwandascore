@@ -170,7 +170,15 @@ export async function getAdminMatchEvents(id) { if (useMock) return (await mock.
 const routes={competitions:'/competitions',seasons:'/seasons',stadiums:'/stadiums',teams:'/teams',players:'/players',matches:'/matches',fixtures:'/matches',news:'/news',users:'/users'}
 export async function adminList(collection) {
   if (useMock) return mock.adminList(collection)
-  const items = unwrap(await admin(routes[collection]+qs({pageSize:100})))
+  const firstPage = await admin(routes[collection] + qs({ page: 1, pageSize: 100 }))
+  let items = unwrap(firstPage)
+  if (collection === 'players' && (firstPage.totalPages || 1) > 1) {
+    const laterPages = await Promise.all(Array.from(
+      { length: firstPage.totalPages - 1 },
+      (_, index) => admin(`${routes[collection]}${qs({ page: index + 2, pageSize: 100 })}`),
+    ))
+    items = [...items, ...laterPages.flatMap(unwrap)]
+  }
   if (collection === 'matches' || collection === 'fixtures') return items.map(matchShape)
   if (collection === 'users') return items.map(userShape)
   return items
@@ -191,6 +199,11 @@ export async function adminUpdateItem(collection,id,payload,actor) {
 }
 export async function adminDeleteItem(collection,id,actor) { if(useMock)return mock.adminDeleteItem(collection,id,actor); const body=collection==='matches'||collection==='fixtures'?{version:(await getMatch(id)).version}:undefined; return admin(`${routes[collection]}/${id}`,{method:'DELETE',body}) }
 export async function adminUpdateLiveMatch(matchId,updates,actor) { if(useMock)return mock.adminUpdateLiveMatch(matchId,updates,actor); const current=await getMatch(matchId); const version=updates.version ?? current.version; const action=updates.status==='HT'?'halftime':updates.status==='FT'?'fulltime':updates.status==='LIVE'?'minute':'minute'; return admin(`/matches/${matchId}/live/${action}`,{method:'POST',body:{version,minute:updates.minute}}) }
+export async function adminUpdateMatchLineups(matchId,lineups,actor) {
+  if (useMock) return mock.adminUpdateMatchLineups(matchId,lineups,actor)
+  const current = await getMatch(matchId)
+  return admin(`/matches/${matchId}/lineups`, { method: 'PUT', body: { version: current.version, lineups } })
+}
 export async function adminAddMatchEvent(matchId,event,actor) {
   if(useMock)return mock.adminAddMatchEvent(matchId,event,actor)
   const m=await getMatch(matchId)
