@@ -237,11 +237,20 @@ export async function adminUpdateItem(collection,id,payload,actor) {
   return admin(`${routes[collection]}/${id}`,{method:'PUT',body:collection==='teams'?teamPayload(payload):payload})
 }
 export async function adminDeleteItem(collection,id,actor) { if(useMock)return mock.adminDeleteItem(collection,id,actor); const body=collection==='matches'||collection==='fixtures'?{version:(await getMatch(id)).version}:undefined; return admin(`${routes[collection]}/${id}`,{method:'DELETE',body}) }
-export async function adminUpdateLiveMatch(matchId,updates,actor) { if(useMock)return mock.adminUpdateLiveMatch(matchId,updates,actor); const current=await getMatch(matchId); const version=updates.version ?? current.version; if(updates.stats)return admin(`/matches/${matchId}/live/stats`,{method:'POST',body:{version,stats:updates.stats}}); const action=updates.status==='HT'?'halftime':updates.status==='FT'?'fulltime':updates.status==='LIVE'?'minute':'minute'; return admin(`/matches/${matchId}/live/${action}`,{method:'POST',body:{version,minute:updates.minute,...(updates.stoppageMinutes!==undefined?{stoppageMinutes:updates.stoppageMinutes}:{})}}) }
+async function retryMatchVersion(matchId, operation) {
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const current = await getMatch(matchId)
+    try {
+      return await operation(current)
+    } catch (error) {
+      if (error.code !== 'MATCH_VERSION_CONFLICT' || attempt === 2) throw error
+    }
+  }
+}
+export async function adminUpdateLiveMatch(matchId,updates,actor) { if(useMock)return mock.adminUpdateLiveMatch(matchId,updates,actor); return retryMatchVersion(matchId,(current)=>{const version=current.version;if(updates.stats)return admin(`/matches/${matchId}/live/stats`,{method:'POST',body:{version,stats:updates.stats}});const action=updates.status==='HT'?'halftime':updates.status==='FT'?'fulltime':updates.status==='LIVE'?'minute':'minute';return admin(`/matches/${matchId}/live/${action}`,{method:'POST',body:{version,minute:updates.minute,...(updates.stoppageMinutes!==undefined?{stoppageMinutes:updates.stoppageMinutes}:{})}})}) }
 export async function adminUpdateMatchLiveBackground(matchId, imageUrl, actor) {
   if (useMock) return mock.adminUpdateMatchLiveBackground(matchId, imageUrl, actor)
-  const current = await getMatch(matchId)
-  return admin(`/matches/${matchId}/live/background`, { method: 'PUT', body: { version: current.version, imageUrl } })
+  return retryMatchVersion(matchId, (current) => admin(`/matches/${matchId}/live/background`, { method: 'PUT', body: { version: current.version, imageUrl } }))
 }
 export async function adminUpdateMatchLineups(matchId,lineups,actor) {
   if (useMock) return mock.adminUpdateMatchLineups(matchId,lineups,actor)
@@ -250,11 +259,10 @@ export async function adminUpdateMatchLineups(matchId,lineups,actor) {
 }
 export async function adminAddMatchEvent(matchId,event,actor) {
   if(useMock)return mock.adminAddMatchEvent(matchId,event,actor)
-  const m=await getMatch(matchId)
   const squadPage = await getPlayers({ teamId: event.teamId, pageSize: 100 })
   const squad = squadPage.items || []
   const byName = (name) => squad.find((player) => player.name?.trim().toLowerCase() === name?.trim().toLowerCase())?.id || null
-  return admin(`/matches/${matchId}/events`,{method:'POST',body:{...event,version:m.version,type:event.type?.toLowerCase(),teamId:event.teamId||event.team?.id,playerId:event.playerId || byName(event.playerName),relatedPlayerId:event.relatedPlayerId || byName(event.type === 'substitution' ? event.playerOutName : event.assistName),note:event.note ?? event.detail ?? null,x:event.x == null || event.x === '' ? undefined : Number(event.x),y:event.y == null || event.y === '' ? undefined : Number(event.y)}})
+  return retryMatchVersion(matchId,(m)=>admin(`/matches/${matchId}/events`,{method:'POST',body:{...event,version:m.version,type:event.type?.toLowerCase(),teamId:event.teamId||event.team?.id,playerId:event.playerId || byName(event.playerName),relatedPlayerId:event.relatedPlayerId || byName(event.type === 'substitution' ? event.playerOutName : event.assistName),note:event.note ?? event.detail ?? null,x:event.x == null || event.x === '' ? undefined : Number(event.x),y:event.y == null || event.y === '' ? undefined : Number(event.y)}}))
 }
-export async function adminDeleteMatchEvent(matchId,eventId,actor) { if(useMock)return mock.adminDeleteMatchEvent(matchId,eventId,actor); const m=await getMatch(matchId); return admin(`/matches/${matchId}/events/${eventId}`,{method:'DELETE',body:{version:m.version}}) }
+export async function adminDeleteMatchEvent(matchId,eventId,actor) { if(useMock)return mock.adminDeleteMatchEvent(matchId,eventId,actor); return retryMatchVersion(matchId,(m)=>admin(`/matches/${matchId}/events/${eventId}`,{method:'DELETE',body:{version:m.version}})) }
 export async function adminResetDemoData(actor) { if(useMock)return mock.adminResetDemoData(actor); throw new ApiError('Demo reset is available only in mock mode', 400) }
