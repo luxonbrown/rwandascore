@@ -9,7 +9,6 @@ import {
   MapPin,
   Play,
   Shield,
-  Square,
   Trophy,
   UserRound,
   Users,
@@ -29,11 +28,11 @@ import { useI18n } from '../hooks/useI18n'
 import { formatDateLong, formatTime } from '../utils/format'
 
 const eventTypes = {
-  goal: ['match.goal', 'text-accent', CircleDot],
-  penalty: ['match.penalty', 'text-accent', CircleDot],
-  own_goal: ['match.ownGoal', 'text-red-400', CircleDot],
-  yellow: ['match.yellow', 'text-yellow-400', Square],
-  red: ['match.red', 'text-red-400', Square],
+  goal: ['match.goal', 'text-accent', FootballIcon],
+  penalty: ['match.penalty', 'text-accent', FootballIcon],
+  own_goal: ['match.ownGoal', 'text-red-400', FootballIcon],
+  yellow: ['match.yellow', 'text-yellow-400', CardIcon],
+  red: ['match.red', 'text-red-400', CardIcon],
   sub: ['match.sub', 'text-sky-300', ArrowLeftRight],
   substitution: ['match.sub', 'text-sky-300', ArrowLeftRight],
   shot: ['match.shot', 'text-sky-300', CircleDot],
@@ -41,6 +40,20 @@ const eventTypes = {
   shot_off_target: ['match.shotOffTarget', 'text-muted', CircleDot],
   save: ['match.save', 'text-purple-300', Shield],
   position: ['match.playerPosition', 'text-accent', UserRound],
+}
+
+function CardIcon({ className = '' }) {
+  return <span aria-hidden="true" className={`inline-block h-4 w-2.5 rounded-[2px] bg-current shadow-sm ${className}`} />
+}
+
+function FootballIcon({ size = 14, className = '' }) {
+  return (
+    <svg aria-hidden="true" width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+      <circle cx="12" cy="12" r="9.25" stroke="currentColor" strokeWidth="1.7" />
+      <path d="m12 7.5 3.8 2.75-1.45 4.45h-4.7L8.2 10.25 12 7.5Z" fill="currentColor" />
+      <path d="m12 7.5-.2-4.7M15.8 10.25l4.45-1.5M14.35 14.7l2.3 4.1M9.65 14.7l-2.3 4.1M8.2 10.25 3.75 8.75" stroke="currentColor" strokeWidth="1.4" />
+    </svg>
+  )
 }
 
 const statRows = [
