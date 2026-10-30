@@ -1,5 +1,5 @@
 import { Link, useParams } from 'react-router-dom'
-import { ArrowLeft, Award, Footprints, Ruler, ShieldCheck } from 'lucide-react'
+import { ArrowLeft, Award, Footprints, Ruler, ShieldCheck, Square } from 'lucide-react'
 import Container from '../components/ui/Container'
 import TeamCrest from '../components/ui/TeamCrest'
 import FavouriteButton from '../components/ui/FavouriteButton'
@@ -143,10 +143,15 @@ export default function PlayerDetail() {
                 <ul className="divide-y divide-line">
                   {recentEvents.map((event) => (
                     <li key={event.id} className="flex items-center justify-between gap-3 py-2.5 text-sm">
-                      <span className="min-w-0 truncate text-white">
-                        {event.type === 'yellow' ? t('match.yellow') : event.type === 'red' ? t('match.red') : event.type === 'substitution' ? t('match.sub') : event.type}
-                        {event.related ? ' · ' + (t('players.substitutedOff') || 'substituted off') : ''}
-                        {event.match ? <span className="block truncate text-xs text-muted">{event.match}</span> : null}
+                      <span className="flex min-w-0 items-start gap-2">
+                        {event.type === 'red' || event.type === 'yellow' ? (
+                          <Square size={13} fill="currentColor" className={`mt-0.5 shrink-0 ${event.type === 'red' ? 'text-red-500' : 'text-yellow-400'}`} />
+                        ) : null}
+                        <span className={`min-w-0 truncate ${event.type === 'red' ? 'font-bold text-red-400' : 'text-white'}`}>
+                          {event.type === 'yellow' ? t('match.yellow') : event.type === 'red' ? t('match.red') : event.type === 'substitution' ? t('match.sub') : event.type}
+                          {event.related ? ' · ' + (t('players.substitutedOff') || 'substituted off') : ''}
+                          {event.match ? <span className="block truncate text-xs text-muted">{event.match}</span> : null}
+                        </span>
                       </span>
                       <span className="shrink-0 text-xs font-bold text-muted">{event.minute}&apos;</span>
                     </li>

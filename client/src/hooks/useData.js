@@ -168,6 +168,7 @@ export function usePlayer(id, options = {}) {
     queryKey: queryKeys.player(id),
     queryFn: () => getPlayer(id),
     enabled: Boolean(id),
+    refetchInterval: siteConfig.livePollingMs,
     ...options,
   })
 }
