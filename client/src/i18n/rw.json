@@ -338,6 +338,8 @@
     "ageValue": "Imyaka {{age}}",
     "heightValue": "{{height}} cm",
     "seasonStats": "Muri iki gihembwe",
+    "recentMatchEvents": "Ibikorwa biheruka mu mikino",
+    "substitutedOff": "yasimbuwe",
     "viewProfile": "Reba umwirondoro",
     "goalsShort": "Ibitego {{count}}",
     "appsShort": "Imikino {{count}}",

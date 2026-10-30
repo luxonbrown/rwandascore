@@ -830,6 +830,11 @@ export async function addMatchEvent(matchId, data, actor, ipAddress = null) {
       },
     });
 
+    if (player && ['yellow', 'red'].includes(data.type)) {
+      const field = data.type === 'yellow' ? 'yellowCards' : 'redCards';
+      await tx.player.update({ where: { id: player.id }, data: { [field]: { increment: 1 } } });
+    }
+
     const delta = scoreDelta(data.type, data.teamId, match);
     const homeScore = match.homeScore + delta.home;
     const awayScore = match.awayScore + delta.away;
@@ -923,6 +928,11 @@ export async function deleteMatchEvent(matchId, eventId, version, actor, ipAddre
     if (!event) throw notFound('Match event not found');
 
     await tx.matchEvent.delete({ where: { id: event.id } });
+
+    if (event.playerId && ['yellow', 'red'].includes(event.type)) {
+      const field = event.type === 'yellow' ? 'yellowCards' : 'redCards';
+      await tx.player.update({ where: { id: event.playerId }, data: { [field]: { decrement: 1 } } });
+    }
 
     const delta = scoreDelta(event.type, event.teamId, match);
     const homeScore = Math.max(0, match.homeScore - delta.home);

@@ -271,6 +271,16 @@ function adjustPlayerGoal(db, event, direction) {
   player.goals = player.stats.goals
 }
 
+function adjustPlayerCard(db, event, direction) {
+  if (!['yellow', 'red'].includes(event.type)) return
+  const player = db.players.find((item) => item.id === event.playerId)
+  if (!player) return
+  player.stats ||= {}
+  const key = event.type === 'yellow' ? 'yellowCards' : 'redCards'
+  player.stats[key] = Math.max(0, (player.stats[key] ?? player[key] ?? 0) + direction)
+  player[key] = player.stats[key]
+}
+
 function topScorersFor(db, competitionId = 'rwanda-premier-league', limit = 10) {
   const leagueTeamIds = new Set(db.standings.map((row) => row.teamId))
   let players = db.players
@@ -667,12 +677,23 @@ export async function getPlayer(id) {
     Math.max(db.players.length, 1),
   )
   const rankEntry = scorers.find((entry) => entry.player.id === player.id)
+  const recentEvents = db.matches.flatMap((match) => (match.events || [])
+    .filter((event) => event.playerId === player.id || event.relatedPlayerId === player.id)
+    .map((event) => ({
+      ...event,
+      matchId: match.id,
+      match: `${teamOf(db, match.homeTeamId)?.name || 'Home'} ${match.homeScore}-${match.awayScore} ${teamOf(db, match.awayTeamId)?.name || 'Away'}`,
+      related: event.relatedPlayerId === player.id,
+    })))
+    .sort((a, b) => Number(b.minute || 0) - Number(a.minute || 0))
+    .slice(0, 10)
 
   return {
     player: playerWithTeam(db, player),
     team: teamOf(db, player.teamId),
     teammates,
     scorerRank: rankEntry?.rank || null,
+    recentEvents,
   }
 }
 
@@ -1412,6 +1433,7 @@ export async function adminAddMatchEvent(matchId, event, actor) {
       type: event.type || 'goal',
       teamId: event.teamId,
       playerId: registeredPlayer?.id || null,
+      relatedPlayerId: event.relatedPlayerId || db.players.find((item) => item.teamId === event.teamId && item.name?.trim().toLocaleLowerCase() === (event.assistName || '').trim().toLocaleLowerCase())?.id || null,
       playerName: event.playerName.trim(),
       assistName: event.assistName || '',
       playerOut: event.playerOut || '',
@@ -1424,6 +1446,7 @@ export async function adminAddMatchEvent(matchId, event, actor) {
     if (match.standingApplied) adjustMockStandings(db, match, -1)
     match.events = [...(match.events || []), created].sort((a, b) => a.minute - b.minute)
     adjustPlayerGoal(db, created, 1)
+    adjustPlayerCard(db, created, 1)
 
     if (['goal', 'penalty'].includes(created.type)) {
       if (created.teamId === match.homeTeamId) match.homeScore += 1
@@ -1464,6 +1487,7 @@ export async function adminDeleteMatchEvent(matchId, eventIndex, actor) {
     if (match.standingApplied) adjustMockStandings(db, match, -1)
     const [removed] = match.events.splice(index, 1)
     adjustPlayerGoal(db, removed, -1)
+    adjustPlayerCard(db, removed, -1)
     if (['goal', 'penalty'].includes(removed.type)) {
       if (removed.teamId === match.homeTeamId) match.homeScore = Math.max(0, match.homeScore - 1)
       else match.awayScore = Math.max(0, match.awayScore - 1)

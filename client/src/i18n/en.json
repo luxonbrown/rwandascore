@@ -338,6 +338,8 @@
     "ageValue": "{{age}} years",
     "heightValue": "{{height}} cm",
     "seasonStats": "This season",
+    "recentMatchEvents": "Recent match events",
+    "substitutedOff": "substituted off",
     "viewProfile": "View profile",
     "goalsShort": "{{count}} goals",
     "appsShort": "{{count}} apps",

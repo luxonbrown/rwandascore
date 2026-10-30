@@ -113,7 +113,7 @@ export async function getPlayer(identifier) {
       take: 8,
     }),
     prisma.matchEvent.findMany({
-      where: { playerId: player.id },
+      where: { OR: [{ playerId: player.id }, { relatedPlayerId: player.id }] },
       include: {
         match: { include: { homeTeam: true, awayTeam: true, competition: true } },
         team: true,
@@ -142,6 +142,9 @@ export async function getPlayer(identifier) {
       type: event.type,
       minute: event.minute,
       matchId: event.matchId,
+      playerId: event.playerId,
+      relatedPlayerId: event.relatedPlayerId,
+      related: event.relatedPlayerId === player.id,
       match: `${event.match.homeTeam.name} ${event.match.homeScore}-${event.match.awayScore} ${event.match.awayTeam.name}`,
       competition: event.match.competition.name,
       date: event.match.kickoffAt,

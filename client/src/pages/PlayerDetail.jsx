@@ -46,7 +46,7 @@ export default function PlayerDetail() {
     )
   }
 
-  const { team, teammates, scorerRank } = query.data
+  const { team, teammates, scorerRank, recentEvents = [] } = query.data
   const primary = team?.colors?.primary || '#1E1E1E'
   const secondary = team?.colors?.secondary || '#FFFFFF'
   const isGoalkeeper = player.position === 'GK'
@@ -136,6 +136,24 @@ export default function PlayerDetail() {
                 ) : null}
               </div>
             </section>
+
+            {recentEvents.length ? (
+              <section className="card p-5">
+                <h2 className="section-title mb-3">{t('players.recentMatchEvents') || 'Recent match events'}</h2>
+                <ul className="divide-y divide-line">
+                  {recentEvents.map((event) => (
+                    <li key={event.id} className="flex items-center justify-between gap-3 py-2.5 text-sm">
+                      <span className="min-w-0 truncate text-white">
+                        {event.type === 'yellow' ? t('match.yellow') : event.type === 'red' ? t('match.red') : event.type === 'substitution' ? t('match.sub') : event.type}
+                        {event.related ? ' · ' + (t('players.substitutedOff') || 'substituted off') : ''}
+                        {event.match ? <span className="block truncate text-xs text-muted">{event.match}</span> : null}
+                      </span>
+                      <span className="shrink-0 text-xs font-bold text-muted">{event.minute}&apos;</span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
 
             <section className="card p-5">
               <h2 className="section-title mb-2">{t('players.bio')}</h2>
