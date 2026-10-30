@@ -144,7 +144,17 @@ export async function getCompetitionData(id) { if (useMock) return mock.getCompe
 export async function getStandings(id='rwanda-premier-league') { if (useMock) return mock.getStandings(id); const data = await get(`/competitions/${id}/standings`); return Array.isArray(data) ? data : data?.standings || data?.items || [] }
 export async function getTopScorers(id='rwanda-premier-league',limit=10) { if (useMock) return mock.getTopScorers(id,limit); return unwrap(await get(`/competitions/${id}/top-scorers${qs({limit})}`)) }
 export async function getTeams(filters={}) { if (useMock) return mock.getTeams(filters); return unwrap(await get(`/teams${qs({ competitionId: filters.competitionId })}`)) }
-export async function getTeamDetail(id) { if (useMock) return mock.getTeamDetail(id); return get(`/teams/${id}`) }
+export async function getTeamDetail(id) {
+  if (useMock) return mock.getTeamDetail(id)
+  const data = await get(`/teams/${id}`)
+  // The API returns team fields at the top level; the detail page consumes a
+  // nested `team` object plus squad/match data at the same level.
+  if (data?.team) return data
+  return {
+    ...data,
+    team: data ? { ...data, national: data.isNational ?? data.national } : null,
+  }
+}
 export async function getPlayers(filters={}) { if (useMock) return mock.getPlayers(filters); return get(`/players${qs(filters)}`) }
 export async function getPlayer(id) { if (useMock) return mock.getPlayer(id); const data = await get(`/players/${id}`); return data?.player ? data : { ...data, player: data, team: data?.team ?? null, teammates: data?.teammates || [], scorerRank: data?.scorerRank ?? null } }
 export async function getNews(filters={}) { if (useMock) return mock.getNews(filters); return unwrap(await get(`/news${qs(filters)}`)) }
