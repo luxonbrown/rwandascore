@@ -1310,6 +1310,7 @@ export async function adminUpdateLiveMatch(matchId, updates, actor) {
       if (minute < 0 || minute > 120) throw new ApiError('Minute must be between 0 and 120')
       match.minute = minute
     }
+    if (updates.stats) match.stats = { ...(match.stats || {}), ...updates.stats }
     if (updates.status !== undefined) {
       const validStatuses = ['UPCOMING', 'LIVE', 'HT', 'FT', 'POSTPONED']
       if (!validStatuses.includes(updates.status)) throw new ApiError('Invalid status')

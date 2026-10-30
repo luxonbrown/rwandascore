@@ -15,10 +15,10 @@ import { listCompetitions, getCompetition } from '../services/competition.servic
 import { listTeams } from '../services/team.service.js';
 import { listPlayers } from '../services/player.service.js';
 import { listNews, getNewsById, createNews, updateNews, deleteNews, setNewsPublished } from '../services/news.service.js';
-import { createMatch, listMatches, updateMatch, updateMatchLineups, deleteMatch, addMatchEvent, deleteMatchEvent, updateMatchStatus, updateMatchLiveBackground } from '../services/match.service.js';
+import { createMatch, listMatches, updateMatch, updateMatchLineups, deleteMatch, addMatchEvent, deleteMatchEvent, updateMatchStatus, updateMatchLiveBackground, updateMatchLiveStats } from '../services/match.service.js';
 import { serializeActivity, serializeCompetition, serializeSeason, serializeStadium, serializeTeam, serializePlayer } from '../utils/serializers.js';
 import {
-  activityListQuery, competitionCreateSchema, competitionUpdateSchema, eventCreateSchema, matchLineupsUpdateSchema, liveBackgroundSchema,
+  activityListQuery, competitionCreateSchema, competitionUpdateSchema, eventCreateSchema, matchLineupsUpdateSchema, liveBackgroundSchema, liveMatchStatsSchema,
   idParam, liveActionSchema, matchCreateSchema, matchListQuery, matchStatusSchema, matchUpdateSchema, matchVersionSchema, newsCreateSchema,
   newsListQuery, newsPublishSchema, newsUpdateSchema, paginationQuery, playerCreateSchema, playerListQuery,
   playerUpdateSchema, resetPasswordSchema, seasonCreateSchema, seasonListQuery,
@@ -160,6 +160,7 @@ const liveStatus = (status) => asyncHandler(async (req, res) => {
 });
 adminRouter.post('/matches/:id/live/start', contentEditors, validate({ params: idParam, body: matchStatusSchema }), liveStatus('live'));
 adminRouter.put('/matches/:id/live/background', contentEditors, validate({ params: idParam, body: liveBackgroundSchema }), send(({ params, body }) => updateMatchLiveBackground(params.id, body)));
+adminRouter.post('/matches/:id/live/stats', contentEditors, validate({ params: idParam, body: liveMatchStatsSchema }), send(({ params, body }) => updateMatchLiveStats(params.id, body)));
 adminRouter.post('/matches/:id/live/minute', contentEditors, validate({ params: idParam, body: matchStatusSchema }), asyncHandler(async (req, res) => res.json(await updateMatchStatus(req.params.id, { ...req.body, status: 'live' }, req.user, ip(req)))));
 adminRouter.post('/matches/:id/live/goal', contentEditors, validate({ params: idParam, body: eventCreateSchema }), asyncHandler(async (req, res) => res.status(201).json(await addMatchEvent(req.params.id, { ...req.body, type: req.body.type || 'goal' }, req.user, ip(req)))));
 adminRouter.post('/matches/:id/live/card', contentEditors, validate({ params: idParam, body: eventCreateSchema }), asyncHandler(async (req, res) => {

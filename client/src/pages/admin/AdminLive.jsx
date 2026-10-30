@@ -216,6 +216,65 @@ function ScoreEditor({ match, onUpdate, isPending }) {
   )
 }
 
+const matchStatFields = [
+  ['possession', 'match.possession', true],
+  ['shots', 'match.shots'],
+  ['shotsOnTarget', 'match.shotsOnTarget'],
+  ['corners', 'match.corners'],
+  ['fouls', 'match.fouls'],
+]
+
+function MatchStatsEditor({ match, onSave, isPending }) {
+  const { t } = useI18n()
+  const [values, setValues] = useState(() => Object.fromEntries(matchStatFields.map(([key]) => [key, match.stats?.[key] || [0, 0]])))
+  const possessionValid = Number(values.possession?.[0] || 0) + Number(values.possession?.[1] || 0) === 100
+  const setValue = (key, side, value) => setValues((current) => ({
+    ...current,
+    [key]: current[key].map((item, index) => index === side ? value : item),
+  }))
+
+  return (
+    <form className="card space-y-4 p-5" onSubmit={(event) => {
+      event.preventDefault()
+      onSave(Object.fromEntries(matchStatFields.map(([key]) => [key, values[key].map(Number)])))
+    }}>
+      <div>
+        <h2 className="section-title">{t('match.stats')}</h2>
+        <p className="mt-1 text-xs text-muted">{t('admin.live.statsHint')}</p>
+      </div>
+      <div className="grid grid-cols-[minmax(0,1fr)_5rem_5rem] items-center gap-x-3 gap-y-2 text-center">
+        <span />
+        <span className="truncate text-[10px] font-bold uppercase text-muted">{match.homeTeam?.shortName || t('match.home')}</span>
+        <span className="truncate text-[10px] font-bold uppercase text-muted">{match.awayTeam?.shortName || t('match.away')}</span>
+        {matchStatFields.map(([key, label, percent]) => (
+          <div key={key} className="contents">
+            <label className="text-left text-xs font-semibold text-white" htmlFor={`match-stat-${key}-home`}>{t(label)}</label>
+            {[0, 1].map((side) => (
+              <input
+                key={side}
+                id={`match-stat-${key}-${side === 0 ? 'home' : 'away'}`}
+                className="input px-2 text-center tabular-nums"
+                type="number"
+                min="0"
+                max={percent ? 100 : 999}
+                step="1"
+                value={values[key]?.[side] ?? 0}
+                onChange={(event) => setValue(key, side, event.target.value)}
+                aria-label={`${t(label)} · ${side === 0 ? match.homeTeam?.name : match.awayTeam?.name}`}
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+      {!possessionValid ? <p className="text-xs text-negative">{t('admin.live.possessionTotal')}</p> : null}
+      <button type="submit" className="btn btn-accent w-full" disabled={isPending || !possessionValid}>
+        <Save size={14} />
+        {isPending ? t('admin.saving') : t('common.save')}
+      </button>
+    </form>
+  )
+}
+
 function EventPanel({ match, roster, rosterLoading, onAdd, onDelete, addPending, deletePending }) {
   const { t } = useI18n()
   const homePlayers = squadNames(roster.filter((player) => player.teamId === match.homeTeamId))
@@ -520,6 +579,15 @@ export default function AdminLive() {
     }
   }
 
+  const updateStats = async (stats) => {
+    try {
+      await updateLive.mutateAsync({ matchId: match.id, updates: { stats } })
+      pushToast(t('admin.live.statsSaved'))
+    } catch (error) {
+      pushToast(error.message, 'error')
+    }
+  }
+
   const saveBackground = async (event) => {
     event.preventDefault()
     try {
@@ -629,6 +697,7 @@ export default function AdminLive() {
                 onUpdate={updateScore}
                 isPending={updateLive.isPending}
               />
+              <MatchStatsEditor key={`stats-${match.id}`} match={match} onSave={updateStats} isPending={updateLive.isPending} />
               <form className="card space-y-3 p-4" onSubmit={saveBackground}>
                 <div className="flex items-center gap-2">
                   <ImagePlus size={16} className="text-accent" />

@@ -637,6 +637,26 @@ export async function updateMatchLiveBackground(id, { version, imageUrl }) {
   return serializeMatch(full, { includeEvents: true });
 }
 
+export async function updateMatchLiveStats(id, { version, stats }) {
+  const current = await prisma.match.findUnique({ where: { id }, include: matchDetailInclude });
+  if (!current) throw notFound('Match not found');
+  if (!['live', 'ht', 'ft'].includes(current.status)) {
+    throw badRequest('Match stats can only be updated for a live, half-time, or finished match');
+  }
+  if (Number(version) !== current.version) {
+    throw conflict('This match was changed by someone else. Reload it and try again.', 'MATCH_VERSION_CONFLICT', {
+      current: serializeMatch(current, { includeEvents: true }),
+    });
+  }
+  const currentStats = current.stats && typeof current.stats === 'object' && !Array.isArray(current.stats) ? current.stats : {};
+  const changed = await prisma.match.updateMany({
+    where: { id, version: current.version },
+    data: { stats: { ...currentStats, ...stats }, version: current.version + 1 },
+  });
+  if (!changed.count) throw conflict('This match was changed by someone else. Reload it and try again.', 'MATCH_VERSION_CONFLICT');
+  return serializeMatch(await emitMatchUpdate(id), { includeEvents: true });
+}
+
 let liveClockTimer = null;
 let liveClockTickRunning = false;
 

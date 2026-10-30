@@ -105,6 +105,22 @@ export const liveBackgroundSchema = z.object({
   imageUrl: z.union([z.string().url().max(2048), z.literal(''), z.null()]),
 });
 
+const nonNegativeStatPair = z.tuple([
+  z.coerce.number().int().min(0).max(999),
+  z.coerce.number().int().min(0).max(999),
+]);
+export const liveMatchStatsSchema = z.object({
+  version: z.coerce.number().int().min(1),
+  stats: z.object({
+    possession: z.tuple([z.coerce.number().int().min(0).max(100), z.coerce.number().int().min(0).max(100)])
+      .refine(([home, away]) => home + away === 100, 'Possession values must add up to 100'),
+    shots: nonNegativeStatPair,
+    shotsOnTarget: nonNegativeStatPair,
+    corners: nonNegativeStatPair,
+    fouls: nonNegativeStatPair,
+  }),
+});
+
 export const matchLineupsUpdateSchema = z.object({
   version: z.coerce.number().int().min(1),
   lineups: z.object({
