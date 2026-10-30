@@ -48,10 +48,10 @@ function CardIcon({ className = '' }) {
 
 function FootballIcon({ size = 14, className = '' }) {
   return (
-    <svg aria-hidden="true" width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
-      <circle cx="12" cy="12" r="9.25" stroke="currentColor" strokeWidth="1.7" />
-      <path d="m12 7.5 3.8 2.75-1.45 4.45h-4.7L8.2 10.25 12 7.5Z" fill="currentColor" />
-      <path d="m12 7.5-.2-4.7M15.8 10.25l4.45-1.5M14.35 14.7l2.3 4.1M9.65 14.7l-2.3 4.1M8.2 10.25 3.75 8.75" stroke="currentColor" strokeWidth="1.4" />
+    <svg aria-hidden="true" width={size} height={size} viewBox="0 0 24 24" className={className}>
+      <circle cx="12" cy="12" r="10" fill="#fff" stroke="#111827" strokeWidth="1.4" />
+      <path d="m12 6.8 3.9 2.85-1.5 4.55h-4.8L8.1 9.65 12 6.8Z" fill="#111827" />
+      <path d="m12 6.8-.1-4.75M15.9 9.65l4.4-1.55M14.4 14.2l2.2 4.5M9.6 14.2l-2.2 4.5M8.1 9.65 3.7 8.1" fill="none" stroke="#111827" strokeWidth="1.45" />
     </svg>
   )
 }
