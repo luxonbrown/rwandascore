@@ -281,6 +281,23 @@ function adjustPlayerCard(db, event, direction) {
   player[key] = player.stats[key]
 }
 
+function adjustPlayerAssists(db, event, direction) {
+  if (event.type !== 'goal' || !event.relatedPlayerId) return
+  const player = db.players.find((item) => item.id === event.relatedPlayerId)
+  if (!player) return
+  player.stats ||= {}
+  player.stats.assists = Math.max(0, (player.stats.assists ?? player.assists ?? 0) + direction)
+  player.assists = player.stats.assists
+}
+
+function adjustPlayerAppearances(db, playerId, direction) {
+  const player = db.players.find((item) => item.id === playerId)
+  if (!player) return
+  player.stats ||= {}
+  player.stats.appearances = Math.max(0, (player.stats.appearances ?? player.appearances ?? 0) + direction)
+  player.appearances = player.stats.appearances
+}
+
 function topScorersFor(db, competitionId = 'rwanda-premier-league', limit = 10) {
   const leagueTeamIds = new Set(db.standings.map((row) => row.teamId))
   let players = db.players
@@ -1297,6 +1314,11 @@ export async function adminUpdateLiveMatch(matchId, updates, actor) {
       const validStatuses = ['UPCOMING', 'LIVE', 'HT', 'FT', 'POSTPONED']
       if (!validStatuses.includes(updates.status)) throw new ApiError('Invalid status')
       match.status = updates.status
+      if (priorStatus === 'UPCOMING' && updates.status === 'LIVE') {
+        const starters = ['home', 'away'].flatMap((side) => (match.lineups?.[side]?.rows || [])
+          .flatMap((row) => (row.players || []).map((item) => item.playerId).filter(Boolean)))
+        for (const playerId of new Set(starters)) adjustPlayerAppearances(db, playerId, 1)
+      }
       if (updates.status === 'FT') match.minute = 90
     }
     if (match.status === 'FT' && (hadStandingContribution || priorStatus !== 'FT')) {
@@ -1447,6 +1469,8 @@ export async function adminAddMatchEvent(matchId, event, actor) {
     match.events = [...(match.events || []), created].sort((a, b) => a.minute - b.minute)
     adjustPlayerGoal(db, created, 1)
     adjustPlayerCard(db, created, 1)
+    adjustPlayerAssists(db, created, 1)
+    if (created.type === 'substitution' && created.playerId) adjustPlayerAppearances(db, created.playerId, 1)
 
     if (['goal', 'penalty'].includes(created.type)) {
       if (created.teamId === match.homeTeamId) match.homeScore += 1
@@ -1488,6 +1512,8 @@ export async function adminDeleteMatchEvent(matchId, eventIndex, actor) {
     const [removed] = match.events.splice(index, 1)
     adjustPlayerGoal(db, removed, -1)
     adjustPlayerCard(db, removed, -1)
+    adjustPlayerAssists(db, removed, -1)
+    if (removed.type === 'substitution' && removed.playerId) adjustPlayerAppearances(db, removed.playerId, -1)
     if (['goal', 'penalty'].includes(removed.type)) {
       if (removed.teamId === match.homeTeamId) match.homeScore = Math.max(0, match.homeScore - 1)
       else match.awayScore = Math.max(0, match.awayScore - 1)

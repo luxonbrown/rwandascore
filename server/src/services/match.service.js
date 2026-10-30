@@ -588,6 +588,16 @@ export async function updateMatchStatus(id, { status, minute, stoppageMinutes, v
       await recalculateStandings(tx, current.seasonId);
     }
 
+    if (current.status === 'scheduled' && status === 'live' && current.lineups) {
+      const lineup = typeof current.lineups === 'object' ? current.lineups : {};
+      const starters = ['home', 'away'].flatMap((side) =>
+        (lineup[side]?.rows || []).flatMap((row) => (row.players || []).map((player) => player.playerId).filter(Boolean)),
+      );
+      if (starters.length) {
+        await tx.player.updateMany({ where: { id: { in: [...new Set(starters)] } }, data: { appearances: { increment: 1 } } });
+      }
+    }
+
     await logActivity(tx, {
       userId: actor?.id,
       action: 'update_status',
@@ -834,6 +844,12 @@ export async function addMatchEvent(matchId, data, actor, ipAddress = null) {
       const field = data.type === 'yellow' ? 'yellowCards' : 'redCards';
       await tx.player.update({ where: { id: player.id }, data: { [field]: { increment: 1 } } });
     }
+    if (player && data.type === 'substitution') {
+      await tx.player.update({ where: { id: player.id }, data: { appearances: { increment: 1 } } });
+    }
+    if (data.type === 'goal' && data.relatedPlayerId) {
+      await tx.player.update({ where: { id: data.relatedPlayerId }, data: { assists: { increment: 1 } } });
+    }
 
     const delta = scoreDelta(data.type, data.teamId, match);
     const homeScore = match.homeScore + delta.home;
@@ -931,7 +947,13 @@ export async function deleteMatchEvent(matchId, eventId, version, actor, ipAddre
 
     if (event.playerId && ['yellow', 'red'].includes(event.type)) {
       const field = event.type === 'yellow' ? 'yellowCards' : 'redCards';
-      await tx.player.update({ where: { id: event.playerId }, data: { [field]: { decrement: 1 } } });
+      await tx.player.updateMany({ where: { id: event.playerId, [field]: { gt: 0 } }, data: { [field]: { decrement: 1 } } });
+    }
+    if (event.playerId && event.type === 'substitution') {
+      await tx.player.updateMany({ where: { id: event.playerId, appearances: { gt: 0 } }, data: { appearances: { decrement: 1 } } });
+    }
+    if (event.type === 'goal' && event.relatedPlayerId) {
+      await tx.player.updateMany({ where: { id: event.relatedPlayerId, assists: { gt: 0 } }, data: { assists: { decrement: 1 } } });
     }
 
     const delta = scoreDelta(event.type, event.teamId, match);
