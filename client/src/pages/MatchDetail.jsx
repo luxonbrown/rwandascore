@@ -104,9 +104,8 @@ function EventPlayerNames({ event, t, fallback }) {
   if (!substitution) return event.playerName || t(fallback || 'match.goal')
   return (
     <>
-      <span className="text-slate-500">{t('match.subOut')}: {event.playerOut || event.assistName || '—'}</span>
-      <span className="mx-1.5 text-muted">→</span>
-      <span className="text-emerald-300">{t('match.subIn')}: {event.playerName || event.player || '—'}</span>
+      <span className="block text-emerald-300">{t('match.subIn')}: {event.playerName || event.player || '—'}</span>
+      <span className="block text-slate-500">{t('match.subOut')}: {event.playerOut || event.assistName || '—'}</span>
     </>
   )
 }

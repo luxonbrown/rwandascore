@@ -492,9 +492,8 @@ function EventPanel({ match, roster, rosterLoading, onAdd, onDelete, addPending,
                   <p className="truncate text-xs font-semibold text-white">
                     {event.type === 'substitution' || event.type === 'sub' ? (
                       <>
-                        <span className="text-slate-500">{t('match.subOut')}: {event.playerOut || event.relatedPlayer || '—'}</span>
-                        <span className="mx-1.5 text-muted">→</span>
-                        <span className="text-emerald-300">{t('match.subIn')}: {event.playerName || event.player || '—'}</span>
+                        <span className="block text-emerald-300">{t('match.subIn')}: {event.playerName || event.player || '—'}</span>
+                        <span className="block text-slate-500">{t('match.subOut')}: {event.playerOut || event.relatedPlayer || '—'}</span>
                       </>
                     ) : <>{event.playerName || event.player}</>}
                     {event.type !== 'substitution' && event.type !== 'sub' && (event.assistName || event.relatedPlayer) ? (
