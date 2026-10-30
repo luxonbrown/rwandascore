@@ -283,6 +283,7 @@ function EventPanel({ match, roster, rosterLoading, onAdd, onDelete, addPending,
     type: 'goal',
     teamId: match.homeTeamId,
     playerName: '',
+    playerOutName: '',
     assistName: '',
     detail: '',
     x: '',
@@ -297,6 +298,7 @@ function EventPanel({ match, roster, rosterLoading, onAdd, onDelete, addPending,
       teamId: match.homeTeamId,
       minute: match.minute || 1,
       playerName: '',
+      playerOutName: '',
       assistName: '',
       detail: '',
       x: '',
@@ -321,6 +323,7 @@ function EventPanel({ match, roster, rosterLoading, onAdd, onDelete, addPending,
             setForm((current) => ({
               ...current,
               playerName: '',
+              playerOutName: '',
               assistName: '',
               detail: '',
               x: '',
@@ -357,6 +360,8 @@ function EventPanel({ match, roster, rosterLoading, onAdd, onDelete, addPending,
             onChange={(event) => {
               set('teamId', event.target.value)
               set('playerName', '')
+              set('playerOutName', '')
+              set('assistName', '')
             }}
           >
             <option value={match.homeTeamId}>{match.homeTeam?.name}</option>
@@ -365,7 +370,7 @@ function EventPanel({ match, roster, rosterLoading, onAdd, onDelete, addPending,
         </div>
         <div>
           <label htmlFor="event-player" className="label">
-            {t('admin.live.eventPlayer')} *
+            {form.type === 'substitution' ? t('admin.live.subIn') : t('admin.live.eventPlayer')} *
           </label>
           <select
             id="event-player"
@@ -402,23 +407,36 @@ function EventPanel({ match, roster, rosterLoading, onAdd, onDelete, addPending,
             onChange={(event) => set('minute', event.target.value)}
           />
         </div>
-        <div>
-          <label htmlFor="event-assist" className="label">
-            {t('admin.live.eventAssist')}
-          </label>
-          <input
-            id="event-assist"
-            className="input"
-            list={`assists-${form.teamId}`}
-            value={form.assistName}
-            onChange={(event) => set('assistName', event.target.value)}
-          />
-          <datalist id={`assists-${form.teamId}`}>
-            {playerNames.map((name) => (
-              <option key={name} value={name} />
-            ))}
-          </datalist>
-        </div>
+        {form.type === 'substitution' ? (
+          <div>
+            <label htmlFor="event-sub-out" className="label">{t('admin.live.subOut')} *</label>
+            <select
+              id="event-sub-out"
+              className="input"
+              required
+              disabled={rosterLoading || !playerNames.length}
+              value={form.playerOutName}
+              onChange={(event) => set('playerOutName', event.target.value)}
+            >
+              <option value="">{t('admin.live.choosePlayer')}</option>
+              {playerNames.map((name) => <option key={name} value={name} disabled={name === form.playerName}>{name}</option>)}
+            </select>
+          </div>
+        ) : (
+          <div>
+            <label htmlFor="event-assist" className="label">{t('admin.live.eventAssist')}</label>
+            <input
+              id="event-assist"
+              className="input"
+              list={`assists-${form.teamId}`}
+              value={form.assistName}
+              onChange={(event) => set('assistName', event.target.value)}
+            />
+            <datalist id={`assists-${form.teamId}`}>
+              {playerNames.map((name) => <option key={name} value={name} />)}
+            </datalist>
+          </div>
+        )}
         <div>
           <label htmlFor="event-detail" className="label">
             {t('admin.live.eventDetail')}
@@ -445,7 +463,7 @@ function EventPanel({ match, roster, rosterLoading, onAdd, onDelete, addPending,
           </button>
         </div>
         <div className="flex items-end sm:col-span-2">
-          <button type="submit" className="btn btn-accent" disabled={addPending}>
+          <button type="submit" className="btn btn-accent" disabled={addPending || (form.type === 'substitution' && (!form.playerName || !form.playerOutName || form.playerName === form.playerOutName))}>
             <CircleDot size={15} />
             {addPending ? t('admin.saving') : t('admin.live.saveEvent')}
           </button>
@@ -472,8 +490,14 @@ function EventPanel({ match, roster, rosterLoading, onAdd, onDelete, addPending,
                 </span>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-xs font-semibold text-white">
-                    {event.playerName || event.player}
-                    {(event.assistName || event.relatedPlayer) ? (
+                    {event.type === 'substitution' || event.type === 'sub' ? (
+                      <>
+                        <span className="text-slate-500">{t('match.subOut')}: {event.playerOut || event.relatedPlayer || '—'}</span>
+                        <span className="mx-1.5 text-muted">→</span>
+                        <span className="text-emerald-300">{t('match.subIn')}: {event.playerName || event.player || '—'}</span>
+                      </>
+                    ) : <>{event.playerName || event.player}</>}
+                    {event.type !== 'substitution' && event.type !== 'sub' && (event.assistName || event.relatedPlayer) ? (
                       <span className="font-normal text-muted"> ({event.assistName || event.relatedPlayer})</span>
                     ) : null}
                   </p>

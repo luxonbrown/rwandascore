@@ -254,7 +254,7 @@ export async function adminAddMatchEvent(matchId,event,actor) {
   const squadPage = await getPlayers({ teamId: event.teamId, pageSize: 100 })
   const squad = squadPage.items || []
   const byName = (name) => squad.find((player) => player.name?.trim().toLowerCase() === name?.trim().toLowerCase())?.id || null
-  return admin(`/matches/${matchId}/events`,{method:'POST',body:{...event,version:m.version,type:event.type?.toLowerCase(),teamId:event.teamId||event.team?.id,playerId:event.playerId || byName(event.playerName),relatedPlayerId:event.relatedPlayerId || byName(event.assistName),note:event.note ?? event.detail ?? null,x:event.x == null || event.x === '' ? undefined : Number(event.x),y:event.y == null || event.y === '' ? undefined : Number(event.y)}})
+  return admin(`/matches/${matchId}/events`,{method:'POST',body:{...event,version:m.version,type:event.type?.toLowerCase(),teamId:event.teamId||event.team?.id,playerId:event.playerId || byName(event.playerName),relatedPlayerId:event.relatedPlayerId || byName(event.type === 'substitution' ? event.playerOutName : event.assistName),note:event.note ?? event.detail ?? null,x:event.x == null || event.x === '' ? undefined : Number(event.x),y:event.y == null || event.y === '' ? undefined : Number(event.y)}})
 }
 export async function adminDeleteMatchEvent(matchId,eventId,actor) { if(useMock)return mock.adminDeleteMatchEvent(matchId,eventId,actor); const m=await getMatch(matchId); return admin(`/matches/${matchId}/events/${eventId}`,{method:'DELETE',body:{version:m.version}}) }
 export async function adminResetDemoData(actor) { if(useMock)return mock.adminResetDemoData(actor); throw new ApiError('Demo reset is available only in mock mode', 400) }

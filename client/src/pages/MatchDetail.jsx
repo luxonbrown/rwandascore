@@ -99,6 +99,18 @@ function StatBar({ label, values, percent }) {
   )
 }
 
+function EventPlayerNames({ event, t, fallback }) {
+  const substitution = event.type === 'sub' || event.type === 'substitution'
+  if (!substitution) return event.playerName || t(fallback || 'match.goal')
+  return (
+    <>
+      <span className="text-slate-500">{t('match.subOut')}: {event.playerOut || event.assistName || '—'}</span>
+      <span className="mx-1.5 text-muted">→</span>
+      <span className="text-emerald-300">{t('match.subIn')}: {event.playerName || event.player || '—'}</span>
+    </>
+  )
+}
+
 function LineupSide({ lineup, team, t, live = false, backgroundImageUrl = null }) {
   const primary = team.colors?.primary || '#f97316'
   const secondary = team.colors?.secondary || '#ffffff'
@@ -423,7 +435,7 @@ export default function MatchDetail() {
                           <Icon size={14} className={color} />
                           <div className="min-w-0 flex-1">
                             <p className="truncate text-xs font-semibold text-white">
-                              {event.playerName || t(labelKey)}
+                              <EventPlayerNames event={event} t={t} fallback={labelKey} />
                             </p>
                             <p className="truncate text-[10px] text-muted">
                               {event.teamId === homeTeam?.id ? homeTeam?.name : awayTeam?.name}
@@ -536,16 +548,16 @@ export default function MatchDetail() {
                     </span>
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-semibold text-white">
-                        {event.playerName || t(labelKey)}
+                        <EventPlayerNames event={event} t={t} fallback={labelKey} />
                         <span className="ml-2 text-[10px] font-bold uppercase tracking-wide text-muted">
                           {t(labelKey)}
                         </span>
                       </p>
                       <p className="text-[11px] text-muted">
                         {home ? homeTeam?.name : awayTeam?.name}
-                        {event.playerOut ? ` · ${t('match.subOn')} ${event.playerOut}` : ''}
+                        {event.playerOut && event.type !== 'sub' && event.type !== 'substitution' ? ` · ${t('match.subOn')} ${event.playerOut}` : ''}
                       </p>
-                      {event.assistName ? (
+                      {event.assistName && event.type !== 'sub' && event.type !== 'substitution' ? (
                         <p className="text-[10px] text-muted">
                           {t('match.assist')}: {event.assistName}
                         </p>

@@ -1456,10 +1456,10 @@ export async function adminAddMatchEvent(matchId, event, actor) {
       type: event.type || 'goal',
       teamId: event.teamId,
       playerId: registeredPlayer?.id || null,
-      relatedPlayerId: event.relatedPlayerId || db.players.find((item) => item.teamId === event.teamId && item.name?.trim().toLocaleLowerCase() === (event.assistName || '').trim().toLocaleLowerCase())?.id || null,
+      relatedPlayerId: event.relatedPlayerId || db.players.find((item) => item.teamId === event.teamId && item.name?.trim().toLocaleLowerCase() === ((event.type === 'substitution' ? event.playerOutName : event.assistName) || '').trim().toLocaleLowerCase())?.id || null,
       playerName: event.playerName.trim(),
-      assistName: event.assistName || '',
-      playerOut: event.playerOut || '',
+      assistName: event.type === 'substitution' ? '' : event.assistName || '',
+      playerOut: event.type === 'substitution' ? event.playerOutName || '' : event.playerOut || '',
       detail: event.detail || '',
     }
     if (![match.homeTeamId, match.awayTeamId].includes(created.teamId)) {
