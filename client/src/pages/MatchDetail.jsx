@@ -243,6 +243,14 @@ export default function MatchDetail() {
   const tab = searchParams.get('tab') || 'overview'
   const setTab = (value) => setSearchParams(value === 'overview' ? {} : { tab: value }, { replace: true })
   const h2h = h2hQuery.data || []
+  const displayStats = { ...(stats || {}) }
+  for (const cardType of ['yellow', 'red']) {
+    const recorded = Array.isArray(displayStats[cardType]) ? displayStats[cardType] : [0, 0]
+    displayStats[cardType] = [homeTeam?.id, awayTeam?.id].map((teamId, side) => Math.max(
+      Number(recorded[side]) || 0,
+      (events || []).filter((event) => event.type === cardType && event.teamId === teamId).length,
+    ))
+  }
 
   return (
     <>
@@ -442,7 +450,7 @@ export default function MatchDetail() {
                       <StatBar
                         key={key}
                         label={t(label)}
-                        values={stats[key] || [0, 0]}
+                        values={displayStats[key] || [0, 0]}
                         percent={percent}
                       />
                     ))}
@@ -483,7 +491,7 @@ export default function MatchDetail() {
               </div>
               <div className="space-y-4">
                 {statRows.map(([key, label, percent]) => (
-                  <StatBar key={key} label={t(label)} values={stats[key] || [0, 0]} percent={percent} />
+                  <StatBar key={key} label={t(label)} values={displayStats[key] || [0, 0]} percent={percent} />
                 ))}
               </div>
             </section>
