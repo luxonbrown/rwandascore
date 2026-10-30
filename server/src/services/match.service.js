@@ -400,7 +400,7 @@ export async function updateMatchStatus(id, { status, minute, version }, actor, 
     });
 
     return { matchId: id };
-  });
+  }, { maxWait: 10_000, timeout: 15_000 });
 
   const full = await emitMatchUpdate(result.matchId);
   return serializeMatch(full, { includeEvents: true });
@@ -540,7 +540,7 @@ export async function addMatchEvent(matchId, data, actor, ipAddress = null) {
       competitionId: match.competitionId,
       seasonId: match.seasonId,
     };
-  });
+  }, { maxWait: 10_000, timeout: 15_000 });
 
   const event = await prisma.matchEvent.findUnique({
     where: { id: result.eventId },
@@ -632,7 +632,7 @@ export async function deleteMatchEvent(matchId, eventId, version, actor, ipAddre
       competitionId: match.competitionId,
       seasonId: match.seasonId,
     };
-  });
+  }, { maxWait: 10_000, timeout: 15_000 });
 
   const full = await emitMatchUpdate(matchId);
   return { success: true, match: serializeMatch(full, { includeEvents: true }) };

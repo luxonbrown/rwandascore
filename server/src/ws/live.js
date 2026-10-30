@@ -65,15 +65,28 @@ export function attachLiveWebSocket(server) {
 export function broadcast(type, data) {
   if (!wss) return;
 
-  const message = JSON.stringify({
-    type,
-    data,
-    timestamp: new Date().toISOString(),
-  });
+  let message;
+  try {
+    message = JSON.stringify({
+      type,
+      data,
+      timestamp: new Date().toISOString(),
+    });
+  } catch {
+    return;
+  }
 
   for (const socket of wss.clients) {
     if (socket.readyState === WebSocket.OPEN) {
-      socket.send(message);
+      try {
+        socket.send(message);
+      } catch {
+        try {
+          socket.terminate();
+        } catch {
+          // A failed client socket must not fail the REST update that triggered the broadcast.
+        }
+      }
     }
   }
 }
