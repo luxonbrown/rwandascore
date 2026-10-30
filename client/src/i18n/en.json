@@ -726,6 +726,8 @@
       "eventType": "Event type",
       "eventPlayer": "Player name",
       "choosePlayer": "Choose a registered player",
+      "loadingPlayers": "Loading registered players…",
+      "noTeamPlayers": "No registered players for this team",
       "eventTeam": "Team",
       "eventAssist": "Assist (optional)",
       "eventDetail": "Detail (optional)",

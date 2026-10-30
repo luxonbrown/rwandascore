@@ -51,10 +51,9 @@ const eventTone = {
   position: 'bg-accent/15 text-accent',
 }
 
-function squadNames(side, roster = []) {
-  if (!side) return []
-  const names = (side.rows || []).flatMap((row) => row.players || []).map((player) => player.name)
-  return [...new Set([...names, ...(side.bench || []).map((player) => player.name), ...roster.map((player) => player.name)].filter(Boolean))]
+function squadNames(roster = []) {
+  return [...new Set(roster.map((player) => player.name).filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b))
 }
 
 function ScoreEditor({ match, onUpdate, isPending }) {
@@ -182,10 +181,10 @@ function ScoreEditor({ match, onUpdate, isPending }) {
   )
 }
 
-function EventPanel({ match, roster, onAdd, onDelete, addPending, deletePending }) {
+function EventPanel({ match, roster, rosterLoading, onAdd, onDelete, addPending, deletePending }) {
   const { t } = useI18n()
-  const homePlayers = squadNames(match.lineups?.home, roster.filter((player) => player.teamId === match.homeTeamId))
-  const awayPlayers = squadNames(match.lineups?.away, roster.filter((player) => player.teamId === match.awayTeamId))
+  const homePlayers = squadNames(roster.filter((player) => player.teamId === match.homeTeamId))
+  const awayPlayers = squadNames(roster.filter((player) => player.teamId === match.awayTeamId))
   const [form, setForm] = useState({
     type: 'goal',
     teamId: match.homeTeamId,
@@ -278,12 +277,19 @@ function EventPanel({ match, roster, onAdd, onDelete, addPending, deletePending 
             id="event-player"
             className="input"
             required
+            disabled={rosterLoading || !playerNames.length}
             value={form.playerName}
             onChange={(event) => set('playerName', event.target.value)}
           >
-            <option value="">{t('admin.live.choosePlayer')}</option>
+            <option value="">
+              {rosterLoading
+                ? t('admin.live.loadingPlayers')
+                : playerNames.length
+                  ? t('admin.live.choosePlayer')
+                  : t('admin.live.noTeamPlayers')}
+            </option>
             {playerNames.map((name) => (
-              <option key={name} value={name} />
+              <option key={name} value={name}>{name}</option>
             ))}
           </select>
         </div>
@@ -572,6 +578,7 @@ export default function AdminLive() {
                 key={`events-${match.id}`}
                 match={{ ...match, events: eventsQuery.data || match.events || [] }}
                 roster={playersQuery.data || []}
+                rosterLoading={playersQuery.isLoading}
                 onAdd={submitEvent}
                 onDelete={removeEvent}
                 addPending={addEvent.isPending}

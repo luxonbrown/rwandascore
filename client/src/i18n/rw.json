@@ -726,6 +726,8 @@
       "eventType": "Ubwoko bw'igikorwa",
       "eventPlayer": "Izina ry'umukinnyi",
       "choosePlayer": "Hitamo umukinnyi uri muri iyi kipe",
+      "loadingPlayers": "Turimo kuzana abakinnyi banditswe…",
+      "noTeamPlayers": "Nta mukinnyi wanditswe muri iyi kipe",
       "eventTeam": "Ikipe",
       "eventAssist": "Uwafashije (bidategetswe)",
       "eventDetail": "Ibisobanuro (bidategetswe)",
