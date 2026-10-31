@@ -216,7 +216,7 @@ function LineupSide({ homeLineup, awayLineup, homeTeam, awayTeam, t, live = fals
       </div>
       <div className="p-4">
         <h3 className="mb-3 text-xs font-extrabold text-white">{live ? t('match.remainingSubstitutes') : t('match.bench') || 'Bench'}</h3>
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-2 gap-2 sm:gap-4">
           {renderBench(homeLineup, homeTeam)}
           {renderBench(awayLineup, awayTeam)}
         </div>
