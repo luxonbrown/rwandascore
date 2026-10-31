@@ -1,4 +1,4 @@
-import { useId, useState } from 'react'
+import { useEffect, useId, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import {
   ArrowLeft,
@@ -12,6 +12,8 @@ import {
   Trophy,
   UserRound,
   Users,
+  Volume2,
+  VolumeX,
 } from 'lucide-react'
 import Container from '../components/ui/Container'
 import Tabs from '../components/ui/Tabs'
@@ -26,6 +28,9 @@ import { useHeadToHead, useMatch } from '../hooks/useData'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { useI18n } from '../hooks/useI18n'
 import { formatDateLong, formatTime } from '../utils/format'
+import { usePreferencesStore } from '../store/preferences'
+import { startSoundtrack, stopSoundtrack } from '../utils/soundtrack'
+import PlayerAvatar from '../components/players/PlayerAvatar'
 
 const eventTypes = {
   goal: ['match.goal', 'text-accent', FootballIcon],
@@ -151,10 +156,7 @@ function LineupSide({ homeLineup, awayLineup, homeTeam, awayTeam, t, live = fals
     const secondary = team.colors?.secondary || '#ffffff'
     return (
       <Link key={player.playerId} to={`/players/${player.playerId}`} className="group flex w-[3.8rem] flex-col items-center gap-0.5 px-0.5 text-center sm:w-[4.6rem]">
-        <span className="relative flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border border-white/80 bg-white text-[11px] font-black text-slate-900 shadow sm:h-9 sm:w-9 sm:text-xs">
-          {player.photoUrl ? <img src={player.photoUrl} alt={player.name} loading="lazy" className="absolute inset-0 z-10 h-full w-full object-cover" onError={(event) => { event.currentTarget.style.display = 'none' }} /> : null}
-          <span>{player.number}</span>
-        </span>
+        <PlayerAvatar player={player} className="h-8 w-8 rounded-full border border-white/80 bg-white text-[11px] font-black text-slate-900 shadow sm:h-9 sm:w-9 sm:text-xs" fallbackClassName="text-[9px] text-slate-900" number={player.number} numberClassName="bg-black/80 text-white" />
         <span className="max-w-full truncate rounded bg-black/55 px-1 text-[8px] font-bold leading-tight text-white group-hover:text-accent sm:text-[9px]">{player.name}</span>
       </Link>
     )
@@ -265,6 +267,14 @@ export default function MatchDetail() {
   const [searchParams, setSearchParams] = useSearchParams()
   const query = useMatch(id)
   const match = query.data
+  const crowdSoundEnabled = usePreferencesStore((state) => state.crowdSoundEnabled)
+  const toggleCrowdSound = usePreferencesStore((state) => state.toggleCrowdSound)
+  const isLiveMatch = match?.status === 'LIVE' || match?.status === 'HT'
+  useEffect(() => {
+    if (isLiveMatch && crowdSoundEnabled) void startSoundtrack()
+    else stopSoundtrack()
+    return () => stopSoundtrack()
+  }, [id, isLiveMatch, crowdSoundEnabled])
   const h2hQuery = useHeadToHead(match?.homeTeamId, match?.awayTeamId)
   useDocumentTitle(match ? `${match.homeTeam?.name} vs ${match.awayTeam?.name}` : t('common.loading'))
 
@@ -321,6 +331,9 @@ export default function MatchDetail() {
             </button>
             <div className="flex items-center gap-2">
               <StatusBadge status={match.status} minute={match.minute} showMinute />
+              {live ? <button type="button" data-sound="off" onClick={toggleCrowdSound} aria-pressed={crowdSoundEnabled} className="btn btn-secondary p-2" aria-label={t(crowdSoundEnabled ? 'live.muteCrowd' : 'live.enableCrowd')} title={t(crowdSoundEnabled ? 'live.muteCrowd' : 'live.enableCrowd')}>
+                {crowdSoundEnabled ? <Volume2 size={16}/> : <VolumeX size={16}/>}
+              </button> : null}
               <ShareButton
                 title={`${homeTeam?.name} vs ${awayTeam?.name}`}
                 text={`${homeTeam?.name} ${match.homeScore}-${match.awayScore} ${awayTeam?.name}`}

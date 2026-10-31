@@ -50,6 +50,47 @@ function defaultMinute(status) {
 
 const LIVE_CLOCK_KEY = 'liveClock';
 
+async function hydrateLineupPlayerPhotos(matches) {
+  const isArray = Array.isArray(matches);
+  const list = isArray ? matches : [matches];
+  const playerIds = list.flatMap((match) => ['home', 'away'].flatMap((side) => {
+    const lineup = match?.lineups?.[side];
+    return [
+      ...(lineup?.rows || []).flatMap((row) => (row.players || []).map((player) => player.playerId).filter(Boolean)),
+      ...(lineup?.bench || []).map((player) => player.playerId).filter(Boolean),
+    ];
+  }));
+  if (!playerIds.length) return matches;
+
+  const players = await prisma.player.findMany({
+    where: { id: { in: [...new Set(playerIds)] } },
+    select: { id: true, photoUrl: true },
+  });
+  const photoById = new Map(players.map((player) => [player.id, player.photoUrl]));
+  const hydrated = list.map((match) => ({
+    ...match,
+    lineups: match.lineups ? Object.fromEntries(['home', 'away'].map((side) => {
+      const lineup = match.lineups[side];
+      if (!lineup) return [side, lineup];
+      return [side, {
+        ...lineup,
+        rows: (lineup.rows || []).map((row) => ({
+          ...row,
+          players: (row.players || []).map((player) => ({
+            ...player,
+            photoUrl: photoById.get(player.playerId) ?? player.photoUrl ?? null,
+          })),
+        })),
+        bench: (lineup.bench || []).map((player) => ({
+          ...player,
+          photoUrl: photoById.get(player.playerId) ?? player.photoUrl ?? null,
+        })),
+      }];
+    })) : null,
+  }));
+  return isArray ? hydrated : hydrated[0];
+}
+
 function withLiveClock(stats, clock) {
   return { ...(stats && typeof stats === 'object' && !Array.isArray(stats) ? stats : {}), [LIVE_CLOCK_KEY]: clock };
 }
@@ -117,13 +158,15 @@ async function emitMatchUpdate(matchId, { includeEvents = true } = {}) {
 
   if (!match) return null;
 
-  broadcast('match:update', { match: serializeMatch(match, { includeEvents }) });
+  const hydratedMatch = await hydrateLineupPlayerPhotos(match);
+
+  broadcast('match:update', { match: serializeMatch(hydratedMatch, { includeEvents }) });
   broadcast('standings:update', {
     competitionId: match.competitionId,
     seasonId: match.seasonId,
   });
 
-  return match;
+  return hydratedMatch;
 }
 
 export async function listMatches({
@@ -184,8 +227,9 @@ export async function listMatches({
     }),
   ]);
 
+  const matchesWithLineupPhotos = await hydrateLineupPlayerPhotos(matches);
   return {
-    items: matches.map((match) => serializeMatch(match)),
+    items: matchesWithLineupPhotos.map((match) => serializeMatch(match)),
     total,
     page,
     pageSize,
@@ -200,7 +244,8 @@ export async function getLiveMatches() {
     orderBy: { kickoffAt: 'desc' },
   });
 
-  return matches.map((match) => serializeMatch(match));
+  const matchesWithLineupPhotos = await hydrateLineupPlayerPhotos(matches);
+  return matchesWithLineupPhotos.map((match) => serializeMatch(match));
 }
 
 export async function getMatch(id) {
@@ -211,7 +256,7 @@ export async function getMatch(id) {
 
   if (!match) throw notFound('Match not found');
 
-  return serializeMatch(match, { includeEvents: true });
+  return serializeMatch(await hydrateLineupPlayerPhotos(match), { includeEvents: true });
 }
 
 export async function getHeadToHead(homeTeamId, awayTeamId, limit = 10) {
@@ -754,7 +799,21 @@ async function tickLiveClocks() {
 
 export function startLiveClockScheduler() {
   if (liveClockTimer) return () => clearInterval(liveClockTimer);
-  const run = () => tickLiveClocks().catch((error) => console.error('Live match clock update failed:', error));
+  const transientDatabaseCodes = new Set(['P1001', 'P1002', 'P1017', 'P2024', 'P2028']);
+  const run = () => tickLiveClocks().catch(async (error) => {
+    if (transientDatabaseCodes.has(error?.code)) {
+      console.warn(`Live match clock database connection failed (${error.code}); retrying once.`);
+      await new Promise((resolve) => setTimeout(resolve, 1_000));
+      try {
+        await tickLiveClocks();
+        return;
+      } catch (retryError) {
+        console.error('Live match clock retry failed:', retryError);
+        return;
+      }
+    }
+    console.error('Live match clock update failed:', error);
+  });
   run();
   liveClockTimer = setInterval(run, 10_000);
   liveClockTimer.unref?.();

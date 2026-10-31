@@ -4,21 +4,21 @@ import FavouriteButton from '../ui/FavouriteButton'
 import { useI18n } from '../../hooks/useI18n'
 import { positionKey } from '../../utils/media'
 import { cn } from '../../utils/cn'
+import PlayerAvatar from './PlayerAvatar'
 
 export default function PlayerCard({ player, team, className }) {
   const { t } = useI18n()
   const primary = team?.colors?.primary || '#2B2B2B'
   const secondary = team?.colors?.secondary || '#FFFFFF'
+  const goals = player.stats?.goals ?? player.goals ?? 0
+  const assists = player.stats?.assists ?? player.assists ?? 0
 
   return (
     <div className={cn('card relative overflow-hidden p-4 transition-colors hover:border-white/15', className)}>
       <FavouriteButton kind="player" id={player.id} className="absolute right-3 top-3" />
       <Link to={`/players/${player.id}`} className="group block">
         <div className="flex items-center gap-3 pr-9">
-          <span className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-surface2">
-            {(player.faceId || player.photoUrl) ? <img src={player.faceId || player.photoUrl} alt={player.name} loading="lazy" className="absolute inset-0 h-full w-full object-cover" onError={(event) => { event.currentTarget.style.display = 'none' }} /> : null}
-            {!player.faceId && !player.photoUrl ? <span className="grid h-full w-full place-items-center text-2xl font-bold" style={{ backgroundColor: primary, color: secondary }}>{player.name?.trim()?.[0]?.toUpperCase() || '?'}</span> : null}
-          </span>
+          <PlayerAvatar player={player} className="h-14 w-14 rounded-xl border border-white/10 bg-surface2" fallbackClassName="text-2xl font-bold" fallbackStyle={{ backgroundColor: primary, color: secondary }} />
           <div className="min-w-0">
             <h3 className="truncate text-sm font-bold text-white group-hover:text-accent">
               {player.name}
@@ -52,9 +52,18 @@ export default function PlayerCard({ player, team, className }) {
             </p>
           </div>
         </div>
-        <span className="mt-3 inline-flex items-center rounded-full border border-line bg-surface2 px-3 py-1 text-[11px] font-bold text-white">
-          #{player.number ?? '—'}
-        </span>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface2 px-3 py-1 text-[11px] font-bold text-white">
+            <span className="tabular-nums">{goals}</span>
+            <span className="text-[9px] uppercase tracking-wide text-muted">{t('players.goals')}</span>
+          </span>
+          {assists > 0 ? (
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface2 px-3 py-1 text-[11px] font-bold text-white">
+              <span className="tabular-nums">{assists}</span>
+              <span className="text-[9px] uppercase tracking-wide text-muted">{t('players.assists')}</span>
+            </span>
+          ) : null}
+        </div>
       </Link>
     </div>
   )

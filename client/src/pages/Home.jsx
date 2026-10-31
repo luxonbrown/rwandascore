@@ -49,8 +49,8 @@ export default function Home() {
   const news = newsQuery.data || []
   const featured = news.find((article) => article.featured) || news[0]
   const secondaryNews = news.filter((article) => article.id !== featured?.id).slice(0, 3)
-  const heroMatch = liveMatches[0] || todaysMatches.find((match) => match.status === 'UPCOMING')
   const nextUp = todaysMatches.filter((match) => match.status === 'UPCOMING').slice(0, 3)
+  const heroMatch = liveMatches[0] || todaysMatches.find((match) => match.status === 'UPCOMING')
   const premierLeagueFixtures = (premierLeagueFixturesQuery.data || [])
     .filter((match) => match.status === 'UPCOMING')
     .slice(0, 4)
@@ -66,9 +66,16 @@ export default function Home() {
   return (
     <>
       <SoundWelcomeToast />
-      <section className="relative overflow-hidden border-b border-line">
+      <section className="home-hero relative overflow-hidden border-b border-line">
         <div className="hero-aura pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_0%,rgba(255,107,0,0.13),transparent_34%),radial-gradient(circle_at_85%_20%,rgba(56,189,248,0.07),transparent_30%)]" />
-        <Container className="relative grid gap-8 py-9 sm:py-12 lg:grid-cols-[1.35fr_0.85fr] lg:items-center">
+        <img
+          src="/amavubi-hero.jpg"
+          alt=""
+          aria-hidden="true"
+          className="home-hero__player pointer-events-none absolute select-none"
+        />
+        <div className="home-hero__shade pointer-events-none absolute inset-0" aria-hidden="true" />
+        <Container className="relative z-10 grid gap-8 py-9 sm:py-12 lg:grid-cols-[1.35fr_0.85fr] lg:items-center">
           <div>
             <p className="mb-3 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em] text-accent">
               <span className="h-px w-6 bg-accent" />

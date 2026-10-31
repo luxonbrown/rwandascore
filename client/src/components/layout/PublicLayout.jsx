@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import { Outlet } from 'react-router-dom'
 import Header from './Header'
 import Footer from './Footer'
@@ -7,20 +6,9 @@ import SettingsModal from './SettingsModal'
 import MobileMoreSheet from './MobileMoreSheet'
 import ScrollToTop from './ScrollToTop'
 import { useI18n } from '../../hooks/useI18n'
-import { usePreferencesStore } from '../../store/preferences'
-import { startSoundtrack, stopSoundtrack } from '../../utils/soundtrack'
 
 export default function PublicLayout() {
   const { t } = useI18n()
-  const soundEnabled = usePreferencesStore((state) => state.soundEnabled)
-
-  useEffect(() => {
-    if (soundEnabled) void startSoundtrack()
-    else stopSoundtrack()
-  }, [soundEnabled])
-
-  useEffect(() => () => stopSoundtrack(), [])
-
   return (
     <div className="flex min-h-screen flex-col bg-ink">
       <ScrollToTop />

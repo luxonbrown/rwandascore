@@ -6,6 +6,7 @@ import { useI18n } from '../../hooks/useI18n'
 import { useUiStore } from '../../store/ui'
 import SoundToggle from '../ui/SoundToggle'
 import { cn } from '../../utils/cn'
+import BrandLogo from '../ui/BrandLogo'
 
 export default function Header() {
   const { t } = useI18n()
@@ -15,7 +16,7 @@ export default function Header() {
     <header className="sticky top-0 z-50 border-b border-line bg-ink/95 backdrop-blur supports-[backdrop-filter]:bg-ink/85">
       <Container className="flex h-14 items-center justify-between gap-4">
         <Link to="/" className="flex shrink-0 items-center gap-2" aria-label={t('nav.home')}>
-          <img src="/logo.webp" alt="RwandaScore" className="h-10 w-[150px] object-contain object-left" />
+          <BrandLogo className="h-10 w-[150px]" />
         </Link>
 
         <nav aria-label={t('nav.menu')} className="hidden min-w-0 flex-1 items-center gap-0.5 lg:flex">

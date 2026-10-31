@@ -3,6 +3,7 @@ import { Facebook, Instagram, Mail, MapPin, Twitter, Youtube } from 'lucide-reac
 import Container from '../ui/Container'
 import { siteConfig } from '../../config'
 import { useI18n } from '../../hooks/useI18n'
+import BrandLogo from '../ui/BrandLogo'
 
 const explore = [
   { to: '/live', key: 'nav.live' },
@@ -27,7 +28,7 @@ export default function Footer() {
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <Link to="/" className="flex items-center gap-2">
-              <img src="/logo.webp" alt="RwandaScore" className="h-11 w-[165px] object-contain object-left" />
+              <BrandLogo className="h-11 w-[165px]" />
             </Link>
             <p className="mt-3 max-w-xs text-xs leading-relaxed text-muted">{t('footer.about')}</p>
             <p className="mt-3 text-[11px] font-semibold text-accent">

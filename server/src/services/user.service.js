@@ -33,7 +33,7 @@ async function ensureNotLastAdmin(client, userId) {
 }
 
 async function withUserCapacityLock(tx, action) {
-  const lock = await tx.$queryRaw`SELECT GET_LOCK('rwandascore:user-capacity', 10) AS acquired`;
+  const lock = await tx.$queryRaw`SELECT GET_LOCK('rwandascore:user-capacity', 5) AS acquired`;
   if (Number(lock?.[0]?.acquired) !== 1) {
     throw conflict('User capacity is being updated. Please retry.', 'USER_CAPACITY_BUSY');
   }
@@ -138,7 +138,7 @@ export async function createUser(data, actor, ipAddress = null) {
       });
       return hydrated;
     });
-  });
+  }, { maxWait: 10_000, timeout: 30_000 });
 
   return { ...serializeUser(user), ...(data.password ? {} : { tempPassword }) };
 }
@@ -207,7 +207,7 @@ export async function updateUser(userId, data, actor, ipAddress = null) {
 
     return updated;
    });
-  });
+  }, { maxWait: 10_000, timeout: 30_000 });
 
   return serializeUser(user);
 }

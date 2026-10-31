@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import TeamCrest from '../ui/TeamCrest'
 import { useI18n } from '../../hooks/useI18n'
-import { positionKey } from '../../utils/media'
+import { playerPhotoUrl, positionKey } from '../../utils/media'
 
 const laneX = { GK: 8, DF: 29, MF: 53, FW: 78 }
 const positionOrder = ['GK', 'DF', 'MF', 'FW']
@@ -20,8 +20,8 @@ function Marker({ player, team, top, featured = false, delay = 0 }) {
       className={`pitch-player${featured ? ' pitch-player-featured' : ''}`}
       style={{ left: `${laneX[player.position] ?? 53}%`, top: `${top}%`, animationDelay: `${delay}ms`, '--marker-color': primary, '--marker-ink': secondary }}
     >
-      {(player.faceId || player.photoUrl) && !photoFailed ? <img className="pitch-player-photo" src={player.faceId || player.photoUrl} alt={player.name} loading="lazy" onError={() => setPhotoFailed(true)} /> : <span className="pitch-player-number">{player.number ?? '—'}</span>}
-      {(player.faceId || player.photoUrl) && !photoFailed ? <span className="pitch-player-photo-number">#{player.number ?? '—'}</span> : null}
+      {playerPhotoUrl(player) && !photoFailed ? <img className="pitch-player-photo" src={playerPhotoUrl(player)} alt={player.name} loading="lazy" onError={() => setPhotoFailed(true)} /> : <span className="pitch-player-number">{player.number ?? '—'}</span>}
+      {playerPhotoUrl(player) && !photoFailed ? <span className="pitch-player-photo-number">#{player.number ?? '—'}</span> : null}
       <span className="pitch-player-name">{player.name}</span>
       <span className="pitch-player-position">{player.position}</span>
     </Link>

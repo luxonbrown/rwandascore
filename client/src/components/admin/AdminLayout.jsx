@@ -26,6 +26,7 @@ import { cn } from '../../utils/cn'
 import { initialsOf } from '../../utils/media'
 import { changePassword } from '../../services/api'
 import SoundToggle from '../ui/SoundToggle'
+import BrandLogo from '../ui/BrandLogo'
 
 function PasswordChangeGate({ onComplete }) {
   const [currentPassword, setCurrentPassword] = useState('')
@@ -68,7 +69,7 @@ const icons = {
 function Brand({ home = '/admin', label = 'Administration' }) {
   return (
     <Link to={home} className="flex items-center gap-2.5 px-5 py-5">
-      <img src="/logo.webp" alt="RwandaScore" className="h-10 w-[150px] object-contain object-left" />
+      <BrandLogo className="h-10 w-[150px]" />
       <span className="sr-only">{label}</span>
     </Link>
   )
@@ -232,7 +233,7 @@ export default function AdminLayout() {
             >
               <Menu size={20} />
             </button>
-            <img src="/logo.webp" alt="RwandaScore" className="h-8 w-[120px] object-contain object-left" />
+            <BrandLogo className="h-8 w-[120px]" />
           </div>
           <span className="flex h-8 w-8 items-center justify-center rounded-full bg-accent text-[11px] font-bold text-ink">
             {initialsOf(user.name)}

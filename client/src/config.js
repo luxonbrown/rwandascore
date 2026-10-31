@@ -9,7 +9,7 @@ export const siteConfig = {
   description:
     'Live scores, fixtures, results, tables and stories from the BK Premier League, Peace Cup and Amavubi.',
   url: 'https://rwandascore.rw',
-  email: 'hello@rwandascore.rw',
+  email: 'beryluckson@gmail.com',
   phone: '+250 788 000 000',
   address: 'KG 11 Ave, Kigali, Rwanda',
   season: '2026/27',
@@ -68,5 +68,7 @@ export const editorNavLinks = adminNavLinks.filter((link) => !['/admin/users', '
 
 export const managerNavLinks = [
   { to: '/manager', key: 'admin.dashboard', icon: 'LayoutDashboard', end: true },
+  { to: '/manager/team', key: 'manager.teamManagement', icon: 'Shield' },
   { to: '/manager/players', key: 'admin.players.title', icon: 'Users' },
+  { to: '/manager/lineups', key: 'manager.lineups', icon: 'CalendarDays' },
 ]

@@ -3,6 +3,10 @@
     "tagline": "Umupira w'amaguru w'u Rwanda. Imikino yose. Ako kanya.",
     "description": "Amanota ya live, imikino iteganyijwe, ibisubizo, imbonerahamwe n'amakuru ya BK Premier League, Igikombe cy'Amahoro na Amavubi."
   },
+  "manager": {
+    "teamManagement": "Gucunga ikipe yanjye",
+    "lineups": "Line-up z'ikipe"
+  },
   "nav": {
     "scores": "Imikino",
     "live": "Ako kanya",
@@ -143,6 +147,10 @@
     "title": "Ikigo cy'ako kanya",
     "subtitle": "Buri mukino, ikarita n'igitego mu Rwanda — bivugururwa uko biba.",
     "auto": "Bivugurura buri masegonda 15",
+    "crowdOn": "Amajwi y'abafana arakora",
+    "crowdOff": "Amajwi y'abafana yazimye",
+    "muteCrowd": "Zimya amajwi y'abafana kuri stade",
+    "enableCrowd": "Fungura amajwi y'abafana kuri stade",
     "inProgress": "Imikino {{count}} iri gukomeza",
     "inProgressOne": "Umukino 1 uri gukomeza",
     "schedule": "Gahunda y'uyu munsi",
@@ -394,17 +402,17 @@
   },
   "soundPrompt": {
     "title": "Zana ibyishimo by'umunsi w'umukino",
-    "body": "Fungura amajwi ya stade n'ay'amanota. Ushobora kuyazimya hano cyangwa igihe cyose ukoresheje akamenyetso k'ijwi kari hejuru.",
-    "enabledTitle": "Amajwi y'umukino arakora",
-    "enabledBody": "Kanda hano uyazimye, cyangwa ukoreshe akamenyetso k'ijwi kari hejuru igihe ubishakiye.",
-    "enable": "Fungura amajwi",
-    "turnOff": "Zimya amajwi",
+    "body": "Fungura amajwi y'ibikorwa n'amanota ku rubuga rwose. Amajwi y'abafana yumvikana muri Live Centre gusa.",
+    "enabledTitle": "Amajwi y'ibikorwa arakora",
+    "enabledBody": "Kanda hano uzimye amajwi y'ibikorwa, cyangwa ukoreshe akamenyetso k'ijwi kari hejuru. Amajwi y'abafana agenzurwa muri Live Centre.",
+    "enable": "Fungura amajwi y'ibikorwa",
+    "turnOff": "Zimya amajwi y'ibikorwa",
     "later": "Nyuma"
   },
   "settings": {
     "title": "Igenamiterere",
-    "soundOn": "Fungura amajwi y'umukino",
-    "soundOff": "Zimya amajwi y'umukino",
+    "soundOn": "Fungura amajwi y'ibikorwa",
+    "soundOff": "Zimya amajwi y'ibikorwa",
     "language": "Ururimi",
     "languageBody": "Hitamo ururimi rukoreshwa kuri RwandaScore.",
     "favouritesBody": "Kurikira amakipe n'abakinnyi kugira ngo ubabone mbere.",

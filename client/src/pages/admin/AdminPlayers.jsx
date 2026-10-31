@@ -4,6 +4,7 @@ import { Pencil, Plus, Trash2 } from 'lucide-react'
 import AdminPageHeader from '../../components/admin/AdminPageHeader'
 import TableFrame from '../../components/admin/TableFrame'
 import PlayerFaceField from '../../components/admin/PlayerFaceField'
+import PlayerAvatar from '../../components/players/PlayerAvatar'
 import FormModal from '../../components/admin/FormModal'
 import ConfirmDeleteModal from '../../components/admin/ConfirmDeleteModal'
 import SearchField from '../../components/ui/SearchField'
@@ -417,8 +418,7 @@ export default function AdminPlayers() {
               {players.map((player) => (
                 <tr key={player.id} className="hover:bg-hover/40">
                   <td className="px-4 py-3">
-                    <p className="font-semibold text-white">{player.name}</p>
-                    <p className="text-[10px] text-muted">{player.nationality}</p>
+                    <div className="flex items-center gap-2.5"><PlayerAvatar player={player} className="h-9 w-9 rounded-full border border-line bg-surface2 text-[10px] font-bold text-white"/><div className="min-w-0"><p className="truncate font-semibold text-white">{player.name}</p><p className="text-[10px] text-muted">{player.nationality}</p></div></div>
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">

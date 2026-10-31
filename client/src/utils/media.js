@@ -1,3 +1,30 @@
+const configuredApiUrl = (import.meta.env.VITE_API_URL || 'http://localhost:4000/api/v1').replace(/\/+$/, '')
+
+function uploadsOrigin() {
+  try {
+    return new URL(configuredApiUrl, typeof window !== 'undefined' ? window.location.origin : 'http://localhost').origin
+  } catch {
+    return 'http://localhost:4000'
+  }
+}
+
+export function playerPhotoUrl(playerOrUrl) {
+  const raw = typeof playerOrUrl === 'string'
+    ? playerOrUrl
+    : playerOrUrl?.faceId || playerOrUrl?.photoUrl || playerOrUrl?.photo || ''
+  if (!raw || typeof raw !== 'string') return ''
+  try {
+    const url = new URL(raw, typeof window !== 'undefined' ? window.location.origin : 'http://localhost')
+    const isLocalHost = ['localhost', '127.0.0.1', '0.0.0.0'].includes(url.hostname)
+    if (url.pathname.startsWith('/uploads/') && (isLocalHost || raw.startsWith('/uploads/'))) {
+      return `${uploadsOrigin()}${url.pathname}${url.search}${url.hash}`
+    }
+    return url.href
+  } catch {
+    return raw
+  }
+}
+
 export function initialsOf(name = '') {
   const parts = String(name).trim().split(/\s+/).filter(Boolean)
   if (!parts.length) return '?'

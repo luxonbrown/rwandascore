@@ -3,6 +3,10 @@
     "tagline": "Rwanda football. Every match. Live.",
     "description": "Live scores, fixtures, results, tables and stories from the BK Premier League, Peace Cup and Amavubi."
   },
+  "manager": {
+    "teamManagement": "Manage my club",
+    "lineups": "Team line-ups"
+  },
   "nav": {
     "scores": "Scores",
     "live": "Live",
@@ -143,6 +147,10 @@
     "title": "Live centre",
     "subtitle": "Every kick, card and goal across Rwanda — updating as it happens.",
     "auto": "Auto-updating every 15 seconds",
+    "crowdOn": "Crowd sound on",
+    "crowdOff": "Crowd sound off",
+    "muteCrowd": "Mute stadium crowd sound",
+    "enableCrowd": "Play stadium crowd sound",
     "inProgress": "{{count}} matches in progress",
     "inProgressOne": "1 match in progress",
     "schedule": "Today's schedule",
@@ -394,17 +402,17 @@
   },
   "soundPrompt": {
     "title": "Bring the matchday atmosphere to life",
-    "body": "Turn on the stadium soundtrack and score sounds. You can mute it here or anytime with the speaker button above.",
-    "enabledTitle": "Matchday sound is on",
-    "enabledBody": "Tap here to mute it, or use the speaker button in the header whenever you like.",
-    "enable": "Turn sound on",
-    "turnOff": "Turn sound off",
+    "body": "Turn on interaction and score sounds across the site. Stadium crowd audio plays only in the Live Centre.",
+    "enabledTitle": "Site interaction sounds are on",
+    "enabledBody": "Tap here to mute interaction sounds, or use the speaker button in the header. Crowd audio has its own control in Live Centre.",
+    "enable": "Turn interaction sounds on",
+    "turnOff": "Turn interaction sounds off",
     "later": "Maybe later"
   },
   "settings": {
     "title": "Settings",
-    "soundOn": "Turn matchday sound on",
-    "soundOff": "Turn matchday sound off",
+    "soundOn": "Turn interaction sounds on",
+    "soundOff": "Turn interaction sounds off",
     "language": "Language",
     "languageBody": "Choose the language used across RwandaScore.",
     "favouritesBody": "Follow teams and players to see them first.",

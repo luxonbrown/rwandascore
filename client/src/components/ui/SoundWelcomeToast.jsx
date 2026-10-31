@@ -3,7 +3,6 @@ import { Music2, Volume2, VolumeX } from 'lucide-react'
 import { useI18n } from '../../hooks/useI18n'
 import { usePreferencesStore } from '../../store/preferences'
 import { playSound } from '../../utils/sound'
-import { startSoundtrack, stopSoundtrack } from '../../utils/soundtrack'
 
 const PROMPT_KEY = 'rwandascore_sound_prompt_seen_v1'
 
@@ -26,14 +25,8 @@ export default function SoundWelcomeToast() {
 
   const close = () => setVisible(false)
   const toggleSound = () => {
-    if (soundEnabled) {
-      setSoundEnabled(false)
-      stopSoundtrack()
-    } else {
-      setSoundEnabled(true)
-      void startSoundtrack()
-      playSound('toggle', { force: true })
-    }
+    setSoundEnabled(!soundEnabled)
+    if (!soundEnabled) playSound('toggle', { force: true })
   }
 
   return (

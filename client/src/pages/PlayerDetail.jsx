@@ -10,6 +10,7 @@ import { usePlayer } from '../hooks/useData'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { useI18n } from '../hooks/useI18n'
 import { positionKey } from '../utils/media'
+import PlayerAvatar from '../components/players/PlayerAvatar'
 
 const statKeys = [
   ['appearances', 'players.appearances'],
@@ -64,11 +65,8 @@ export default function PlayerDetail() {
             {t('players.title')}
           </Link>
           <div className="flex flex-wrap items-center gap-5">
-            <div
-              className="relative flex h-32 w-28 shrink-0 items-end justify-center overflow-hidden rounded-2xl pb-3 shadow-lift"
-              style={{ backgroundColor: primary, color: secondary }}
-            >
-              {(player.faceId || player.photoUrl) ? <img src={player.faceId || player.photoUrl} alt={player.name} className="absolute inset-0 h-full w-full object-cover" onError={(event) => { event.currentTarget.style.display = 'none' }} /> : null}
+            <div className="relative flex h-32 w-28 shrink-0 items-end justify-center overflow-hidden rounded-2xl pb-3 shadow-lift" style={{ backgroundColor: primary, color: secondary }}>
+              <PlayerAvatar player={player} className="absolute inset-0 h-full w-full" fallbackClassName="text-4xl font-black" />
               <span className="relative z-10 rounded-lg bg-black/55 px-2 text-3xl font-black">#{player.number ?? '—'}</span>
               <span className="absolute -right-4 -top-4 h-16 w-16 rounded-full bg-white/10" />
               <span className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-black/10" />

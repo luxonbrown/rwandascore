@@ -35,6 +35,8 @@ import AdminNotifications from './pages/admin/AdminNotifications'
 import EditorDashboard from './pages/admin/EditorDashboard'
 import ManagerDashboard from './pages/admin/ManagerDashboard'
 import ManagerPlayers from './pages/admin/ManagerPlayers'
+import ManagerTeam from './pages/admin/ManagerTeam'
+import ManagerLineups from './pages/admin/ManagerLineups'
 import AudioFeedback from './components/ui/AudioFeedback'
 import { useAuthStore } from './store/auth'
 
@@ -93,7 +95,9 @@ export default function App() {
       </Route>
       <Route path="manager" element={<AdminLayout />}>
         <Route index element={<ManagerDashboard />} />
+        <Route path="team" element={<ManagerTeam />} />
         <Route path="players" element={<ManagerPlayers />} />
+        <Route path="lineups" element={<ManagerLineups />} />
         <Route path="*" element={<Navigate to="/manager" replace />} />
       </Route>
     </Routes>
