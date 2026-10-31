@@ -145,24 +145,49 @@ function EventPlayerNames({ event, t, fallback }) {
   )
 }
 
-function LineupSide({ lineup, team, t, live = false, backgroundImageUrl = null }) {
-  const primary = team.colors?.primary || '#f97316'
-  const secondary = team.colors?.secondary || '#ffffff'
+function LineupSide({ homeLineup, awayLineup, homeTeam, awayTeam, t, live = false, backgroundImageUrl = null }) {
+  const renderPlayer = (player, team) => {
+    const primary = team.colors?.primary || '#f97316'
+    const secondary = team.colors?.secondary || '#ffffff'
+    return (
+      <Link key={player.playerId} to={`/players/${player.playerId}`} className="group flex w-[3.8rem] flex-col items-center gap-0.5 px-0.5 text-center sm:w-[4.6rem]">
+        <span className="relative flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border border-white/80 bg-white text-[11px] font-black text-slate-900 shadow sm:h-9 sm:w-9 sm:text-xs">
+          {player.photoUrl ? <img src={player.photoUrl} alt={player.name} loading="lazy" className="absolute inset-0 z-10 h-full w-full object-cover" onError={(event) => { event.currentTarget.style.display = 'none' }} /> : null}
+          <span>{player.number}</span>
+        </span>
+        <span className="max-w-full truncate rounded bg-black/55 px-1 text-[8px] font-bold leading-tight text-white group-hover:text-accent sm:text-[9px]">{player.name}</span>
+      </Link>
+    )
+  }
+  const renderRows = (lineup, team, reverse = false) => {
+    const rows = reverse ? [...(lineup?.rows || [])].reverse() : lineup?.rows || []
+    return rows.map((row) => (
+      <div className="relative z-10 flex justify-center" key={`${team.id}-${row.label}`}>
+        <div className="flex w-full items-start justify-around gap-0.5">
+          {row.players.map((player) => renderPlayer(player, team))}
+        </div>
+      </div>
+    ))
+  }
+  const renderBench = (lineup, team) => (
+    <div className="min-w-0">
+      <h3 className="mb-2 truncate text-[10px] font-bold text-white">{team.name}</h3>
+      {lineup?.bench?.length ? <ul className="grid grid-cols-1 gap-x-3 gap-y-1.5 sm:grid-cols-2">
+        {lineup.bench.map((player) => <li key={player.playerId}>
+          <Link to={`/players/${player.playerId}`} className="flex min-w-0 items-center gap-2 rounded px-1 py-1 text-[10px] text-white/90 hover:bg-hover">
+            <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full border border-white/50 bg-white/10 text-[9px] font-bold text-white">{player.number}</span>
+            <span className="min-w-0"><span className="block truncate font-semibold">{player.name}</span><span className="block text-[9px] text-muted">{player.position || ''}</span></span>
+          </Link>
+        </li>)}
+      </ul> : <p className="text-[10px] text-muted">—</p>}
+    </div>
+  )
   return (
     <section className="card overflow-hidden">
-      <div className="flex items-center justify-between gap-3 border-b border-line bg-surface2/50 px-4 py-3">
-        <Link to={`/teams/${team.id}`} className="flex min-w-0 items-center gap-2.5 hover:text-accent">
-          <TeamCrest team={team} size="sm" />
-          <span className="truncate text-sm font-bold text-white">{team.name}</span>
-        </Link>
-        <span className="rounded bg-black/25 px-2 py-1 text-[10px] font-bold tracking-wide text-muted">
-          {lineup.formation}
-        </span>
-      </div>
       <div
-        className="relative isolate flex min-h-[34rem] flex-col justify-around overflow-hidden border-b border-white/20 bg-[linear-gradient(90deg,rgba(255,255,255,.12)_1px,transparent_1px),linear-gradient(rgba(255,255,255,.12)_1px,transparent_1px),linear-gradient(135deg,#176b3a,#0c482d)] bg-[size:50%_100%,100%_25%,auto] px-2 py-5 sm:px-4"
+        className="relative isolate flex min-h-[37rem] flex-col overflow-hidden border-b border-white/20 bg-[linear-gradient(90deg,rgba(255,255,255,.1)_1px,transparent_1px),linear-gradient(rgba(255,255,255,.1)_1px,transparent_1px),linear-gradient(135deg,#124b2e,#0b3b25)] bg-[size:50%_100%,100%_25%,auto] px-2 py-4 sm:px-4"
         style={backgroundImageUrl ? {
-          backgroundImage: `linear-gradient(rgba(5, 35, 19, .76), rgba(5, 35, 19, .76)), url("${backgroundImageUrl.replaceAll('"', '%22')}")`,
+          backgroundImage: `linear-gradient(rgba(5, 35, 19, .72), rgba(5, 35, 19, .72)), url("${backgroundImageUrl.replaceAll('"', '%22')}")`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         } : undefined}
@@ -170,52 +195,29 @@ function LineupSide({ lineup, team, t, live = false, backgroundImageUrl = null }
         <div className="pointer-events-none absolute inset-2 rounded border border-white/35" />
         <div className="pointer-events-none absolute inset-x-2 top-1/2 border-t border-white/30" />
         <div className="pointer-events-none absolute left-1/2 top-1/2 aspect-square w-24 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/30" />
-        <div className="pointer-events-none absolute inset-x-[18%] top-2 h-[12%] border-x border-b border-white/30" />
-        <div className="pointer-events-none absolute inset-x-[18%] bottom-2 h-[12%] border-x border-t border-white/30" />
-        {lineup.rows.map((row) => (
-          <div className="relative z-10" key={`${row.label}-${row.players.map((player) => player.playerId).join('-')}`}>
-            <div className="flex flex-wrap justify-around gap-1">
-              {row.players.map((player) => (
-                <Link
-                  key={player.playerId}
-                  to={`/players/${player.playerId}`}
-                  className="group flex w-[4.6rem] flex-col items-center gap-1 rounded-lg px-0.5 py-1 text-center transition hover:bg-black/25"
-                >
-                  <span className="relative h-12 w-12 overflow-hidden rounded-full border-2 border-white bg-black/30 shadow-lg ring-2 ring-black/20">
-                    {player.photoUrl ? <img src={player.photoUrl} alt={player.name} loading="lazy" className="absolute inset-0 z-10 h-full w-full object-cover" onError={(event) => { event.currentTarget.style.display = 'none' }} /> : null}
-                    <span className="absolute inset-0 z-0 flex items-center justify-center text-sm font-black text-white">{player.name.split(/\s+/).map((part) => part[0]).slice(0, 2).join('')}</span>
-                    <span className="absolute -bottom-0.5 right-0 rounded-full px-1 text-[9px] font-extrabold leading-4 shadow" style={{ backgroundColor: primary, color: secondary }}>{player.number}</span>
-                  </span>
-                  <span className="line-clamp-2 max-w-full rounded bg-black/55 px-1 py-0.5 text-[10px] font-bold leading-tight text-white group-hover:text-accent">
-                    {player.name.split(' ').slice(-1)[0]}
-                  </span>
-                  {player.position ? <span className="rounded bg-black/40 px-1 text-[8px] font-semibold text-white/75">{player.position}</span> : null}
-                </Link>
-              ))}
-            </div>
-          </div>
-        ))}
+        <div className="pointer-events-none absolute inset-x-[34%] top-2 h-[9%] border-x border-b border-white/30" />
+        <div className="pointer-events-none absolute inset-x-[34%] bottom-2 h-[9%] border-x border-t border-white/30" />
+        <div className="absolute left-4 top-4 z-20 flex max-w-[45%] items-center gap-2 rounded-lg bg-black/45 p-1.5 backdrop-blur-sm">
+          <TeamCrest team={homeTeam} size="sm" />
+          <div className="min-w-0"><p className="truncate text-[10px] font-bold text-white">{homeTeam.name}</p><p className="text-[9px] font-semibold text-white/70">{homeLineup?.formation}</p></div>
+        </div>
+        <div className="absolute right-4 bottom-4 z-20 flex max-w-[45%] items-center gap-2 rounded-lg bg-black/45 p-1.5 text-right backdrop-blur-sm">
+          <div className="min-w-0"><p className="truncate text-[10px] font-bold text-white">{awayTeam.name}</p><p className="text-[9px] font-semibold text-white/70">{awayLineup?.formation}</p></div>
+          <TeamCrest team={awayTeam} size="sm" />
+        </div>
+        <div className="relative z-10 flex min-h-[18rem] flex-1 flex-col justify-around py-2">
+          {renderRows(homeLineup, homeTeam)}
+        </div>
+        <div className="relative z-10 flex min-h-[18rem] flex-1 flex-col justify-around py-2">
+          {renderRows(awayLineup, awayTeam, true)}
+        </div>
       </div>
       <div className="p-4">
-        <h3 className="mb-2 text-[10px] font-bold uppercase tracking-wide text-muted">
-          {live ? t('match.remainingSubstitutes') : t('match.bench') || 'Bench'}
-        </h3>
-        <ul className="grid gap-1.5 sm:grid-cols-2">
-          {lineup.bench.map((player) => (
-            <li key={player.playerId}>
-              <Link
-                to={`/players/${player.playerId}`}
-                className="flex items-center justify-between gap-2 rounded px-1.5 py-1 text-[11px] text-white/80 hover:bg-hover hover:text-white"
-              >
-                <span className="truncate">
-                  <span className="mr-1.5 text-muted">{player.number}</span>
-                  {player.name}
-                </span>
-                <span className="font-bold text-muted">{player.rating}</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <h3 className="mb-3 text-xs font-extrabold text-white">{live ? t('match.remainingSubstitutes') : t('match.bench') || 'Bench'}</h3>
+        <div className="grid gap-4 md:grid-cols-2">
+          {renderBench(homeLineup, homeTeam)}
+          {renderBench(awayLineup, awayTeam)}
+        </div>
       </div>
     </section>
   )
@@ -550,10 +552,15 @@ export default function MatchDetail() {
           lineups ? (
             <section>
               {live ? <p className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-positive"><span className="h-2 w-2 animate-pulse rounded-full bg-positive" />{t('match.currentLineups')}</p> : null}
-              <div className="grid gap-5 xl:grid-cols-2">
-                <LineupSide lineup={live ? lineupWithSubstitutions(lineups.home, homeTeam?.id, events) : lineups.home} team={homeTeam} t={t} live={live} backgroundImageUrl={live ? stats?.liveBackgroundImageUrl : null} />
-                <LineupSide lineup={live ? lineupWithSubstitutions(lineups.away, awayTeam?.id, events) : lineups.away} team={awayTeam} t={t} live={live} backgroundImageUrl={live ? stats?.liveBackgroundImageUrl : null} />
-              </div>
+              <LineupSide
+                homeLineup={live ? lineupWithSubstitutions(lineups.home, homeTeam?.id, events) : lineups.home}
+                awayLineup={live ? lineupWithSubstitutions(lineups.away, awayTeam?.id, events) : lineups.away}
+                homeTeam={homeTeam}
+                awayTeam={awayTeam}
+                t={t}
+                live={live}
+                backgroundImageUrl={live ? stats?.liveBackgroundImageUrl : null}
+              />
             </section>
           ) : (
             <EmptyState icon={UserRound} title={live ? t('match.noLiveLineups') : t('match.noLineups')} />

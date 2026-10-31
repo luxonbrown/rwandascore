@@ -9,6 +9,9 @@ export const useUiStore = create((set) => ({
   toasts: [],
   openSettings: () => set({ settingsOpen: true }),
   closeSettings: () => set({ settingsOpen: false }),
+  openMobileMore: () => set({ mobileMoreOpen: true }),
+  closeMobileMore: () => set({ mobileMoreOpen: false }),
+  toggleMobileMore: () => set((state) => ({ mobileMoreOpen: !state.mobileMoreOpen })),
   setMobileMoreOpen: (mobileMoreOpen) => set({ mobileMoreOpen }),
   setMobileMenuOpen: (mobileMenuOpen) => set({ mobileMenuOpen }),
   pushToast: (message, type = 'success') => {
